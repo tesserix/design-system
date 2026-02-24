@@ -16,6 +16,10 @@ export interface SearchBarProps extends Omit<TextInputProps, 'style'> {
   showClear?: boolean
   /** Disabled state */
   disabled?: boolean
+  /** Accessibility label for input */
+  accessibilityLabel?: string
+  /** Accessibility label for clear action */
+  clearButtonLabel?: string
   /** Size */
   size?: 'sm' | 'md' | 'lg'
   /** Custom container style */
@@ -37,6 +41,8 @@ export const SearchBar = React.forwardRef<TextInput, SearchBarProps>(
       onClear,
       showClear = true,
       disabled = false,
+      accessibilityLabel = 'Search',
+      clearButtonLabel = 'Clear search',
       size = 'md',
       style,
       placeholder = 'Search...',
@@ -80,6 +86,8 @@ export const SearchBar = React.forwardRef<TextInput, SearchBarProps>(
           onChangeText={onChangeText}
           onSubmitEditing={onSubmit}
           editable={!disabled}
+          accessibilityLabel={accessibilityLabel}
+          accessibilityState={{ disabled }}
           placeholder={placeholder}
           placeholderTextColor="#9ca3af"
           style={{
@@ -91,7 +99,13 @@ export const SearchBar = React.forwardRef<TextInput, SearchBarProps>(
           {...props}
         />
         {showClear && value && value.length > 0 && (
-          <TouchableOpacity onPress={handleClear} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity
+            onPress={handleClear}
+            accessibilityRole="button"
+            accessibilityLabel={clearButtonLabel}
+            accessibilityState={{ disabled }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Text style={{ fontSize: sizeStyle.fontSize, color: '#6b7280' }}>✕</Text>
           </TouchableOpacity>
         )}

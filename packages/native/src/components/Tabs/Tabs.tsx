@@ -26,6 +26,8 @@ export interface TabsProps {
   activeTabStyle?: ViewStyle
   /** Custom text style */
   textStyle?: TextStyle
+  /** Accessibility label prefix for tabs */
+  accessibilityLabel?: string
 }
 
 export const Tabs: React.FC<TabsProps> = ({
@@ -37,19 +39,28 @@ export const Tabs: React.FC<TabsProps> = ({
   tabStyle,
   activeTabStyle,
   textStyle,
+  accessibilityLabel = 'Tab',
 }) => {
-  const [activeTab, setActiveTab] = useState(value || tabs[0]?.value)
+  const [internalTab, setInternalTab] = useState(value ?? tabs[0]?.value)
+  const isControlled = value !== undefined
+  const activeTab = isControlled ? value : internalTab
   const activeColor = colorScheme === 'primary' ? '#3b82f6' : '#6b7280'
 
   const handleTabPress = (tabValue: string) => {
-    setActiveTab(tabValue)
+    if (!isControlled) {
+      setInternalTab(tabValue)
+    }
     if (onChange) {
       onChange(tabValue)
     }
   }
 
   return (
-    <View style={[{ flexDirection: 'row', borderBottomWidth: 2, borderBottomColor: '#e5e7eb' }, style]}>
+    <View
+      accessible
+      accessibilityRole="tablist"
+      style={[{ flexDirection: 'row', borderBottomWidth: 2, borderBottomColor: '#e5e7eb' }, style]}
+    >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.value
         return (
@@ -57,6 +68,10 @@ export const Tabs: React.FC<TabsProps> = ({
             key={tab.value}
             onPress={() => !tab.disabled && handleTabPress(tab.value)}
             disabled={tab.disabled}
+            accessible
+            accessibilityRole="tab"
+            accessibilityLabel={`${accessibilityLabel} ${tab.label}`}
+            accessibilityState={{ selected: isActive, disabled: tab.disabled }}
             style={[
               {
                 paddingVertical: spacing[3],

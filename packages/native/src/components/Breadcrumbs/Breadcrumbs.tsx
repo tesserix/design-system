@@ -6,6 +6,7 @@ import { fontSize } from '@tesserix/tokens/typography'
 export interface Breadcrumb {
   label: string
   onPress?: () => void
+  accessibilityLabel?: string
 }
 
 export interface BreadcrumbsProps {
@@ -33,7 +34,12 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
 
         return (
           <React.Fragment key={index}>
-            <Wrapper onPress={item.onPress}>
+            <Wrapper
+              onPress={item.onPress}
+              accessible={Boolean(item.onPress)}
+              accessibilityRole={item.onPress ? 'link' : undefined}
+              accessibilityLabel={item.accessibilityLabel ?? item.label}
+            >
               <Text
                 style={[
                   {

@@ -20,6 +20,10 @@ export interface ChipProps {
   onPress?: () => void
   /** Disabled state */
   disabled?: boolean
+  /** Accessibility label for chip */
+  accessibilityLabel?: string
+  /** Accessibility label for close action */
+  closeButtonLabel?: string
   /** Custom container style */
   style?: ViewStyle
   /** Custom text style */
@@ -48,6 +52,8 @@ export const Chip: React.FC<ChipProps> = ({
   onClose,
   onPress,
   disabled = false,
+  accessibilityLabel,
+  closeButtonLabel = 'Remove',
   style,
   textStyle,
 }) => {
@@ -78,6 +84,10 @@ export const Chip: React.FC<ChipProps> = ({
       onPress={onPress}
       disabled={disabled || !onPress}
       activeOpacity={0.7}
+      accessible
+      accessibilityRole={onPress ? 'button' : 'text'}
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityState={{ disabled }}
       style={[containerStyle, style]}
     >
       <Text style={[labelStyle, textStyle]}>{label}</Text>
@@ -85,6 +95,9 @@ export const Chip: React.FC<ChipProps> = ({
         <TouchableOpacity
           onPress={onClose}
           disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel={`${closeButtonLabel} ${label}`}
+          accessibilityState={{ disabled }}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={{ marginLeft: spacing[1] }}
         >

@@ -75,6 +75,12 @@ export type { SliderProps } from './components/Slider'
 export { SearchBar } from './components/SearchBar'
 export type { SearchBarProps } from './components/SearchBar'
 
+export { DatePicker } from './components/DatePicker'
+export type { DatePickerProps } from './components/DatePicker'
+
+export { OTPInput } from './components/OTPInput'
+export type { OTPInputProps } from './components/OTPInput'
+
 export { FormControl, Field, Label, HelperText, ErrorText } from './components/FormControl'
 export type {
   FormControlProps,
@@ -108,6 +114,15 @@ export type { ToastProps } from './components/Toast'
 
 export { ActionSheet } from './components/ActionSheet'
 export type { ActionSheetProps, ActionSheetOption } from './components/ActionSheet'
+
+export { CircularProgress } from './components/CircularProgress'
+export type { CircularProgressProps } from './components/CircularProgress'
+
+export { Banner } from './components/Banner'
+export type { BannerProps } from './components/Banner'
+
+export { LoadingOverlay } from './components/LoadingOverlay'
+export type { LoadingOverlayProps } from './components/LoadingOverlay'
 
 // Data Display Components
 export { Card } from './components/Card'
@@ -169,3 +184,24 @@ export type { LinkProps } from './components/Link'
 
 export { FAB } from './components/FAB'
 export type { FABProps } from './components/FAB'
+
+export { Timeline } from './components/Timeline'
+export type { TimelineProps, TimelineItemData } from './components/Timeline'
+
+export { Carousel } from './components/Carousel'
+export type { CarouselProps } from './components/Carousel'
+
+export { TabBar } from './components/TabBar'
+export type { TabBarProps, TabBarItem } from './components/TabBar'
+
+export { BackButton } from './components/BackButton'
+export type { BackButtonProps } from './components/BackButton'
+
+export { Pressable } from './components/Pressable'
+export type { PressableProps } from './components/Pressable'
+
+export { PullToRefresh } from './components/PullToRefresh'
+export type { PullToRefreshProps } from './components/PullToRefresh'
+
+export { Portal, PortalHost } from './components/Portal'
+export type { PortalProps, PortalHostProps } from './components/Portal'

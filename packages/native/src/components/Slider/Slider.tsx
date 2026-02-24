@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { View, PanResponder, ViewStyle, ViewProps } from 'react-native'
 import { spacing } from '@tesserix/tokens/spacing'
 
@@ -40,6 +40,7 @@ export const Slider: React.FC<SliderProps> = ({
   ...props
 }) => {
   const [trackWidth, setTrackWidth] = useState(0)
+  const startValueRef = useRef(value)
   const color = colorMap[colorScheme]
 
   const normalizedValue = Math.max(min, Math.min(max, value))
@@ -48,11 +49,14 @@ export const Slider: React.FC<SliderProps> = ({
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => !disabled,
     onMoveShouldSetPanResponder: () => !disabled,
+    onPanResponderGrant: () => {
+      startValueRef.current = normalizedValue
+    },
     onPanResponderMove: (_, gestureState) => {
-      if (disabled) return
+      if (disabled || trackWidth <= 0) return
 
-      const newPercentage = Math.max(0, Math.min(100, (gestureState.moveX / trackWidth) * 100))
-      const rawValue = (newPercentage / 100) * (max - min) + min
+      const deltaValue = (gestureState.dx / trackWidth) * (max - min)
+      const rawValue = startValueRef.current + deltaValue
       const steppedValue = Math.round(rawValue / step) * step
 
       if (onChange) {

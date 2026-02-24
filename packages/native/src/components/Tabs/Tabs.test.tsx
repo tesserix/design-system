@@ -30,4 +30,12 @@ describe('Tabs', () => {
     fireEvent.press(getByText('Disabled'))
     expect(onChange).not.toHaveBeenCalled()
   })
+
+  it('updates active tab from controlled value changes', () => {
+    const { getByText, rerender } = render(<Tabs tabs={mockTabs} value="1" />)
+    expect(getByText('Tab 1')).toHaveStyle({ color: '#3b82f6' })
+
+    rerender(<Tabs tabs={mockTabs} value="2" />)
+    expect(getByText('Tab 2')).toHaveStyle({ color: '#3b82f6' })
+  })
 })

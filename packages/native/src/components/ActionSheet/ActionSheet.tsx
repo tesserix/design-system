@@ -11,6 +11,7 @@ import { spacing } from '@tesserix/tokens/spacing'
 import { fontSize } from '@tesserix/tokens/typography'
 
 export interface ActionSheetOption {
+  id?: string
   label: string
   onPress: () => void
   destructive?: boolean
@@ -110,11 +111,14 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({
           )}
           <FlatList
             data={options}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={(item, index) => item.id ?? `${item.label}-${index}`}
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => handleOptionPress(item)}
                 disabled={item.disabled}
+                accessibilityRole="button"
+                accessibilityLabel={item.label}
+                accessibilityState={{ disabled: item.disabled }}
                 style={{
                   paddingVertical: spacing[4],
                   paddingHorizontal: spacing[6],
@@ -137,6 +141,8 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({
           />
           <TouchableOpacity
             onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel={cancelLabel}
             style={{
               paddingVertical: spacing[4],
               paddingHorizontal: spacing[6],

@@ -16,6 +16,8 @@ export interface ListItemProps {
   onPress?: () => void
   /** Disabled state */
   disabled?: boolean
+  /** Accessibility label */
+  accessibilityLabel?: string
   /** Custom container style */
   style?: ViewStyle
   /** Custom title style */
@@ -31,6 +33,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   rightElement,
   onPress,
   disabled = false,
+  accessibilityLabel,
   style,
   titleStyle,
   subtitleStyle,
@@ -42,6 +45,10 @@ export const ListItem: React.FC<ListItemProps> = ({
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.7}
+      accessible
+      accessibilityRole={onPress ? 'button' : 'text'}
+      accessibilityLabel={accessibilityLabel ?? title}
+      accessibilityState={{ disabled }}
       style={[
         {
           flexDirection: 'row',

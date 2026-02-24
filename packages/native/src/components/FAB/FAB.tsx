@@ -12,6 +12,8 @@ export interface FABProps extends TouchableOpacityProps {
   position?: { bottom?: number; right?: number; top?: number; left?: number }
   /** Custom style */
   style?: ViewStyle
+  /** Accessibility label */
+  accessibilityLabel?: string
 }
 
 const sizeMap = {
@@ -33,6 +35,8 @@ export const FAB: React.FC<FABProps> = ({
   colorScheme = 'primary',
   position = { bottom: 16, right: 16 },
   style,
+  accessibilityLabel = 'Floating action button',
+  accessibilityState,
   ...props
 }) => {
   const fabSize = sizeMap[size]
@@ -59,6 +63,13 @@ export const FAB: React.FC<FABProps> = ({
         },
         style,
       ]}
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{
+        ...accessibilityState,
+        disabled: Boolean(props.disabled),
+      }}
       {...props}
     >
       {icon || <Text style={{ color: '#ffffff', fontSize: 24 }}>+</Text>}

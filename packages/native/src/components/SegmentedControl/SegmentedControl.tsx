@@ -6,6 +6,7 @@ import { fontSize } from '@tesserix/tokens/typography'
 export interface Segment {
   label: string
   value: string
+  disabled?: boolean
 }
 
 export interface SegmentedControlProps {
@@ -25,6 +26,8 @@ export interface SegmentedControlProps {
   activeSegmentStyle?: ViewStyle
   /** Custom text style */
   textStyle?: TextStyle
+  /** Accessibility label prefix for segments */
+  accessibilityLabel?: string
 }
 
 export const SegmentedControl: React.FC<SegmentedControlProps> = ({
@@ -36,12 +39,17 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
   segmentStyle,
   activeSegmentStyle,
   textStyle,
+  accessibilityLabel = 'Segment',
 }) => {
-  const [activeValue, setActiveValue] = useState(value || segments[0]?.value)
+  const [internalValue, setInternalValue] = useState(value ?? segments[0]?.value)
+  const isControlled = value !== undefined
+  const activeValue = isControlled ? value : internalValue
   const activeColor = colorScheme === 'primary' ? '#3b82f6' : '#6b7280'
 
   const handlePress = (segmentValue: string) => {
-    setActiveValue(segmentValue)
+    if (!isControlled) {
+      setInternalValue(segmentValue)
+    }
     if (onChange) {
       onChange(segmentValue)
     }
@@ -49,6 +57,8 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
 
   return (
     <View
+      accessible
+      accessibilityRole="tablist"
       style={[
         {
           flexDirection: 'row',
@@ -64,7 +74,12 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
         return (
           <TouchableOpacity
             key={segment.value}
-            onPress={() => handlePress(segment.value)}
+            onPress={() => !segment.disabled && handlePress(segment.value)}
+            disabled={segment.disabled}
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`${accessibilityLabel} ${segment.label}`}
+            accessibilityState={{ selected: isActive, disabled: segment.disabled }}
             style={[
               {
                 flex: 1,
@@ -72,6 +87,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
                 paddingHorizontal: spacing[3],
                 borderRadius: 6,
                 backgroundColor: isActive ? activeColor : 'transparent',
+                opacity: segment.disabled ? 0.5 : 1,
               },
               segmentStyle,
               isActive && activeSegmentStyle,
