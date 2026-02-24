@@ -26,7 +26,12 @@ const colors = getThemeColors('default', 'light')
 const primaryColor = hslToRgba(colors.primary) // 'rgba(70, 82, 99, 1)'
 ```
 
-Available themes: `default`, `emerald`, `sapphire`, `rose`, `amber`, `violet`, `teal`
+Available themes (23 total):
+- **Original**: `default`, `emerald`, `sapphire`, `rose`, `amber`, `violet`, `teal`
+- **Neutral**: `slate`, `zinc`, `stone`
+- **Vibrant**: `indigo`, `cyan`, `lime`, `orange`, `pink`, `crimson`
+- **Nature**: `forest`, `ocean`, `sunset`, `lavender`
+- **Specialty**: `neon`, `midnight`, `mocha`
 
 ### Spacing
 
@@ -169,7 +174,7 @@ const styles = StyleSheet.create({
 
 ## Token Categories
 
-- **Colors**: Semantic color tokens with theme support
+- **Colors**: Semantic color tokens with 23 theme variants
 - **Spacing**: 4px-based spacing scale
 - **Typography**: Font sizes, weights, line heights, and presets
 - **Radius**: Border radius values
@@ -177,6 +182,27 @@ const styles = StyleSheet.create({
 - **Breakpoints**: Responsive breakpoint values
 - **Z-Index**: Stacking context layers
 - **Animations**: Duration and easing functions
+
+## Tree-Shaking & Bundle Size Optimization
+
+The package is optimized for tree-shaking. For the smallest bundle size, import directly from subpaths:
+
+```typescript
+// Recommended: Direct imports (best for tree-shaking)
+import { getThemeColors, slateColors } from '@tesserix/tokens/colors'
+import { spacing } from '@tesserix/tokens/spacing'
+import { fontSize } from '@tesserix/tokens/typography'
+
+// Also works: Main entry (includes commonly used utilities)
+import { getThemeColors, themes } from '@tesserix/tokens'
+```
+
+**Bundle size impact:**
+- Main entry (`@tesserix/tokens`): ~8KB gzipped (includes all utilities + themes object)
+- Subpath imports: ~1-3KB gzipped (only what you use)
+- Individual theme colors: ~0.5KB gzipped
+
+When using modern bundlers (Vite, Webpack 5+, Rollup), unused themes and tokens are automatically removed from your bundle.
 
 ## License
 
