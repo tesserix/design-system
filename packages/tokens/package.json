@@ -1,0 +1,88 @@
+{
+  "name": "@tesserix/tokens",
+  "version": "1.0.0",
+  "description": "Design tokens for Tesserix Design System - platform-agnostic color, spacing, typography tokens",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./colors": {
+      "types": "./dist/colors.d.ts",
+      "import": "./dist/colors.mjs",
+      "require": "./dist/colors.js"
+    },
+    "./spacing": {
+      "types": "./dist/spacing.d.ts",
+      "import": "./dist/spacing.mjs",
+      "require": "./dist/spacing.js"
+    },
+    "./typography": {
+      "types": "./dist/typography.d.ts",
+      "import": "./dist/typography.mjs",
+      "require": "./dist/typography.js"
+    },
+    "./radius": {
+      "types": "./dist/radius.d.ts",
+      "import": "./dist/radius.mjs",
+      "require": "./dist/radius.js"
+    },
+    "./shadows": {
+      "types": "./dist/shadows.d.ts",
+      "import": "./dist/shadows.mjs",
+      "require": "./dist/shadows.js"
+    },
+    "./breakpoints": {
+      "types": "./dist/breakpoints.d.ts",
+      "import": "./dist/breakpoints.mjs",
+      "require": "./dist/breakpoints.js"
+    },
+    "./z-index": {
+      "types": "./dist/z-index.d.ts",
+      "import": "./dist/z-index.mjs",
+      "require": "./dist/z-index.js"
+    },
+    "./animations": {
+      "types": "./dist/animations.d.ts",
+      "import": "./dist/animations.mjs",
+      "require": "./dist/animations.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tesserix/design-system",
+    "directory": "packages/tokens"
+  },
+  "keywords": [
+    "design-tokens",
+    "design-system",
+    "tokens",
+    "theming",
+    "colors",
+    "typography"
+  ],
+  "author": "Tesserix",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
