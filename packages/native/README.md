@@ -104,6 +104,7 @@ function Actions() {
 - **VStack** - Vertical stack (alias for Stack with direction="column")
 - **HStack** - Horizontal stack (alias for Stack with direction="row")
 - **Flex** - Flexbox container with flex props
+- **SplitPane** - Resizable two-pane layout container
 
 ### Typography
 - **Text** - Text component with size and weight props
@@ -134,12 +135,27 @@ function Actions() {
 - **Drawer** - Side drawer overlay
 - **ActionSheet** - Mobile action chooser sheet
 - **Toast** - Timed notification popup
+- **ContextMenu** - Long-press contextual action menu
+- **Spotlight** - Highlighted feature callout overlay
+- **Walkthrough** - Multi-step in-app guided tour overlay
+
+### Media & Data
 - **ChatBubble** - Conversation message bubble
+- **ActivityFeed** - Timeline-style activity stream
 - **ImageGallery** - Thumbnail and fullscreen image gallery
+- **MasonryGrid** - Multi-column masonry layout
+- **VirtualList** - FlatList wrapper with virtualization defaults
 - **InfiniteScroll** - Paginated list wrapper with loading/end states
+- **AudioPlayer** - Embedded audio playback UI
+- **VideoPlayer** - Embedded video playback UI
+- **QRCode** - QR code display component
+
+### Utilities
 - **FloatingMenu** - Expandable floating action menu
 - **Countdown** - Live countdown timer component
 - **CopyToClipboard** - Copy-action trigger with copied feedback
+- **RichTextEditor** - Toolbar-based rich text editor shell
+- **TagsInput** - Multi-tag input with add/remove actions
 
 ## Design Tokens
 

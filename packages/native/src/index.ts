@@ -250,6 +250,42 @@ export type { CountdownProps } from './components/Countdown'
 export { CopyToClipboard } from './components/CopyToClipboard'
 export type { CopyToClipboardProps } from './components/CopyToClipboard'
 
+export { ActivityFeed } from './components/ActivityFeed'
+export type { ActivityFeedProps, ActivityFeedItem } from './components/ActivityFeed'
+
+export { MasonryGrid } from './components/MasonryGrid'
+export type { MasonryGridProps } from './components/MasonryGrid'
+
+export { VirtualList } from './components/VirtualList'
+export type { VirtualListProps } from './components/VirtualList'
+
+export { AudioPlayer } from './components/AudioPlayer'
+export type { AudioPlayerProps } from './components/AudioPlayer'
+
+export { VideoPlayer } from './components/VideoPlayer'
+export type { VideoPlayerProps } from './components/VideoPlayer'
+
+export { QRCode } from './components/QRCode'
+export type { QRCodeProps } from './components/QRCode'
+
+export { RichTextEditor } from './components/RichTextEditor'
+export type { RichTextEditorProps } from './components/RichTextEditor'
+
+export { TagsInput } from './components/TagsInput'
+export type { TagsInputProps } from './components/TagsInput'
+
+export { ContextMenu } from './components/ContextMenu'
+export type { ContextMenuProps, ContextMenuItem } from './components/ContextMenu'
+
+export { SplitPane } from './components/SplitPane'
+export type { SplitPaneProps } from './components/SplitPane'
+
+export { Spotlight } from './components/Spotlight'
+export type { SpotlightProps } from './components/Spotlight'
+
+export { Walkthrough } from './components/Walkthrough'
+export type { WalkthroughProps, WalkthroughStep } from './components/Walkthrough'
+
 export { TabBar } from './components/TabBar'
 export type { TabBarProps, TabBarItem } from './components/TabBar'
 
@@ -285,3 +321,13 @@ export type { CommentItemProps } from './components/CommentItem'
 
 export { UserCard } from './components/UserCard'
 export type { UserCardProps } from './components/UserCard'
+
+// Data Visualization Components
+export { BarChart } from './components/BarChart'
+export type { BarChartProps, BarChartData } from './components/BarChart'
+
+export { LineChart } from './components/LineChart'
+export type { LineChartProps, LineChartData } from './components/LineChart'
+
+export { Gauge } from './components/Gauge'
+export type { GaugeProps } from './components/Gauge'
