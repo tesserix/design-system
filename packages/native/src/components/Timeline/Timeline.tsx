@@ -1,6 +1,7 @@
 import React from 'react'
-import { View, Text, StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native'
-import { spacing, typography } from '@tesserix/tokens'
+import { View, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native'
+import { semanticSpacing } from '@tesserix/tokens/spacing'
+import { fontSize } from '@tesserix/tokens/typography'
 
 export interface TimelineItemData {
   /** Item title */
@@ -45,7 +46,6 @@ export const Timeline: React.FC<TimelineProps> = ({
           <View
             key={index}
             style={styles.itemContainer}
-            accessibilityRole="listitem"
             accessibilityLabel={`${item.title}${item.timestamp ? `, ${item.timestamp}` : ''}${item.description ? `. ${item.description}` : ''}`}
           >
             <View style={styles.leftColumn}>
@@ -102,11 +102,11 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     flexDirection: 'row',
-    paddingBottom: spacing.lg,
+    paddingBottom: semanticSpacing.lg,
   },
   leftColumn: {
     alignItems: 'center',
-    marginRight: spacing.md,
+    marginRight: semanticSpacing.md,
   },
   dot: {
     justifyContent: 'center',
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   line: {
     flex: 1,
-    marginTop: spacing.xs,
+    marginTop: semanticSpacing.xs,
   },
   contentColumn: {
     flex: 1,
@@ -127,21 +127,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.xs,
+    marginBottom: semanticSpacing.xs,
   },
   title: {
-    fontSize: typography.fontSize.md,
+    fontSize: fontSize.base,
     fontWeight: '600',
     color: '#111827',
     flex: 1,
   },
   timestamp: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     color: '#6b7280',
-    marginLeft: spacing.sm,
+    marginLeft: semanticSpacing.sm,
   },
   description: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     color: '#4b5563',
     lineHeight: 20,
   },

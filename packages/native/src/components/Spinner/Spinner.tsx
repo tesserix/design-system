@@ -55,6 +55,7 @@ export const Spinner = React.forwardRef<View, SpinnerProps>(
       colorScheme = 'primary',
       color,
       containerStyle,
+      testID,
       ...props
     },
     ref
@@ -63,7 +64,7 @@ export const Spinner = React.forwardRef<View, SpinnerProps>(
     const spinnerSize = sizeMap[size]
 
     return (
-      <View ref={ref} style={containerStyle}>
+      <View ref={ref} style={containerStyle} testID={testID}>
         <ActivityIndicator
           size={spinnerSize}
           color={spinnerColor}

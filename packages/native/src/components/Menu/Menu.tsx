@@ -57,19 +57,19 @@ export const Menu: React.FC<MenuProps> = ({
   }
 
   const handleOpen = () => {
+    setIsOpen(true)
+
     const triggerNode = triggerRef.current as View & {
       measureInWindow?: (callback: (x: number, y: number, width: number, height: number) => void) => void
     }
 
     if (!triggerNode?.measureInWindow) {
       setTriggerRect(null)
-      setIsOpen(true)
       return
     }
 
     triggerNode.measureInWindow((x, y, width, height) => {
       setTriggerRect({ x, y, width, height })
-      setIsOpen(true)
     })
   }
 

@@ -81,6 +81,18 @@ export type { DatePickerProps } from './components/DatePicker'
 export { OTPInput } from './components/OTPInput'
 export type { OTPInputProps } from './components/OTPInput'
 
+export { TimePicker } from './components/TimePicker'
+export type { TimePickerProps } from './components/TimePicker'
+
+export { Autocomplete } from './components/Autocomplete'
+export type { AutocompleteProps, AutocompleteOption } from './components/Autocomplete'
+
+export { MultiSelect } from './components/MultiSelect'
+export type { MultiSelectProps, MultiSelectOption } from './components/MultiSelect'
+
+export { ColorPicker } from './components/ColorPicker'
+export type { ColorPickerProps } from './components/ColorPicker'
+
 export { FormControl, Field, Label, HelperText, ErrorText } from './components/FormControl'
 export type {
   FormControlProps,
@@ -123,6 +135,12 @@ export type { BannerProps } from './components/Banner'
 
 export { LoadingOverlay } from './components/LoadingOverlay'
 export type { LoadingOverlayProps } from './components/LoadingOverlay'
+
+export { Notification } from './components/Notification'
+export type { NotificationProps } from './components/Notification'
+
+export { ProgressSteps } from './components/ProgressSteps'
+export type { ProgressStepsProps, ProgressStep } from './components/ProgressSteps'
 
 // Data Display Components
 export { Card } from './components/Card'
@@ -205,3 +223,15 @@ export type { PullToRefreshProps } from './components/PullToRefresh'
 
 export { Portal, PortalHost } from './components/Portal'
 export type { PortalProps, PortalHostProps } from './components/Portal'
+
+export { Header } from './components/Header'
+export type { HeaderProps } from './components/Header'
+
+export { Table } from './components/Table'
+export type { TableProps, TableColumn } from './components/Table'
+
+export { Calendar } from './components/Calendar'
+export type { CalendarProps } from './components/Calendar'
+
+export { Swipeable } from './components/Swipeable'
+export type { SwipeableProps } from './components/Swipeable'

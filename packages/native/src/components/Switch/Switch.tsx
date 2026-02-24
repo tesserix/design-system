@@ -83,6 +83,13 @@ export const Switch = React.forwardRef<View, SwitchProps>(
     },
     ref
   ) => {
+    const handleValueChange = (nextValue: boolean) => {
+      if (isDisabled) {
+        return
+      }
+      onChange?.(nextValue)
+    }
+
     const trackColor = {
       false: '#d1d5db',
       true: colorSchemeMap[colorScheme],
@@ -119,7 +126,7 @@ export const Switch = React.forwardRef<View, SwitchProps>(
           <View style={switchContainer}>
             <RNSwitch
               value={isChecked}
-              onValueChange={onChange}
+              onValueChange={handleValueChange}
               trackColor={trackColor}
               thumbColor={thumbColor}
               disabled={isDisabled}
@@ -139,7 +146,7 @@ export const Switch = React.forwardRef<View, SwitchProps>(
         <View style={switchContainer}>
           <RNSwitch
             value={isChecked}
-            onValueChange={onChange}
+            onValueChange={handleValueChange}
             trackColor={trackColor}
             thumbColor={thumbColor}
             disabled={isDisabled}

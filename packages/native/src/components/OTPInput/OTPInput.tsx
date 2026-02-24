@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { View, TextInput, ViewStyle, TextStyle } from 'react-native'
 import { spacing } from '@tesserix/tokens/spacing'
 import { fontSize } from '@tesserix/tokens/typography'
@@ -39,7 +39,22 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   textStyle,
 }) => {
   const inputRefs = useRef<TextInput[]>([])
+  const lastCompletedRef = useRef<string | null>(null)
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    const isComplete = value.length === length && /^\d+$/.test(value)
+
+    if (isComplete && value !== lastCompletedRef.current) {
+      lastCompletedRef.current = value
+      onComplete?.(value)
+      return
+    }
+
+    if (!isComplete) {
+      lastCompletedRef.current = null
+    }
+  }, [length, onComplete, value])
 
   const handleChange = (text: string, index: number) => {
     // Only allow numbers

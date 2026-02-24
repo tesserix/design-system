@@ -9,7 +9,7 @@ import {
   ViewStyle,
   StyleProp,
 } from 'react-native'
-import { spacing } from '@tesserix/tokens'
+import { semanticSpacing } from '@tesserix/tokens/spacing'
 
 export interface CarouselProps {
   /** Items to render */
@@ -47,7 +47,7 @@ export const Carousel: React.FC<CarouselProps> = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0)
   const scrollViewRef = useRef<ScrollView>(null)
-  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollPosition = event.nativeEvent.contentOffset.x
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    paddingVertical: semanticSpacing.md,
   },
   dot: {
     width: 8,
