@@ -1,0 +1,90 @@
+{
+  "name": "@tesserix/icons",
+  "version": "1.0.0",
+  "description": "Icon library for Tesserix Design System - Lucide icons wrapper + custom brand icons",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "import": "./dist/web.mjs",
+      "require": "./dist/web.js"
+    },
+    "./native": {
+      "types": "./dist/native.d.ts",
+      "import": "./dist/native.mjs",
+      "require": "./dist/native.js"
+    },
+    "./custom": {
+      "types": "./dist/custom/index.d.ts",
+      "import": "./dist/custom/index.mjs",
+      "require": "./dist/custom/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "peerDependencies": {
+    "lucide-react": "^0.469.0",
+    "lucide-react-native": "^0.469.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-native": ">=0.70.0",
+    "react-native-svg": ">=13.0.0"
+  },
+  "peerDependenciesMeta": {
+    "lucide-react": {
+      "optional": true
+    },
+    "lucide-react-native": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    },
+    "react-native-svg": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tesserix/design-system",
+    "directory": "packages/icons"
+  },
+  "keywords": [
+    "icons",
+    "lucide",
+    "react-icons",
+    "react-native-icons",
+    "design-system",
+    "svg-icons"
+  ],
+  "author": "Tesserix",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "lucide-react": "^0.469.0",
+    "lucide-react-native": "^0.469.0",
+    "react": "^19.2.4",
+    "react-native": "^0.76.6",
+    "react-native-svg": "^15.9.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
