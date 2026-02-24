@@ -15,6 +15,9 @@ export type { StackProps } from './components/Stack'
 export { Flex } from './components/Flex'
 export type { FlexProps } from './components/Flex'
 
+export { Divider } from './components/Divider'
+export type { DividerProps } from './components/Divider'
+
 // Typography Components
 export { Text } from './components/Text'
 export type { TextProps } from './components/Text'
@@ -26,13 +29,28 @@ export type { HeadingProps } from './components/Heading'
 export { Button } from './components/Button'
 export type { ButtonProps } from './components/Button'
 
+export { IconButton } from './components/IconButton'
+export type { IconButtonProps } from './components/IconButton'
+
 // Form Components
 export { Input } from './components/Input'
 export type { InputProps } from './components/Input'
 
+export { Switch } from './components/Switch'
+export type { SwitchProps } from './components/Switch'
+
+export { Checkbox } from './components/Checkbox'
+export type { CheckboxProps } from './components/Checkbox'
+
 // Feedback Components
 export { Spinner } from './components/Spinner'
 export type { SpinnerProps } from './components/Spinner'
+
+export { ProgressBar } from './components/ProgressBar'
+export type { ProgressBarProps } from './components/ProgressBar'
+
+export { Alert } from './components/Alert'
+export type { AlertProps } from './components/Alert'
 
 // Data Display Components
 export { Card } from './components/Card'
