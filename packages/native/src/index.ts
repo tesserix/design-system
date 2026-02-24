@@ -29,3 +29,17 @@ export type { ButtonProps } from './components/Button'
 // Form Components
 export { Input } from './components/Input'
 export type { InputProps } from './components/Input'
+
+// Feedback Components
+export { Spinner } from './components/Spinner'
+export type { SpinnerProps } from './components/Spinner'
+
+// Data Display Components
+export { Card } from './components/Card'
+export type { CardProps } from './components/Card'
+
+export { Badge } from './components/Badge'
+export type { BadgeProps } from './components/Badge'
+
+export { Avatar } from './components/Avatar'
+export type { AvatarProps } from './components/Avatar'
