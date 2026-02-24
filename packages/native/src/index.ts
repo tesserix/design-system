@@ -25,3 +25,7 @@ export type { HeadingProps } from './components/Heading'
 // Button Components
 export { Button } from './components/Button'
 export type { ButtonProps } from './components/Button'
+
+// Form Components
+export { Input } from './components/Input'
+export type { InputProps } from './components/Input'
