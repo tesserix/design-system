@@ -42,13 +42,20 @@ export const Notification: React.FC<NotificationProps> = ({
 }) => {
   const slideAnim = useRef(new Animated.Value(-100)).current
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null)
+
+  const runAnimation = (animation: Animated.CompositeAnimation) => {
+    animationRef.current?.stop()
+    animationRef.current = animation
+    animation.start()
+  }
 
   useEffect(() => {
     if (visible) {
-      Animated.spring(slideAnim, {
+      runAnimation(Animated.spring(slideAnim, {
         toValue: 0,
         useNativeDriver: true,
-      }).start()
+      }))
 
       if (duration > 0) {
         timerRef.current = setTimeout(() => {
@@ -56,28 +63,36 @@ export const Notification: React.FC<NotificationProps> = ({
         }, duration)
       }
     } else {
-      Animated.timing(slideAnim, {
+      runAnimation(Animated.timing(slideAnim, {
         toValue: -100,
         duration: 200,
         useNativeDriver: true,
-      }).start()
+      }))
     }
 
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current)
+        timerRef.current = null
       }
+      animationRef.current?.stop()
+      animationRef.current = null
     }
   }, [visible, duration, slideAnim])
 
   const handleDismiss = () => {
-    Animated.timing(slideAnim, {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+
+    onDismiss?.()
+
+    runAnimation(Animated.timing(slideAnim, {
       toValue: -100,
       duration: 200,
       useNativeDriver: true,
-    }).start(() => {
-      onDismiss?.()
-    })
+    }))
   }
 
   const variantColors = {

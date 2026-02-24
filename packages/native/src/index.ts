@@ -93,6 +93,9 @@ export type { MultiSelectProps, MultiSelectOption } from './components/MultiSele
 export { ColorPicker } from './components/ColorPicker'
 export type { ColorPickerProps } from './components/ColorPicker'
 
+export { FileUpload } from './components/FileUpload'
+export type { FileUploadProps, FileUploadFile } from './components/FileUpload'
+
 export { FormControl, Field, Label, HelperText, ErrorText } from './components/FormControl'
 export type {
   FormControlProps,
@@ -101,6 +104,26 @@ export type {
   HelperTextProps,
   ErrorTextProps,
 } from './components/FormControl'
+
+export {
+  Form,
+  FormField,
+  createYupAdapter,
+  createZodAdapter,
+  useFieldArray,
+  useForm,
+  useFormContext,
+} from './components/Form'
+export type {
+  FormController,
+  FormErrors,
+  FormFieldProps,
+  FormProps,
+  FormTouched,
+  FormValidator,
+  SchemaAdapter,
+  UseFormOptions,
+} from './components/Form'
 
 // Feedback Components
 export { Spinner } from './components/Spinner'
@@ -209,6 +232,24 @@ export type { TimelineProps, TimelineItemData } from './components/Timeline'
 export { Carousel } from './components/Carousel'
 export type { CarouselProps } from './components/Carousel'
 
+export { ChatBubble } from './components/ChatBubble'
+export type { ChatBubbleProps } from './components/ChatBubble'
+
+export { ImageGallery } from './components/ImageGallery'
+export type { ImageGalleryProps, ImageGalleryItem } from './components/ImageGallery'
+
+export { InfiniteScroll } from './components/InfiniteScroll'
+export type { InfiniteScrollProps } from './components/InfiniteScroll'
+
+export { FloatingMenu } from './components/FloatingMenu'
+export type { FloatingMenuProps, FloatingMenuItem } from './components/FloatingMenu'
+
+export { Countdown } from './components/Countdown'
+export type { CountdownProps } from './components/Countdown'
+
+export { CopyToClipboard } from './components/CopyToClipboard'
+export type { CopyToClipboardProps } from './components/CopyToClipboard'
+
 export { TabBar } from './components/TabBar'
 export type { TabBarProps, TabBarItem } from './components/TabBar'
 
@@ -235,3 +276,12 @@ export type { CalendarProps } from './components/Calendar'
 
 export { Swipeable } from './components/Swipeable'
 export type { SwipeableProps } from './components/Swipeable'
+
+export { ShareButton } from './components/ShareButton'
+export type { ShareButtonProps } from './components/ShareButton'
+
+export { CommentItem } from './components/CommentItem'
+export type { CommentItemProps } from './components/CommentItem'
+
+export { UserCard } from './components/UserCard'
+export type { UserCardProps } from './components/UserCard'

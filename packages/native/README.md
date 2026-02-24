@@ -116,12 +116,17 @@ function Actions() {
 ### Forms
 - **FormControl** - Field wrapper with label/helper/error support
 - **Field** - Composed form field helper that injects state/accessibility props
+- **Form** / **useForm** - Form state container and validation lifecycle
+- **FormField** - Binds form state to controls with FormControl integration
+- **useFieldArray** - Array field operations (`append`, `remove`, `update`, `replace`)
+- **createZodAdapter** / **createYupAdapter** - Schema validation adapters
 - **Input** - Single-line text input
 - **Textarea** - Multi-line text input
 - **Select** - Option picker with modal menu
 - **Checkbox** - Binary/multi-select checkbox
 - **Radio** / **RadioGroup** - Single-select options
 - **Switch** - On/off toggle
+- **FileUpload** - File/image selection with preview and remove
 
 ### Overlays
 - **Modal** - Centered dialog overlay
@@ -129,6 +134,12 @@ function Actions() {
 - **Drawer** - Side drawer overlay
 - **ActionSheet** - Mobile action chooser sheet
 - **Toast** - Timed notification popup
+- **ChatBubble** - Conversation message bubble
+- **ImageGallery** - Thumbnail and fullscreen image gallery
+- **InfiniteScroll** - Paginated list wrapper with loading/end states
+- **FloatingMenu** - Expandable floating action menu
+- **Countdown** - Live countdown timer component
+- **CopyToClipboard** - Copy-action trigger with copied feedback
 
 ## Design Tokens
 
