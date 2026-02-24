@@ -61,8 +61,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <TouchableOpacity
           onPress={() => handleFormat('bold')}
           style={[styles.toolbarButton, isBold && styles.toolbarButtonActive]}
+          disabled={disabled}
           accessibilityRole="button"
           accessibilityLabel="Bold"
+          accessibilityState={{ selected: isBold, disabled }}
         >
           <Text style={[styles.toolbarText, { fontWeight: 'bold' }]}>B</Text>
         </TouchableOpacity>
@@ -70,8 +72,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <TouchableOpacity
           onPress={() => handleFormat('italic')}
           style={[styles.toolbarButton, isItalic && styles.toolbarButtonActive]}
+          disabled={disabled}
           accessibilityRole="button"
           accessibilityLabel="Italic"
+          accessibilityState={{ selected: isItalic, disabled }}
         >
           <Text style={[styles.toolbarText, { fontStyle: 'italic' }]}>I</Text>
         </TouchableOpacity>
@@ -79,8 +83,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <TouchableOpacity
           onPress={() => handleFormat('underline')}
           style={[styles.toolbarButton, isUnderline && styles.toolbarButtonActive]}
+          disabled={disabled}
           accessibilityRole="button"
           accessibilityLabel="Underline"
+          accessibilityState={{ selected: isUnderline, disabled }}
         >
           <Text style={[styles.toolbarText, { textDecorationLine: 'underline' }]}>
             U
@@ -91,8 +97,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         <TouchableOpacity
           style={styles.toolbarButton}
+          disabled={disabled}
           accessibilityRole="button"
           accessibilityLabel="Bullet list"
+          accessibilityState={{ disabled }}
         >
           <Text style={styles.toolbarText}>• List</Text>
         </TouchableOpacity>
@@ -112,7 +120,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           isUnderline && { textDecorationLine: 'underline' },
           disabled && styles.editorDisabled,
         ]}
-        accessibilityRole="none"
         accessibilityLabel="Rich text editor"
         accessibilityState={{ disabled }}
       />

@@ -83,9 +83,7 @@ export const Walkthrough: React.FC<WalkthroughProps> = ({
       transparent
       animationType="fade"
       onRequestClose={handleComplete}
-      accessible={true}
-      accessibilityRole="none"
-      accessibilityLabel="Walkthrough overlay"
+      accessibilityViewIsModal={true}
     >
       <View style={styles.overlay}>
         {/* Highlight target area if provided */}

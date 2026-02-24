@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   View,
   StyleSheet,
@@ -42,33 +42,40 @@ export const SplitPane: React.FC<SplitPaneProps> = ({
 }) => {
   const [ratio, setRatio] = useState(initialRatio)
   const [containerSize, setContainerSize] = useState(0)
+  const gestureStartRatioRef = useRef(initialRatio)
 
   const isHorizontal = orientation === 'horizontal'
+
+  const clampRatio = (value: number) => {
+    if (containerSize === 0) {
+      return Math.max(0, Math.min(1, value))
+    }
+
+    const minRatio = minSize / containerSize
+    const maxRatio = maxSize ? maxSize / containerSize : 1
+    return Math.max(Math.max(0, minRatio), Math.min(Math.min(1, maxRatio), value))
+  }
+
+  const updateRatio = (nextRatio: number) => {
+    const clamped = clampRatio(nextRatio)
+    setRatio(clamped)
+    onRatioChange?.(clamped)
+  }
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: () => {
+      gestureStartRatioRef.current = ratio
+    },
     onPanResponderMove: (_, gestureState) => {
       if (containerSize === 0) return
 
       const delta = isHorizontal ? gestureState.dx : gestureState.dy
-      const newFirstSize = ratio * containerSize + delta
+      const newFirstSize = gestureStartRatioRef.current * containerSize + delta
 
-      let newRatio = newFirstSize / containerSize
-
-      // Apply constraints
-      if (newFirstSize < minSize) {
-        newRatio = minSize / containerSize
-      }
-      if (maxSize && newFirstSize > maxSize) {
-        newRatio = maxSize / containerSize
-      }
-
-      // Ensure ratio is between 0 and 1
-      newRatio = Math.max(0, Math.min(1, newRatio))
-
-      setRatio(newRatio)
-      onRatioChange?.(newRatio)
+      const newRatio = newFirstSize / containerSize
+      updateRatio(newRatio)
     },
   })
 
@@ -95,9 +102,7 @@ export const SplitPane: React.FC<SplitPaneProps> = ({
           styles.pane,
           { flex: firstFlex },
         ]}
-        accessible={true}
-        accessibilityRole="none"
-        accessibilityLabel="First pane"
+        accessible={false}
       >
         {first}
       </View>
@@ -114,6 +119,19 @@ export const SplitPane: React.FC<SplitPaneProps> = ({
         accessibilityRole="adjustable"
         accessibilityLabel="Resize divider"
         accessibilityHint={`Drag to resize ${orientation} split panes`}
+        accessibilityValue={{ min: 0, max: 100, now: Math.round(ratio * 100) }}
+        accessibilityActions={[
+          { name: 'increment', label: 'Increase first pane size' },
+          { name: 'decrement', label: 'Decrease first pane size' },
+        ]}
+        onAccessibilityAction={({ nativeEvent }) => {
+          if (nativeEvent.actionName === 'increment') {
+            updateRatio(ratio + 0.05)
+          }
+          if (nativeEvent.actionName === 'decrement') {
+            updateRatio(ratio - 0.05)
+          }
+        }}
       />
 
       <View
@@ -121,9 +139,7 @@ export const SplitPane: React.FC<SplitPaneProps> = ({
           styles.pane,
           { flex: secondFlex },
         ]}
-        accessible={true}
-        accessibilityRole="none"
-        accessibilityLabel="Second pane"
+        accessible={false}
       >
         {second}
       </View>

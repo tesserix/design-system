@@ -52,13 +52,6 @@ export const TagsInput: React.FC<TagsInputProps> = ({
     onChange?.(newTags)
   }
 
-  const handleKeyPress = (e: any) => {
-    if (e.nativeEvent.key === 'Enter') {
-      e.preventDefault()
-      handleAddTag()
-    }
-  }
-
   return (
     <View style={[styles.container, style]}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -92,7 +85,6 @@ export const TagsInput: React.FC<TagsInputProps> = ({
           value={inputValue}
           onChangeText={setInputValue}
           onSubmitEditing={handleAddTag}
-          onKeyPress={handleKeyPress}
           placeholder={value.length === 0 ? placeholder : ''}
           editable={!disabled}
           style={styles.input}

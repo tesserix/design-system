@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   TouchableOpacity,
@@ -36,18 +36,43 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onError,
   style,
 }) => {
-  void loop
-  void onEnd
-  void onError
   const [isPlaying, setIsPlaying] = useState(autoPlay)
   const [isMuted, setIsMuted] = useState(false)
-  const [currentTime] = useState(0)
-  const [duration] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration] = useState(180) // Mock duration
 
   // Note: In a real implementation, use expo-av or react-native-video
   // This is a placeholder showing the interface
+  useEffect(() => {
+    if (!source.uri.trim()) {
+      onError?.(new Error('Video source URI is required'))
+    }
+  }, [onError, source.uri])
+
+  useEffect(() => {
+    if (!isPlaying) return
+
+    const id = setInterval(() => {
+      setCurrentTime((prev) => {
+        const next = prev + 1
+        if (next < duration) return next
+
+        if (loop) return 0
+
+        setIsPlaying(false)
+        onEnd?.()
+        return duration
+      })
+    }, 1000)
+
+    return () => clearInterval(id)
+  }, [duration, isPlaying, loop, onEnd])
 
   const handlePlayPause = () => {
+    if (!source.uri.trim()) {
+      onError?.(new Error('Video source URI is required'))
+      return
+    }
     setIsPlaying(!isPlaying)
   }
 
@@ -64,7 +89,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <View
       style={[styles.container, style]}
-      accessibilityRole="none"
+      accessibilityLabel={`Video player${source.uri ? ` for ${source.uri}` : ''}`}
+      accessibilityHint="Use controls to play, pause, and mute video"
     >
       {/* Video placeholder */}
       <View style={styles.videoPlaceholder}>

@@ -92,15 +92,15 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       transparent
       animationType="fade"
       onRequestClose={onDismiss}
-      accessible={true}
-      accessibilityRole="none"
-      accessibilityLabel="Feature spotlight"
+      accessibilityViewIsModal={true}
     >
       <TouchableOpacity
         style={styles.overlay}
         activeOpacity={1}
         onPress={onDismiss}
-        accessible={false}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Feature spotlight"
       >
         {/* Top section */}
         <View

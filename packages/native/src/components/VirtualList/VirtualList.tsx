@@ -14,6 +14,8 @@ export const VirtualList = <T,>({
   windowSize = 21,
   maxToRenderPerBatch = 10,
   updateCellsBatchingPeriod = 50,
+  removeClippedSubviews = true,
+  initialNumToRender = 10,
   ...flatListProps
 }: VirtualListProps<T>) => {
   return (
@@ -22,8 +24,8 @@ export const VirtualList = <T,>({
       windowSize={windowSize}
       maxToRenderPerBatch={maxToRenderPerBatch}
       updateCellsBatchingPeriod={updateCellsBatchingPeriod}
-      removeClippedSubviews={true}
-      initialNumToRender={10}
+      removeClippedSubviews={removeClippedSubviews}
+      initialNumToRender={initialNumToRender}
     />
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   TouchableOpacity,
@@ -39,17 +39,42 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   onError,
   style,
 }) => {
-  void loop
-  void onEnd
-  void onError
   const [isPlaying, setIsPlaying] = useState(autoPlay)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration] = useState(180) // Mock duration
 
   // Note: In a real implementation, use expo-av or react-native-track-player
   // This is a placeholder showing the interface
+  useEffect(() => {
+    if (!source.uri.trim()) {
+      onError?.(new Error('Audio source URI is required'))
+    }
+  }, [onError, source.uri])
+
+  useEffect(() => {
+    if (!isPlaying) return
+
+    const id = setInterval(() => {
+      setCurrentTime((prev) => {
+        const next = prev + 1
+        if (next < duration) return next
+
+        if (loop) return 0
+
+        setIsPlaying(false)
+        onEnd?.()
+        return duration
+      })
+    }, 1000)
+
+    return () => clearInterval(id)
+  }, [duration, isPlaying, loop, onEnd])
 
   const handlePlayPause = () => {
+    if (!source.uri.trim()) {
+      onError?.(new Error('Audio source URI is required'))
+      return
+    }
     setIsPlaying(!isPlaying)
   }
 
@@ -58,7 +83,17 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   }
 
   const handleSkipForward = () => {
-    setCurrentTime(Math.min(duration, currentTime + 10))
+    const next = Math.min(duration, currentTime + 10)
+    setCurrentTime(next)
+
+    if (next >= duration) {
+      if (loop) {
+        setCurrentTime(0)
+      } else {
+        setIsPlaying(false)
+        onEnd?.()
+      }
+    }
   }
 
   const formatTime = (seconds: number) => {
@@ -72,8 +107,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   return (
     <View
       style={[styles.container, style]}
-      accessibilityRole="none"
       accessibilityLabel={`Audio player${source.uri ? ` for ${source.uri}` : ''}`}
+      accessibilityHint="Use controls to play, pause, and seek audio"
     >
       {(title || artist) && (
         <View style={styles.info}>

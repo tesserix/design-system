@@ -52,6 +52,8 @@ describe('SplitPane', () => {
         second={<View><Text>Second</Text></View>}
       />
     )
-    expect(getByLabelText('First pane')).toBeTruthy()
+    expect(getByLabelText('Resize divider').props.accessibilityValue).toEqual(
+      expect.objectContaining({ now: 70 })
+    )
   })
 })
