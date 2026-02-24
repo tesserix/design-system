@@ -84,4 +84,23 @@ describe('Checkbox', () => {
     render(<Checkbox ref={ref} />)
     expect(ref.current).toBeTruthy()
   })
+
+  it('exposes accessibility state and role', () => {
+    const { getByTestId } = render(
+      <Checkbox
+        testID="checkbox"
+        label="Accept terms"
+        helperText="Required"
+        isChecked
+        isDisabled
+      />
+    )
+    const checkbox = getByTestId('checkbox')
+    expect(checkbox.props.accessibilityRole).toBe('checkbox')
+    expect(checkbox.props.accessibilityLabel).toBe('Accept terms')
+    expect(checkbox.props.accessibilityHint).toBe('Required')
+    expect(checkbox.props.accessibilityState).toEqual(
+      expect.objectContaining({ checked: true, disabled: true })
+    )
+  })
 })

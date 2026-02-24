@@ -2,6 +2,7 @@ import React from 'react'
 import { render } from '@testing-library/react-native'
 import { Text, View } from 'react-native'
 import { Stack, VStack, HStack } from './Stack'
+import { spacing } from '@tesserix/tokens/spacing'
 
 describe('Stack', () => {
   it('renders correctly', () => {
@@ -51,6 +52,18 @@ describe('Stack', () => {
       </Stack>
     )
     expect(getByTestId('stack')).toBeTruthy()
+  })
+
+  it('applies box-style spacing props on the container', () => {
+    const { getByTestId } = render(
+      <Stack testID="stack" p={4} bg="#ffffff">
+        <View><Text>Item</Text></View>
+      </Stack>
+    )
+    expect(getByTestId('stack')).toHaveStyle({
+      padding: spacing[4],
+      backgroundColor: '#ffffff',
+    })
   })
 
   it('applies align items', () => {

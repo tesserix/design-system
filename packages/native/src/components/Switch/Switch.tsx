@@ -76,6 +76,9 @@ export const Switch = React.forwardRef<View, SwitchProps>(
       helperText,
       isDisabled = false,
       containerStyle,
+      accessibilityLabel,
+      accessibilityHint,
+      accessibilityState,
       ...props
     },
     ref
@@ -102,6 +105,13 @@ export const Switch = React.forwardRef<View, SwitchProps>(
       marginLeft: label ? spacing[2] : 0,
       flex: 1,
     }
+    const resolvedAccessibilityLabel = accessibilityLabel ?? label
+    const resolvedAccessibilityHint = accessibilityHint ?? helperText
+    const mergedAccessibilityState = {
+      ...accessibilityState,
+      disabled: isDisabled,
+      checked: isChecked,
+    }
 
     if (!label && !helperText) {
       return (
@@ -113,6 +123,10 @@ export const Switch = React.forwardRef<View, SwitchProps>(
               trackColor={trackColor}
               thumbColor={thumbColor}
               disabled={isDisabled}
+              accessibilityRole="switch"
+              accessibilityLabel={resolvedAccessibilityLabel}
+              accessibilityHint={resolvedAccessibilityHint}
+              accessibilityState={mergedAccessibilityState}
               {...props}
             />
           </View>
@@ -129,6 +143,10 @@ export const Switch = React.forwardRef<View, SwitchProps>(
             trackColor={trackColor}
             thumbColor={thumbColor}
             disabled={isDisabled}
+            accessibilityRole="switch"
+            accessibilityLabel={resolvedAccessibilityLabel}
+            accessibilityHint={resolvedAccessibilityHint}
+            accessibilityState={mergedAccessibilityState}
             {...props}
           />
         </View>

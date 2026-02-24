@@ -82,4 +82,17 @@ describe('Switch', () => {
     render(<Switch ref={ref} />)
     expect(ref.current).toBeTruthy()
   })
+
+  it('applies accessibility label, hint, and state', () => {
+    const { UNSAFE_getByType } = render(
+      <Switch label="Enable notifications" helperText="Double tap to toggle" isChecked isDisabled />
+    )
+    const switchComponent = UNSAFE_getByType(require('react-native').Switch)
+    expect(switchComponent.props.accessibilityRole).toBe('switch')
+    expect(switchComponent.props.accessibilityLabel).toBe('Enable notifications')
+    expect(switchComponent.props.accessibilityHint).toBe('Double tap to toggle')
+    expect(switchComponent.props.accessibilityState).toEqual(
+      expect.objectContaining({ checked: true, disabled: true })
+    )
+  })
 })

@@ -12,9 +12,7 @@ module.exports = {
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@testing-library|@tesserix)/)',
-  ],
+  transformIgnorePatterns: [],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },

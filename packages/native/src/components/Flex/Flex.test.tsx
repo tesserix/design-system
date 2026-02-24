@@ -68,12 +68,12 @@ describe('Flex', () => {
   })
 
   it('applies flex value', () => {
-    const { getByTestID } = render(
+    const { getByTestId } = render(
       <Flex testID="flex" flex={1}>
         <View><Text>Content</Text></View>
       </Flex>
     )
-    expect(getByTestID('flex')).toBeTruthy()
+    expect(getByTestId('flex')).toBeTruthy()
   })
 
   it('applies align self', () => {

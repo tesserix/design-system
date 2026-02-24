@@ -47,6 +47,14 @@ export interface CheckboxProps {
    * Test ID for testing
    */
   testID?: string
+  /**
+   * Accessibility label for screen readers
+   */
+  accessibilityLabel?: string
+  /**
+   * Accessibility hint for screen readers
+   */
+  accessibilityHint?: string
 }
 
 const sizeMap = {
@@ -87,6 +95,8 @@ export const Checkbox = React.forwardRef<View, CheckboxProps>(
       isIndeterminate = false,
       containerStyle,
       testID,
+      accessibilityLabel,
+      accessibilityHint,
     },
     ref
   ) => {
@@ -136,6 +146,8 @@ export const Checkbox = React.forwardRef<View, CheckboxProps>(
       marginLeft: label ? spacing[2] : 0,
       flex: 1,
     }
+    const resolvedAccessibilityLabel = accessibilityLabel ?? label
+    const resolvedAccessibilityHint = accessibilityHint ?? helperText
 
     return (
       <TouchableOpacity
@@ -145,6 +157,14 @@ export const Checkbox = React.forwardRef<View, CheckboxProps>(
         style={[containerStyles, containerStyle]}
         activeOpacity={0.7}
         testID={testID}
+        accessible
+        accessibilityRole="checkbox"
+        accessibilityLabel={resolvedAccessibilityLabel}
+        accessibilityHint={resolvedAccessibilityHint}
+        accessibilityState={{
+          disabled: isDisabled,
+          checked: isIndeterminate ? 'mixed' : isChecked,
+        }}
       >
         <View style={checkboxStyles}>
           {isIndeterminate ? (

@@ -15,8 +15,8 @@ export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   variant?: 'solid' | 'outline' | 'ghost'
   /** Button size */
   size?: 'sm' | 'md' | 'lg'
-  /** Button color scheme */
-  colorScheme?: 'primary' | 'secondary' | 'danger' | 'success'
+  /** Button color scheme (`danger` is deprecated alias for `error`) */
+  colorScheme?: 'primary' | 'secondary' | 'error' | 'danger' | 'success'
   /** Full width button */
   fullWidth?: boolean
   /** Loading state */
@@ -49,11 +49,23 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
       children,
       style,
       textStyle,
+      accessibilityState,
+      accessibilityLabel,
       ...props
     },
     ref
   ) => {
     const sizeStyle = sizeStyles[size]
+    const resolvedColorScheme = colorScheme === 'danger' ? 'error' : colorScheme
+    const computedAccessibilityLabel =
+      accessibilityLabel ??
+      (typeof children === 'string' || typeof children === 'number' ? String(children) : undefined)
+    const isDisabledState = Boolean(disabled || isLoading)
+    const mergedAccessibilityState = {
+      ...accessibilityState,
+      disabled: isDisabledState,
+      busy: Boolean(isLoading),
+    }
 
     // Base styles
     const containerStyle: ViewStyle = {
@@ -71,17 +83,17 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
     const variantStyles: ViewStyle =
       variant === 'solid'
         ? {
-            backgroundColor: colorScheme === 'primary' ? '#3b82f6' :
-              colorScheme === 'danger' ? '#ef4444' :
-              colorScheme === 'success' ? '#10b981' :
+            backgroundColor: resolvedColorScheme === 'primary' ? '#3b82f6' :
+              resolvedColorScheme === 'error' ? '#ef4444' :
+              resolvedColorScheme === 'success' ? '#10b981' :
               '#6b7280',
           }
         : variant === 'outline'
         ? {
             borderWidth: 1,
-            borderColor: colorScheme === 'primary' ? '#3b82f6' :
-              colorScheme === 'danger' ? '#ef4444' :
-              colorScheme === 'success' ? '#10b981' :
+            borderColor: resolvedColorScheme === 'primary' ? '#3b82f6' :
+              resolvedColorScheme === 'error' ? '#ef4444' :
+              resolvedColorScheme === 'success' ? '#10b981' :
               '#6b7280',
             backgroundColor: 'transparent',
           }
@@ -95,9 +107,9 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
       color:
         variant === 'solid'
           ? '#ffffff'
-          : colorScheme === 'primary' ? '#3b82f6' :
-          colorScheme === 'danger' ? '#ef4444' :
-          colorScheme === 'success' ? '#10b981' :
+          : resolvedColorScheme === 'primary' ? '#3b82f6' :
+          resolvedColorScheme === 'error' ? '#ef4444' :
+          resolvedColorScheme === 'success' ? '#10b981' :
           '#6b7280',
     }
 
@@ -105,8 +117,12 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
       <TouchableOpacity
         ref={ref}
         style={[containerStyle, variantStyles, style]}
-        disabled={disabled || isLoading}
+        disabled={isDisabledState}
         activeOpacity={0.7}
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={computedAccessibilityLabel}
+        accessibilityState={mergedAccessibilityState}
         {...props}
       >
         {isLoading ? (

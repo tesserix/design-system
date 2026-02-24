@@ -50,7 +50,7 @@ describe('ProgressBar', () => {
 
   it('renders in indeterminate state', () => {
     const { getByTestId } = render(<ProgressBar testID="progress" isIndeterminate />)
-    expect(getByTestID('progress')).toBeTruthy()
+    expect(getByTestId('progress')).toBeTruthy()
   })
 
   it('clamps value to max', () => {

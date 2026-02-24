@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
-import { Text } from 'react-native'
+import { ActivityIndicator, Text } from 'react-native'
 import { IconButton } from './IconButton'
 
 const MockIcon = () => <Text>Icon</Text>
@@ -124,6 +124,17 @@ describe('IconButton', () => {
       <IconButton icon={<MockIcon />} aria-label="Close dialog" />
     )
     expect(getByLabelText('Close dialog')).toBeTruthy()
+  })
+
+  it('sets accessibility state when loading', () => {
+    const { getByTestId, UNSAFE_getByType } = render(
+      <IconButton testID="icon-button" icon={<MockIcon />} aria-label="Test" isLoading />
+    )
+    const button = getByTestId('icon-button')
+    expect(button.props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: true, busy: true })
+    )
+    expect(UNSAFE_getByType(ActivityIndicator)).toBeTruthy()
   })
 
   it('forwards ref', () => {

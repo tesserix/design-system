@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, ViewStyle } from 'react-native'
+import { StyleProp, View, ViewStyle } from 'react-native'
 import { spacing } from '@tesserix/tokens/spacing'
 import { BoxProps } from '../Box/Box'
 
@@ -21,6 +21,25 @@ export interface StackProps extends Omit<BoxProps, 'style'> {
 export const Stack = React.forwardRef<View, StackProps>(
   (
     {
+      p,
+      px,
+      py,
+      pt,
+      pr,
+      pb,
+      pl,
+      m,
+      mx,
+      my,
+      mt,
+      mr,
+      mb,
+      ml,
+      bg,
+      rounded,
+      flex,
+      w,
+      h,
       direction = 'column',
       space,
       align,
@@ -28,10 +47,34 @@ export const Stack = React.forwardRef<View, StackProps>(
       wrap,
       children,
       style,
-      ...boxProps
+      ...viewProps
     },
     ref
   ) => {
+    const boxStyle: ViewStyle = {
+      ...(p !== undefined && { padding: spacing[p] }),
+      ...(px !== undefined && { paddingHorizontal: spacing[px] }),
+      ...(py !== undefined && { paddingVertical: spacing[py] }),
+      ...(pt !== undefined && { paddingTop: spacing[pt] }),
+      ...(pr !== undefined && { paddingRight: spacing[pr] }),
+      ...(pb !== undefined && { paddingBottom: spacing[pb] }),
+      ...(pl !== undefined && { paddingLeft: spacing[pl] }),
+      ...(m !== undefined && { margin: spacing[m] }),
+      ...(mx !== undefined && { marginHorizontal: spacing[mx] }),
+      ...(my !== undefined && { marginVertical: spacing[my] }),
+      ...(mt !== undefined && { marginTop: spacing[mt] }),
+      ...(mr !== undefined && { marginRight: spacing[mr] }),
+      ...(mb !== undefined && { marginBottom: spacing[mb] }),
+      ...(ml !== undefined && { marginLeft: spacing[ml] }),
+      ...(bg && { backgroundColor: bg }),
+      ...(rounded !== undefined && {
+        borderRadius: typeof rounded === 'number' ? rounded : 8,
+      }),
+      ...(flex !== undefined && { flex }),
+      ...(w !== undefined && { width: w }),
+      ...(h !== undefined && { height: h }),
+    }
+
     const stackStyle: ViewStyle = {
       flexDirection: direction,
       ...(align && { alignItems: align }),
@@ -51,14 +94,14 @@ export const Stack = React.forwardRef<View, StackProps>(
           ? { marginRight: spacing[space] }
           : { marginBottom: spacing[space] }
 
-      return React.cloneElement(child, {
-        // @ts-ignore
-        style: [child.props.style, spacingStyle],
+      const childWithStyle = child as React.ReactElement<{ style?: StyleProp<ViewStyle> }>
+      return React.cloneElement(childWithStyle, {
+        style: [childWithStyle.props.style, spacingStyle],
       })
     })
 
     return (
-      <View ref={ref} style={[stackStyle, style]} {...boxProps}>
+      <View ref={ref} style={[boxStyle, stackStyle, style]} {...viewProps}>
         {childrenWithSpacing}
       </View>
     )

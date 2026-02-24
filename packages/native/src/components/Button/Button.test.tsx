@@ -49,9 +49,10 @@ describe('Button', () => {
   })
 
   it('renders with different color schemes', () => {
-    const colorSchemes: Array<'primary' | 'secondary' | 'danger' | 'success'> = [
+    const colorSchemes: Array<'primary' | 'secondary' | 'error' | 'danger' | 'success'> = [
       'primary',
       'secondary',
+      'error',
       'danger',
       'success',
     ]
@@ -65,13 +66,27 @@ describe('Button', () => {
     })
   })
 
+  it('exposes button accessibility role and state', () => {
+    const { getByTestId } = render(<Button testID="button">Save</Button>)
+    const button = getByTestId('button')
+    expect(button.props.accessibilityRole).toBe('button')
+    expect(button.props.accessibilityLabel).toBe('Save')
+    expect(button.props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: false, busy: false })
+    )
+  })
+
   it('renders in loading state', () => {
     const { getByTestId } = render(
       <Button testID="button" isLoading>
         Click me
       </Button>
     )
-    expect(getByTestId('button')).toBeTruthy()
+    const button = getByTestId('button')
+    expect(button).toBeTruthy()
+    expect(button.props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: true, busy: true })
+    )
   })
 
   it('does not call onPress when loading', () => {

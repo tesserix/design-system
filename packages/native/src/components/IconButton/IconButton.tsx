@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
+import { ActivityIndicator, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
 import { spacing } from '@tesserix/tokens/spacing'
 import { radius } from '@tesserix/tokens/radius'
 
@@ -11,7 +11,7 @@ export interface IconButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   /**
    * Aria label for accessibility
    */
-  'aria-label': string
+  'aria-label'?: string
   /**
    * Size of the button
    * @default 'md'
@@ -92,6 +92,8 @@ export const IconButton = React.forwardRef<React.ElementRef<typeof TouchableOpac
       isDisabled = false,
       isLoading = false,
       style,
+      accessibilityState,
+      accessibilityLabel,
       ...props
     },
     ref
@@ -129,19 +131,34 @@ export const IconButton = React.forwardRef<React.ElementRef<typeof TouchableOpac
       ...variantStyles,
       ...(isDisabled && { opacity: 0.5 }),
     }
+    const isDisabledState = isDisabled || isLoading
+    const mergedAccessibilityState = {
+      ...accessibilityState,
+      disabled: isDisabledState,
+      busy: isLoading,
+    }
+    const resolvedLabel = accessibilityLabel ?? ariaLabel
 
     return (
       <TouchableOpacity
         ref={ref}
         style={[containerStyles, style]}
-        disabled={isDisabled || isLoading}
+        disabled={isDisabledState}
         activeOpacity={0.7}
         accessible
-        accessibilityLabel={ariaLabel}
+        accessibilityLabel={resolvedLabel}
         accessibilityRole="button"
+        accessibilityState={mergedAccessibilityState}
         {...props}
       >
-        {icon}
+        {isLoading ? (
+          <ActivityIndicator
+            size="small"
+            color={variant === 'solid' ? '#ffffff' : accentColor}
+          />
+        ) : (
+          icon
+        )}
       </TouchableOpacity>
     )
   }

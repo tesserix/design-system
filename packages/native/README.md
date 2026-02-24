@@ -2,6 +2,10 @@
 
 React Native UI components for the Tesserix Design System.
 
+## Roadmap
+
+- v1.1 execution plan: [V1_1_ROADMAP.md](./V1_1_ROADMAP.md)
+
 ## Features
 
 - Expo-first design (compatible with bare React Native)
@@ -81,7 +85,7 @@ function Actions() {
       <Button variant="solid" colorScheme="primary">
         Primary Action
       </Button>
-      <Button variant="outline" colorScheme="danger">
+      <Button variant="outline" colorScheme="error">
         Delete
       </Button>
       <Button variant="ghost" isLoading>
@@ -107,6 +111,24 @@ function Actions() {
 
 ### Buttons
 - **Button** - Touchable button with variants and states
+- **IconButton** - Icon-only action button
+
+### Forms
+- **FormControl** - Field wrapper with label/helper/error support
+- **Field** - Composed form field helper that injects state/accessibility props
+- **Input** - Single-line text input
+- **Textarea** - Multi-line text input
+- **Select** - Option picker with modal menu
+- **Checkbox** - Binary/multi-select checkbox
+- **Radio** / **RadioGroup** - Single-select options
+- **Switch** - On/off toggle
+
+### Overlays
+- **Modal** - Centered dialog overlay
+- **BottomSheet** - Bottom-anchored overlay panel
+- **Drawer** - Side drawer overlay
+- **ActionSheet** - Mobile action chooser sheet
+- **Toast** - Timed notification popup
 
 ## Design Tokens
 

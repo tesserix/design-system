@@ -84,4 +84,23 @@ describe('Input', () => {
     const inputUnstyled = getByPlaceholderText('Enter text')
     expect(inputUnstyled).toBeTruthy()
   })
+
+  it('applies accessibility label, hint, and state from field props', () => {
+    const { getByPlaceholderText } = render(
+      <Input
+        placeholder="Enter email"
+        label="Email"
+        helperText="Use your work email"
+        isInvalid
+        errorMessage="Invalid email"
+        isDisabled
+      />
+    )
+    const input = getByPlaceholderText('Enter email')
+    expect(input.props.accessibilityLabel).toBe('Email')
+    expect(input.props.accessibilityHint).toBe('Invalid email')
+    expect(input.props.accessibilityState).toEqual(
+      expect.objectContaining({ disabled: true, invalid: true })
+    )
+  })
 })

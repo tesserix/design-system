@@ -52,6 +52,9 @@ export const Input = React.forwardRef<RNTextInput, InputProps>(
       containerStyle,
       inputStyle,
       labelStyle,
+      accessibilityLabel,
+      accessibilityHint,
+      accessibilityState,
       ...props
     },
     ref
@@ -94,6 +97,13 @@ export const Input = React.forwardRef<RNTextInput, InputProps>(
       marginTop: spacing[1],
       color: isInvalid ? '#ef4444' : '#6b7280',
     }
+    const resolvedAccessibilityLabel = accessibilityLabel ?? label
+    const resolvedAccessibilityHint = accessibilityHint ?? (isInvalid ? errorMessage : helperText)
+    const mergedAccessibilityState = {
+      ...accessibilityState,
+      disabled: Boolean(isDisabled),
+      ...(isInvalid !== undefined ? { invalid: Boolean(isInvalid) } : {}),
+    }
 
     return (
       <View style={[containerStyles, containerStyle]}>
@@ -103,6 +113,9 @@ export const Input = React.forwardRef<RNTextInput, InputProps>(
           style={[inputStyles, inputStyle]}
           editable={!isDisabled}
           placeholderTextColor="#9ca3af"
+          accessibilityLabel={resolvedAccessibilityLabel}
+          accessibilityHint={resolvedAccessibilityHint}
+          accessibilityState={mergedAccessibilityState}
           {...props}
         />
         {(errorMessage || helperText) && (
