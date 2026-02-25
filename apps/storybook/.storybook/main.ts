@@ -26,6 +26,15 @@ const config: StorybookConfig = {
     config.plugins = config.plugins || []
     config.plugins.push(tailwindcss())
 
+    // Ensure esbuild handles JSX properly with automatic React runtime
+    config.esbuild = config.esbuild || {}
+    config.esbuild.jsx = 'automatic'
+    config.esbuild.jsxDev = true
+
+    // Make React available globally for react-native-web
+    config.define = config.define || {}
+    config.define.global = 'globalThis'
+
     // Allow Storybook/Vite to load stories and source files from monorepo packages.
     config.server = config.server || {}
     config.server.fs = config.server.fs || {}
@@ -56,6 +65,18 @@ const config: StorybookConfig = {
       {
         find: /^postcss-value-parser$/,
         replacement: join(__dirname, 'shims/postcss-value-parser.ts'),
+      },
+      {
+        find: /^@react-native\/normalize-colors$/,
+        replacement: join(__dirname, 'shims/normalize-colors.ts'),
+      },
+      {
+        find: /^@react-native\/normalize-colors\/index$/,
+        replacement: join(__dirname, 'shims/normalize-colors.ts'),
+      },
+      {
+        find: /^@react-native\/normalize-colors\/index\.js$/,
+        replacement: join(__dirname, 'shims/normalize-colors.ts'),
       },
       {
         find: /^styleq$/,

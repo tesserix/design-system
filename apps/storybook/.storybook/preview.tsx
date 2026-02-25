@@ -1,6 +1,6 @@
 import type { Preview, Decorator } from '@storybook/react'
-import { useEffect } from 'react'
-import { AppRegistry } from 'react-native'
+import React, { useEffect } from 'react'
+import { AppRegistry, Platform } from 'react-native'
 
 // Import web themes directly from source so Storybook does not depend on prebuilt package output.
 import '../../../packages/web/src/themes/default.css'
@@ -29,6 +29,21 @@ import '../../../packages/web/src/themes/mocha.css'
 
 // Initialize react-native-web
 if (typeof document !== 'undefined') {
+  // Make React available globally for react-native-web
+  // Some react-native-web modules expect React to be global
+  // @ts-ignore
+  if (typeof window !== 'undefined' && !window.React) {
+    // @ts-ignore
+    window.React = React
+  }
+
+  // Set Platform.OS to web to ensure react-native-web behavior
+  // @ts-ignore - Platform.OS is read-only but we need to set it for web
+  if (!Platform.OS || Platform.OS === 'ios' || Platform.OS === 'android') {
+    // @ts-ignore
+    Platform.OS = 'web'
+  }
+
   // Register a dummy app to initialize react-native-web styles
   AppRegistry.registerComponent('App', () => () => null)
 
@@ -44,6 +59,7 @@ if (typeof document !== 'undefined') {
     body {
       margin: 0;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     /* React Native Web default styles */
@@ -56,12 +72,29 @@ if (typeof document !== 'undefined') {
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
+      position: relative;
+      min-height: 0;
+      min-width: 0;
     }
 
     /* Ensure react-native-web Text components display properly */
     div[class*="css-text"] {
       display: inline;
       box-sizing: border-box;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* TouchableOpacity and other touchable components */
+    div[role="button"] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Image components */
+    img[class*="css"] {
+      max-width: 100%;
+      height: auto;
     }
   `
   document.head.appendChild(style)
