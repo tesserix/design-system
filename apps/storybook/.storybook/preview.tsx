@@ -1,6 +1,7 @@
 import type { Preview, Decorator } from '@storybook/react'
-import React, { useEffect, Component, ReactNode } from 'react'
+import React, { Component, ReactNode } from 'react'
 import { AppRegistry, Platform } from 'react-native'
+import { INITIAL_VIEWPORTS } from 'storybook/viewport'
 
 // Import Tailwind base styles
 import './globals.css'
@@ -90,6 +91,20 @@ if (typeof document !== 'undefined') {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+    }
+
+    /* Storybook canvas wrappers can force light surfaces; override them with theme tokens. */
+    .sb-show-main,
+    .sb-main-centered,
+    .sb-main-padded,
+    .docs-story,
+    .sbdocs,
+    .sbdocs-wrapper,
+    .sbdocs-preview {
+      background-color: hsl(var(--background)) !important;
+      color: hsl(var(--foreground)) !important;
     }
 
     /* React Native Web base styles */
@@ -97,6 +112,8 @@ if (typeof document !== 'undefined') {
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
     }
 
     /* React Native Web default styles */
@@ -140,31 +157,15 @@ if (typeof document !== 'undefined') {
 const withTheme: Decorator = (Story, context) => {
   const theme = context.globals.theme || 'default'
   const mode = context.globals.mode || 'light'
-
-  const ThemeWrapper = () => {
-    // Set theme and mode whenever they change
-    useEffect(() => {
-      if (typeof document === 'undefined') return
-
-      const root = document.documentElement
-
-      // Set theme variant
-      root.setAttribute('data-theme', theme)
-
-      // Set light/dark mode
-      if (mode === 'dark') {
-        root.classList.add('dark')
-        root.classList.remove('light')
-      } else {
-        root.classList.add('light')
-        root.classList.remove('dark')
-      }
-    }, [])
-
-    return <Story />
+  const resolvedTheme = theme === 'default' ? 'slate' : theme
+  if (typeof document !== 'undefined') {
+    const root = document.documentElement
+    root.setAttribute('data-theme', resolvedTheme)
+    root.classList.toggle('dark', mode === 'dark')
+    root.classList.toggle('light', mode !== 'dark')
   }
 
-  return <ThemeWrapper />
+  return <Story />
 }
 
 const withErrorBoundary: Decorator = (Story) => (
@@ -177,6 +178,12 @@ const preview: Preview = {
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    backgrounds: {
+      disable: true,
+    },
+    viewport: {
+      options: INITIAL_VIEWPORTS,
+    },
     a11y: {
       test: 'error',
     },
@@ -196,7 +203,7 @@ const preview: Preview = {
   globalTypes: {
     theme: {
       description: 'Theme Variant',
-      defaultValue: 'default',
+      defaultValue: 'slate',
       toolbar: {
         title: 'Theme',
         icon: 'paintbrush',

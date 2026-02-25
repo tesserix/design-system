@@ -1,10 +1,13 @@
 import { addons } from 'storybook/manager-api'
+import { themes } from 'storybook/theming'
 
 addons.setConfig({
-  brandTitle: 'Tesserix Design System',
-  brandUrl: 'https://docs.tesserix.app',
-  brandImage: '/tesserix-logo-light.png',
-  brandTarget: '_blank',
+  theme: {
+    ...themes.dark,
+    brandUrl: 'https://docs.tesserix.app',
+    brandImage: '/tesserix-logo-dark.png',
+    brandTarget: '_blank',
+  },
   sidebar: {
     showRoots: true,
     collapsedRoots: [],
@@ -15,6 +18,7 @@ addons.setConfig({
   panelPosition: 'bottom',
   // Hide settings addon
   toolbar: {
+    settings: { hidden: true },
     'storybook/settings': { hidden: true },
   },
 })

@@ -69,3 +69,13 @@
   "keywords": "design system, react, react native, ui components, storybook, typescript, tailwind css, accessibility"
 }
 </script>
+
+<style>
+  /* Hide Storybook settings/shortcuts control in manager toolbar. */
+  button[title='Settings'],
+  button[title='Shortcuts'],
+  button[aria-label*='settings' i],
+  button[aria-label*='shortcuts' i] {
+    display: none !important;
+  }
+</style>
