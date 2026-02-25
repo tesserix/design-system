@@ -1,8 +1,9 @@
 {
-  "framework": "nextjs",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm --filter @tesserix/docs build",
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "devCommand": "pnpm --filter @tesserix/docs dev",
+  "outputDirectory": "apps/docs/.next",
+  "framework": "nextjs",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
