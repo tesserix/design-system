@@ -4,7 +4,7 @@ addons.setConfig({
   brandTitle: 'Tesserix Design System',
   brandUrl: 'https://docs.tesserix.app',
   brandImage: '/tesserix-logo-light.png',
-  brandTarget: '_self',
+  brandTarget: '_blank',
   sidebar: {
     showRoots: true,
     collapsedRoots: [],

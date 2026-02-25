@@ -116,7 +116,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.deploy == true)
     environment:
       name: production-ui
-      url: https://tesserix-ui-mahesh-sangawars-projects.vercel.app
+      url: https://ui.tesserix.app
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -154,7 +154,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.deploy == true)
     environment:
       name: production-docs
-      url: https://tesserix-docs-mahesh-sangawars-projects.vercel.app
+      url: https://docs.tesserix.app
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

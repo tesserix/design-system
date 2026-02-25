@@ -2,6 +2,12 @@
 
 A comprehensive design system for web and React Native applications, built with TypeScript, Tailwind CSS, and shadcn/ui principles.
 
+## 🔗 Links
+
+- **📚 Documentation**: [docs.tesserix.app](https://docs.tesserix.app)
+- **🎨 Storybook**: [ui.tesserix.app](https://ui.tesserix.app)
+- **📦 Chromatic**: [chromatic.com/library?appId=699e8c384ce106a70ccc4c6d](https://www.chromatic.com/library?appId=699e8c384ce106a70ccc4c6d)
+
 ## 🏗️ Monorepo Structure
 
 ```
