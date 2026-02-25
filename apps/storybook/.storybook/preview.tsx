@@ -1,6 +1,40 @@
 import type { Preview, Decorator } from '@storybook/react'
-import React, { useEffect } from 'react'
+import React, { useEffect, Component, ReactNode } from 'react'
 import { AppRegistry, Platform } from 'react-native'
+
+// Error Boundary for Chromatic safety
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('Story Error:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 20, color: 'red', border: '1px solid red', borderRadius: 4 }}>
+          <h3>Story Error</h3>
+          <pre style={{ fontSize: 12, overflow: 'auto' }}>
+            {this.state.error?.message || 'Unknown error'}
+          </pre>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
 
 // Import web themes directly from source so Storybook does not depend on prebuilt package output.
 import '../../../packages/web/src/themes/default.css'
@@ -104,25 +138,37 @@ const withTheme: Decorator = (Story, context) => {
   const theme = context.globals.theme || 'default'
   const mode = context.globals.mode || 'light'
 
-  // Set theme and mode whenever they change
-  useEffect(() => {
-    const root = document.documentElement
+  const ThemeWrapper = () => {
+    // Set theme and mode whenever they change
+    useEffect(() => {
+      if (typeof document === 'undefined') return
 
-    // Set theme variant
-    root.setAttribute('data-theme', theme)
+      const root = document.documentElement
 
-    // Set light/dark mode
-    if (mode === 'dark') {
-      root.classList.add('dark')
-      root.classList.remove('light')
-    } else {
-      root.classList.add('light')
-      root.classList.remove('dark')
-    }
-  }, [theme, mode])
+      // Set theme variant
+      root.setAttribute('data-theme', theme)
 
-  return <Story />
+      // Set light/dark mode
+      if (mode === 'dark') {
+        root.classList.add('dark')
+        root.classList.remove('light')
+      } else {
+        root.classList.add('light')
+        root.classList.remove('dark')
+      }
+    }, [])
+
+    return <Story />
+  }
+
+  return <ThemeWrapper />
 }
+
+const withErrorBoundary: Decorator = (Story) => (
+  <ErrorBoundary>
+    <Story />
+  </ErrorBoundary>
+)
 
 const preview: Preview = {
   tags: ['autodocs'],
@@ -132,7 +178,9 @@ const preview: Preview = {
       test: 'error',
     },
     chromatic: {
+      disableSnapshot: false,
       pauseAnimationAtEnd: true,
+      delay: 300,
     },
     controls: {
       matchers: {
@@ -141,7 +189,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withTheme],
+  decorators: [withErrorBoundary, withTheme],
   globalTypes: {
     theme: {
       description: 'Theme Variant',
