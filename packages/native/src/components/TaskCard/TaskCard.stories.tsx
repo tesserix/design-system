@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { TaskCard } from '@tesserix/native'
 
 const meta: Meta<typeof TaskCard> = {
-  title: 'Native/TaskCard',
+  title: 'Native/DataDisplay/TaskCard',
   component: TaskCard,
   parameters: {
     layout: 'centered',

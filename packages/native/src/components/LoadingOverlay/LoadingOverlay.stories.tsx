@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { LoadingOverlay } from '@tesserix/native'
 
 const meta: Meta<typeof LoadingOverlay> = {
-  title: 'Native/LoadingOverlay',
+  title: 'Native/Feedback/LoadingOverlay',
   component: LoadingOverlay,
   parameters: {
     layout: 'centered',

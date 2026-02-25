@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Gauge } from '@tesserix/native'
 
 const meta: Meta<typeof Gauge> = {
-  title: 'Native/Gauge',
+  title: 'Native/Utilities/Gauge',
   component: Gauge,
   parameters: {
     layout: 'centered',

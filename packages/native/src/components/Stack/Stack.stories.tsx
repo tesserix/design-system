@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Stack } from '@tesserix/native'
 
 const meta: Meta<typeof Stack> = {
-  title: 'Native/Stack',
+  title: 'Native/Layout/Stack',
   component: Stack,
   parameters: {
     layout: 'centered',

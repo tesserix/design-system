@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Calendar } from '@tesserix/native'
 
 const meta: Meta<typeof Calendar> = {
-  title: 'Native/Calendar',
+  title: 'Native/Components/Calendar',
   component: Calendar,
   parameters: {
     layout: 'centered',

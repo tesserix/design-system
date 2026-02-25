@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { AudioPlayer } from '@tesserix/native'
 
 const meta: Meta<typeof AudioPlayer> = {
-  title: 'Native/AudioPlayer',
+  title: 'Native/Media/AudioPlayer',
   component: AudioPlayer,
   parameters: {
     layout: 'centered',

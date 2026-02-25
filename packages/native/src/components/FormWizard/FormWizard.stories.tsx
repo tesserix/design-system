@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { FormWizard } from '@tesserix/native'
 
 const meta: Meta<typeof FormWizard> = {
-  title: 'Native/FormWizard',
+  title: 'Native/Forms/FormWizard',
   component: FormWizard,
   parameters: {
     layout: 'centered',

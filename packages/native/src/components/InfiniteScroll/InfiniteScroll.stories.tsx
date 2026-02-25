@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { InfiniteScroll } from '@tesserix/native'
 
 const meta: Meta<typeof InfiniteScroll> = {
-  title: 'Native/InfiniteScroll',
+  title: 'Native/Media/InfiniteScroll',
   component: InfiniteScroll,
   parameters: {
     layout: 'centered',

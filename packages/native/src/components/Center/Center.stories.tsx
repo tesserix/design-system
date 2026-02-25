@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Center } from '@tesserix/native'
 
 const meta: Meta<typeof Center> = {
-  title: 'Native/Center',
+  title: 'Native/Layout/Center',
   component: Center,
   parameters: {
     layout: 'centered',

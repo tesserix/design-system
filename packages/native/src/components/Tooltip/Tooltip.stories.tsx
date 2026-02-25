@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Tooltip } from '@tesserix/native'
 
 const meta: Meta<typeof Tooltip> = {
-  title: 'Native/Tooltip',
+  title: 'Native/Overlays/Tooltip',
   component: Tooltip,
   parameters: {
     layout: 'centered',

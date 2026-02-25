@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Link } from '@tesserix/native'
 
 const meta: Meta<typeof Link> = {
-  title: 'Native/Link',
+  title: 'Native/Navigation/Link',
   component: Link,
   parameters: {
     layout: 'centered',

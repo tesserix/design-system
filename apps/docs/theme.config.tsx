@@ -9,7 +9,21 @@ const config = {
   docsRepositoryBase: 'https://github.com/tesserix/design-system/tree/main/apps/docs',
   footer: {
     text: (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          fontSize: 12,
+          lineHeight: 1.1,
+        }}
+      >
+        <img
+          src="/icon.png"
+          alt="Tesserix"
+          style={{ width: 16, height: 16, borderRadius: 3, display: 'inline-block' }}
+        />
         <span>© {new Date().getFullYear()}</span>
         <a href="https://tesserix.app" target="_blank" rel="noreferrer">
           Tesserix

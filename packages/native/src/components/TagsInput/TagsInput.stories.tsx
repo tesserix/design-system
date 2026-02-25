@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { TagsInput } from '@tesserix/native'
 
 const meta: Meta<typeof TagsInput> = {
-  title: 'Native/TagsInput',
+  title: 'Native/Utilities/TagsInput',
   component: TagsInput,
   parameters: {
     layout: 'centered',

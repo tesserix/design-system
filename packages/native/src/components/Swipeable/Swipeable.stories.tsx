@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Swipeable } from '@tesserix/native'
 
 const meta: Meta<typeof Swipeable> = {
-  title: 'Native/Swipeable',
+  title: 'Native/Components/Swipeable',
   component: Swipeable,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Notification } from '@tesserix/native'
 
 const meta: Meta<typeof Notification> = {
-  title: 'Native/Notification',
+  title: 'Native/Feedback/Notification',
   component: Notification,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Select } from '@tesserix/native'
 
 const meta: Meta<typeof Select> = {
-  title: 'Native/Select',
+  title: 'Native/Forms/Select',
   component: Select,
   parameters: {
     layout: 'centered',

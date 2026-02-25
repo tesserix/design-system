@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { List } from '@tesserix/native'
 
 const meta: Meta<typeof List> = {
-  title: 'Native/List',
+  title: 'Native/DataDisplay/List',
   component: List,
   parameters: {
     layout: 'centered',

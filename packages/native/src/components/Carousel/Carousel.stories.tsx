@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Carousel } from '@tesserix/native'
 
 const meta: Meta<typeof Carousel> = {
-  title: 'Native/Carousel',
+  title: 'Native/Media/Carousel',
   component: Carousel,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ProgressBar } from '@tesserix/native'
 
 const meta: Meta<typeof ProgressBar> = {
-  title: 'Native/ProgressBar',
+  title: 'Native/Feedback/ProgressBar',
   component: ProgressBar,
   parameters: {
     layout: 'centered',

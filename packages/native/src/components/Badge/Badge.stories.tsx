@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Badge } from '@tesserix/native'
 
 const meta: Meta<typeof Badge> = {
-  title: 'Native/Badge',
+  title: 'Native/DataDisplay/Badge',
   component: Badge,
   parameters: {
     layout: 'centered',

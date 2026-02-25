@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { EmptyState } from '@tesserix/native'
 
 const meta: Meta<typeof EmptyState> = {
-  title: 'Native/EmptyState',
+  title: 'Native/Feedback/EmptyState',
   component: EmptyState,
   parameters: {
     layout: 'centered',

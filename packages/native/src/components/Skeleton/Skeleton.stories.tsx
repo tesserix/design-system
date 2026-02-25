@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Skeleton } from '@tesserix/native'
 
 const meta: Meta<typeof Skeleton> = {
-  title: 'Native/Skeleton',
+  title: 'Native/Feedback/Skeleton',
   component: Skeleton,
   parameters: {
     layout: 'centered',

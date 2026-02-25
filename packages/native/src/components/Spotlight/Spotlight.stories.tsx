@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Spotlight } from '@tesserix/native'
 
 const meta: Meta<typeof Spotlight> = {
-  title: 'Native/Spotlight',
+  title: 'Native/Overlays/Spotlight',
   component: Spotlight,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { TabBar } from '@tesserix/native'
 
 const meta: Meta<typeof TabBar> = {
-  title: 'Native/TabBar',
+  title: 'Native/Navigation/TabBar',
   component: TabBar,
   parameters: {
     layout: 'centered',

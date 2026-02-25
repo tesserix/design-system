@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { VirtualList } from '@tesserix/native'
 
 const meta: Meta<typeof VirtualList> = {
-  title: 'Native/VirtualList',
+  title: 'Native/Media/VirtualList',
   component: VirtualList,
   parameters: {
     layout: 'centered',

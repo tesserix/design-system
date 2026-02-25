@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Input } from '@tesserix/native'
 
 const meta: Meta<typeof Input> = {
-  title: 'Native/Input',
+  title: 'Native/Forms/Input',
   component: Input,
   parameters: {
     layout: 'centered',

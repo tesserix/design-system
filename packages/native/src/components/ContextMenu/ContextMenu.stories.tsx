@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ContextMenu } from '@tesserix/native'
 
 const meta: Meta<typeof ContextMenu> = {
-  title: 'Native/ContextMenu',
+  title: 'Native/Overlays/ContextMenu',
   component: ContextMenu,
   parameters: {
     layout: 'centered',

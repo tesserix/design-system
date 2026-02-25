@@ -404,10 +404,6 @@ export type { LineChartProps, LineChartData } from './components/LineChart'
 export { Gauge } from './components/Gauge'
 export type { GaugeProps } from './components/Gauge'
 
-// Test Component (for debugging)
-export { Test } from './components/_Test'
-export type { TestProps } from './components/_Test'
-
 // Hooks
 export * from './hooks'
 

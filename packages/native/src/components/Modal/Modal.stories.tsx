@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Modal } from '@tesserix/native'
 
 const meta: Meta<typeof Modal> = {
-  title: 'Native/Modal',
+  title: 'Native/Overlays/Modal',
   component: Modal,
   parameters: {
     layout: 'centered',

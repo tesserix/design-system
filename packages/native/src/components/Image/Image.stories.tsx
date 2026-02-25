@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Image } from '@tesserix/native'
 
 const meta: Meta<typeof Image> = {
-  title: 'Native/Image',
+  title: 'Native/DataDisplay/Image',
   component: Image,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ShareButton } from '@tesserix/native'
 
 const meta: Meta<typeof ShareButton> = {
-  title: 'Native/ShareButton',
+  title: 'Native/Utilities/ShareButton',
   component: ShareButton,
   parameters: {
     layout: 'centered',

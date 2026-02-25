@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Slider } from '@tesserix/native'
 
 const meta: Meta<typeof Slider> = {
-  title: 'Native/Slider',
+  title: 'Native/Forms/Slider',
   component: Slider,
   parameters: {
     layout: 'centered',

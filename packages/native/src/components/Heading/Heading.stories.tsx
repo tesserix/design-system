@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Heading } from '@tesserix/native'
 
 const meta: Meta<typeof Heading> = {
-  title: 'Native/Heading',
+  title: 'Native/Typography/Heading',
   component: Heading,
   parameters: {
     layout: 'centered',

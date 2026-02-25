@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { QRCode } from '@tesserix/native'
 
 const meta: Meta<typeof QRCode> = {
-  title: 'Native/QRCode',
+  title: 'Native/Media/QRCode',
   component: QRCode,
   parameters: {
     layout: 'centered',

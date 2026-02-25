@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { CartItem } from '@tesserix/native'
 
 const meta: Meta<typeof CartItem> = {
-  title: 'Native/CartItem',
+  title: 'Native/Components/CartItem',
   component: CartItem,
   parameters: {
     layout: 'centered',

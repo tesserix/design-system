@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Invoice } from '@tesserix/native'
 
 const meta: Meta<typeof Invoice> = {
-  title: 'Native/Invoice',
+  title: 'Native/DataDisplay/Invoice',
   component: Invoice,
   parameters: {
     layout: 'centered',

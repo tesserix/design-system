@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Breadcrumbs } from '@tesserix/native'
 
 const meta: Meta<typeof Breadcrumbs> = {
-  title: 'Native/Breadcrumbs',
+  title: 'Native/Navigation/Breadcrumbs',
   component: Breadcrumbs,
   parameters: {
     layout: 'centered',

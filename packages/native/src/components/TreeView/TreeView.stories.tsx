@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { TreeView } from '@tesserix/native'
 
 const meta: Meta<typeof TreeView> = {
-  title: 'Native/TreeView',
+  title: 'Native/DataDisplay/TreeView',
   component: TreeView,
   parameters: {
     layout: 'centered',

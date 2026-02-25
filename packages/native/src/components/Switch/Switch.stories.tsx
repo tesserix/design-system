@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Switch } from '@tesserix/native'
 
 const meta: Meta<typeof Switch> = {
-  title: 'Native/Switch',
+  title: 'Native/Forms/Switch',
   component: Switch,
   parameters: {
     layout: 'centered',

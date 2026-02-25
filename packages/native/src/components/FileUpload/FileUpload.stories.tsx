@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { FileUpload } from '@tesserix/native'
 
 const meta: Meta<typeof FileUpload> = {
-  title: 'Native/FileUpload',
+  title: 'Native/Forms/FileUpload',
   component: FileUpload,
   parameters: {
     layout: 'centered',

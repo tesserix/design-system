@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Avatar } from '@tesserix/native'
 
 const meta: Meta<typeof Avatar> = {
-  title: 'Native/Avatar',
+  title: 'Native/DataDisplay/Avatar',
   component: Avatar,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { OrderSummary } from '@tesserix/native'
 
 const meta: Meta<typeof OrderSummary> = {
-  title: 'Native/OrderSummary',
+  title: 'Native/DataDisplay/OrderSummary',
   component: OrderSummary,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { OTPInput } from '@tesserix/native'
 
 const meta: Meta<typeof OTPInput> = {
-  title: 'Native/OTPInput',
+  title: 'Native/Forms/OTPInput',
   component: OTPInput,
   parameters: {
     layout: 'centered',

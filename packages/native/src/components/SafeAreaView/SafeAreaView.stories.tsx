@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { SafeAreaView } from '@tesserix/native'
 
 const meta: Meta<typeof SafeAreaView> = {
-  title: 'Native/SafeAreaView',
+  title: 'Native/Layout/SafeAreaView',
   component: SafeAreaView,
   parameters: {
     layout: 'centered',

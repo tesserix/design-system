@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ColorPicker } from '@tesserix/native'
 
 const meta: Meta<typeof ColorPicker> = {
-  title: 'Native/ColorPicker',
+  title: 'Native/Forms/ColorPicker',
   component: ColorPicker,
   parameters: {
     layout: 'centered',

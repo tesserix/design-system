@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { MultiSelect } from '@tesserix/native'
 
 const meta: Meta<typeof MultiSelect> = {
-  title: 'Native/MultiSelect',
+  title: 'Native/Forms/MultiSelect',
   component: MultiSelect,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { RichTextEditor } from '@tesserix/native'
 
 const meta: Meta<typeof RichTextEditor> = {
-  title: 'Native/RichTextEditor',
+  title: 'Native/Utilities/RichTextEditor',
   component: RichTextEditor,
   parameters: {
     layout: 'centered',

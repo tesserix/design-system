@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { BackButton } from '@tesserix/native'
 
 const meta: Meta<typeof BackButton> = {
-  title: 'Native/BackButton',
+  title: 'Native/Navigation/BackButton',
   component: BackButton,
   parameters: {
     layout: 'centered',

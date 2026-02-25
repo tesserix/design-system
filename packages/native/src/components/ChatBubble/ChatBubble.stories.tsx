@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ChatBubble } from '@tesserix/native'
 
 const meta: Meta<typeof ChatBubble> = {
-  title: 'Native/ChatBubble',
+  title: 'Native/DataDisplay/ChatBubble',
   component: ChatBubble,
   parameters: {
     layout: 'centered',

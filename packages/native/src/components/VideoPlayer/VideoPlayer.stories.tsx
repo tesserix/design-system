@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { VideoPlayer } from '@tesserix/native'
 
 const meta: Meta<typeof VideoPlayer> = {
-  title: 'Native/VideoPlayer',
+  title: 'Native/Media/VideoPlayer',
   component: VideoPlayer,
   parameters: {
     layout: 'centered',

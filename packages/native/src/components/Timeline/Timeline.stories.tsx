@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Timeline } from '@tesserix/native'
 
 const meta: Meta<typeof Timeline> = {
-  title: 'Native/Timeline',
+  title: 'Native/DataDisplay/Timeline',
   component: Timeline,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { DataGrid } from '@tesserix/native'
 
 const meta: Meta<typeof DataGrid> = {
-  title: 'Native/DataGrid',
+  title: 'Native/DataDisplay/DataGrid',
   component: DataGrid,
   parameters: {
     layout: 'centered',

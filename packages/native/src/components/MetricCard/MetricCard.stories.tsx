@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { MetricCard } from '@tesserix/native'
 
 const meta: Meta<typeof MetricCard> = {
-  title: 'Native/MetricCard',
+  title: 'Native/DataDisplay/MetricCard',
   component: MetricCard,
   parameters: {
     layout: 'centered',

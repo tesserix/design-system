@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ActionSheet } from '@tesserix/native'
 
 const meta: Meta<typeof ActionSheet> = {
-  title: 'Native/ActionSheet',
+  title: 'Native/Overlays/ActionSheet',
   component: ActionSheet,
   parameters: {
     layout: 'centered',

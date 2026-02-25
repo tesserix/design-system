@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ActivityFeed } from '@tesserix/native'
 
 const meta: Meta<typeof ActivityFeed> = {
-  title: 'Native/ActivityFeed',
+  title: 'Native/DataDisplay/ActivityFeed',
   component: ActivityFeed,
   parameters: {
     layout: 'centered',

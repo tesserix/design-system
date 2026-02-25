@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Spinner } from '@tesserix/native'
 
 const meta: Meta<typeof Spinner> = {
-  title: 'Native/Spinner',
+  title: 'Native/Feedback/Spinner',
   component: Spinner,
   parameters: {
     layout: 'centered',

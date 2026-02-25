@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { SplitPane } from '@tesserix/native'
 
 const meta: Meta<typeof SplitPane> = {
-  title: 'Native/SplitPane',
+  title: 'Native/Layout/SplitPane',
   component: SplitPane,
   parameters: {
     layout: 'centered',

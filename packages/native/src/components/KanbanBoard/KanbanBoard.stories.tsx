@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { KanbanBoard } from '@tesserix/native'
 
 const meta: Meta<typeof KanbanBoard> = {
-  title: 'Native/KanbanBoard',
+  title: 'Native/Utilities/KanbanBoard',
   component: KanbanBoard,
   parameters: {
     layout: 'centered',

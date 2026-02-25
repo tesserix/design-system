@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Countdown } from '@tesserix/native'
 
 const meta: Meta<typeof Countdown> = {
-  title: 'Native/Countdown',
+  title: 'Native/Utilities/Countdown',
   component: Countdown,
   parameters: {
     layout: 'centered',

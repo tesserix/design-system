@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { LineChart } from '@tesserix/native'
 
 const meta: Meta<typeof LineChart> = {
-  title: 'Native/LineChart',
+  title: 'Native/Utilities/LineChart',
   component: LineChart,
   parameters: {
     layout: 'centered',

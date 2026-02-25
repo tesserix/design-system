@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ScrollView } from '@tesserix/native'
 
 const meta: Meta<typeof ScrollView> = {
-  title: 'Native/ScrollView',
+  title: 'Native/Layout/ScrollView',
   component: ScrollView,
   parameters: {
     layout: 'centered',

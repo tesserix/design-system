@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { BottomSheet } from '@tesserix/native'
 
 const meta: Meta<typeof BottomSheet> = {
-  title: 'Native/BottomSheet',
+  title: 'Native/Overlays/BottomSheet',
   component: BottomSheet,
   parameters: {
     layout: 'centered',

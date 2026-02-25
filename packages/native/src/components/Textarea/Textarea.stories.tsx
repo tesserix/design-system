@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Textarea } from '@tesserix/native'
 
 const meta: Meta<typeof Textarea> = {
-  title: 'Native/Textarea',
+  title: 'Native/Forms/Textarea',
   component: Textarea,
   parameters: {
     layout: 'centered',

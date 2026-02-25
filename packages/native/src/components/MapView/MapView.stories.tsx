@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { MapView } from '@tesserix/native'
 
 const meta: Meta<typeof MapView> = {
-  title: 'Native/MapView',
+  title: 'Native/Media/MapView',
   component: MapView,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { MasonryGrid } from '@tesserix/native'
 
 const meta: Meta<typeof MasonryGrid> = {
-  title: 'Native/MasonryGrid',
+  title: 'Native/Media/MasonryGrid',
   component: MasonryGrid,
   parameters: {
     layout: 'centered',

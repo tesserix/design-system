@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ProductGrid } from '@tesserix/native'
 
 const meta: Meta<typeof ProductGrid> = {
-  title: 'Native/ProductGrid',
+  title: 'Native/DataDisplay/ProductGrid',
   component: ProductGrid,
   parameters: {
     layout: 'centered',

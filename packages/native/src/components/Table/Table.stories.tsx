@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Table } from '@tesserix/native'
 
 const meta: Meta<typeof Table> = {
-  title: 'Native/Table',
+  title: 'Native/DataDisplay/Table',
   component: Table,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Banner } from '@tesserix/native'
 
 const meta: Meta<typeof Banner> = {
-  title: 'Native/Banner',
+  title: 'Native/Feedback/Banner',
   component: Banner,
   parameters: {
     layout: 'centered',

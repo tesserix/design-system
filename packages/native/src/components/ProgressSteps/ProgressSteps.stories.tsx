@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ProgressSteps } from '@tesserix/native'
 
 const meta: Meta<typeof ProgressSteps> = {
-  title: 'Native/ProgressSteps',
+  title: 'Native/Feedback/ProgressSteps',
   component: ProgressSteps,
   parameters: {
     layout: 'centered',

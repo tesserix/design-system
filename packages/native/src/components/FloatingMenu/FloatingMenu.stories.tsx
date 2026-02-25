@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { FloatingMenu } from '@tesserix/native'
 
 const meta: Meta<typeof FloatingMenu> = {
-  title: 'Native/FloatingMenu',
+  title: 'Native/Utilities/FloatingMenu',
   component: FloatingMenu,
   parameters: {
     layout: 'centered',

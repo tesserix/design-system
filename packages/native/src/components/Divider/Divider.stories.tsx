@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Divider } from '@tesserix/native'
 
 const meta: Meta<typeof Divider> = {
-  title: 'Native/Divider',
+  title: 'Native/Layout/Divider',
   component: Divider,
   parameters: {
     layout: 'centered',

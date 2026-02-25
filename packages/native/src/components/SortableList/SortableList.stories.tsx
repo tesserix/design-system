@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { SortableList } from '@tesserix/native'
 
 const meta: Meta<typeof SortableList> = {
-  title: 'Native/SortableList',
+  title: 'Native/Utilities/SortableList',
   component: SortableList,
   parameters: {
     layout: 'centered',

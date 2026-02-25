@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { PricingTable } from '@tesserix/native'
 
 const meta: Meta<typeof PricingTable> = {
-  title: 'Native/PricingTable',
+  title: 'Native/DataDisplay/PricingTable',
   component: PricingTable,
   parameters: {
     layout: 'centered',

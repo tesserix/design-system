@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Radio } from '@tesserix/native'
 
 const meta: Meta<typeof Radio> = {
-  title: 'Native/Radio',
+  title: 'Native/Forms/Radio',
   component: Radio,
   parameters: {
     layout: 'centered',

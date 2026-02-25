@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Text } from '@tesserix/native'
 
 const meta: Meta<typeof Text> = {
-  title: 'Native/Text',
+  title: 'Native/Typography/Text',
   component: Text,
   parameters: {
     layout: 'centered',

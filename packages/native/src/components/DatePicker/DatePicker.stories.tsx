@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { DatePicker } from '@tesserix/native'
 
 const meta: Meta<typeof DatePicker> = {
-  title: 'Native/DatePicker',
+  title: 'Native/Forms/DatePicker',
   component: DatePicker,
   parameters: {
     layout: 'centered',

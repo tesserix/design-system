@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { SearchBar } from '@tesserix/native'
 
 const meta: Meta<typeof SearchBar> = {
-  title: 'Native/SearchBar',
+  title: 'Native/Forms/SearchBar',
   component: SearchBar,
   parameters: {
     layout: 'centered',

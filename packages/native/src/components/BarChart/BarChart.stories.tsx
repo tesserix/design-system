@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { BarChart } from '@tesserix/native'
 
 const meta: Meta<typeof BarChart> = {
-  title: 'Native/BarChart',
+  title: 'Native/Utilities/BarChart',
   component: BarChart,
   parameters: {
     layout: 'centered',

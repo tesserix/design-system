@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Walkthrough } from '@tesserix/native'
 
 const meta: Meta<typeof Walkthrough> = {
-  title: 'Native/Walkthrough',
+  title: 'Native/Overlays/Walkthrough',
   component: Walkthrough,
   parameters: {
     layout: 'centered',

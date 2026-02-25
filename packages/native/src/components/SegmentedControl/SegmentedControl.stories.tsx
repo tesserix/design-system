@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { SegmentedControl } from '@tesserix/native'
 
 const meta: Meta<typeof SegmentedControl> = {
-  title: 'Native/SegmentedControl',
+  title: 'Native/Navigation/SegmentedControl',
   component: SegmentedControl,
   parameters: {
     layout: 'centered',

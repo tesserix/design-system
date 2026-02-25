@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Checkbox } from '@tesserix/native'
 
 const meta: Meta<typeof Checkbox> = {
-  title: 'Native/Checkbox',
+  title: 'Native/Forms/Checkbox',
   component: Checkbox,
   parameters: {
     layout: 'centered',

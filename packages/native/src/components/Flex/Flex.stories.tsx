@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Flex } from '@tesserix/native'
 
 const meta: Meta<typeof Flex> = {
-  title: 'Native/Flex',
+  title: 'Native/Layout/Flex',
   component: Flex,
   parameters: {
     layout: 'centered',

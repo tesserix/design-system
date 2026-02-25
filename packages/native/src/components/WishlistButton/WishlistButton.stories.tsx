@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { WishlistButton } from '@tesserix/native'
 
 const meta: Meta<typeof WishlistButton> = {
-  title: 'Native/WishlistButton',
+  title: 'Native/Utilities/WishlistButton',
   component: WishlistButton,
   parameters: {
     layout: 'centered',

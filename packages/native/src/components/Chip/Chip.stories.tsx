@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Chip } from '@tesserix/native'
 
 const meta: Meta<typeof Chip> = {
-  title: 'Native/Chip',
+  title: 'Native/DataDisplay/Chip',
   component: Chip,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { MapMarker } from '@tesserix/native'
 
 const meta: Meta<typeof MapMarker> = {
-  title: 'Native/MapMarker',
+  title: 'Native/Media/MapMarker',
   component: MapMarker,
   parameters: {
     layout: 'centered',

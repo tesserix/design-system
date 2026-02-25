@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { CommentItem } from '@tesserix/native'
 
 const meta: Meta<typeof CommentItem> = {
-  title: 'Native/CommentItem',
+  title: 'Native/DataDisplay/CommentItem',
   component: CommentItem,
   parameters: {
     layout: 'centered',

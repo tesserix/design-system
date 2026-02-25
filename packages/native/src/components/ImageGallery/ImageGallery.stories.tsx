@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ImageGallery } from '@tesserix/native'
 
 const meta: Meta<typeof ImageGallery> = {
-  title: 'Native/ImageGallery',
+  title: 'Native/Media/ImageGallery',
   component: ImageGallery,
   parameters: {
     layout: 'centered',

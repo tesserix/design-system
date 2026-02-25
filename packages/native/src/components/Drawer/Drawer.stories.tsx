@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Drawer } from '@tesserix/native'
 
 const meta: Meta<typeof Drawer> = {
-  title: 'Native/Drawer',
+  title: 'Native/Overlays/Drawer',
   component: Drawer,
   parameters: {
     layout: 'centered',

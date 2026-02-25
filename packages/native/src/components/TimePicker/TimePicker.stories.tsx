@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { TimePicker } from '@tesserix/native'
 
 const meta: Meta<typeof TimePicker> = {
-  title: 'Native/TimePicker',
+  title: 'Native/Forms/TimePicker',
   component: TimePicker,
   parameters: {
     layout: 'centered',

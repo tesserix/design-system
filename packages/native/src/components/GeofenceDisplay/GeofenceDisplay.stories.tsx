@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { GeofenceDisplay } from '@tesserix/native'
 
 const meta: Meta<typeof GeofenceDisplay> = {
-  title: 'Native/GeofenceDisplay',
+  title: 'Native/Media/GeofenceDisplay',
   component: GeofenceDisplay,
   parameters: {
     layout: 'centered',

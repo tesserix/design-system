@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { FAB } from '@tesserix/native'
 
 const meta: Meta<typeof FAB> = {
-  title: 'Native/FAB',
+  title: 'Native/Utilities/FAB',
   component: FAB,
   parameters: {
     layout: 'centered',

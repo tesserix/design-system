@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Pressable } from '@tesserix/native'
 
 const meta: Meta<typeof Pressable> = {
-  title: 'Native/Pressable',
+  title: 'Native/Navigation/Pressable',
   component: Pressable,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { IconButton } from '@tesserix/native'
 
 const meta: Meta<typeof IconButton> = {
-  title: 'Native/IconButton',
+  title: 'Native/Components/IconButton',
   component: IconButton,
   parameters: {
     layout: 'centered',

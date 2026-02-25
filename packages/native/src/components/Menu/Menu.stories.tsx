@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Menu } from '@tesserix/native'
 
 const meta: Meta<typeof Menu> = {
-  title: 'Native/Menu',
+  title: 'Native/Navigation/Menu',
   component: Menu,
   parameters: {
     layout: 'centered',

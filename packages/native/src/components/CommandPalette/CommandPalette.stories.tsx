@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { CommandPalette } from '@tesserix/native'
 
 const meta: Meta<typeof CommandPalette> = {
-  title: 'Native/CommandPalette',
+  title: 'Native/Utilities/CommandPalette',
   component: CommandPalette,
   parameters: {
     layout: 'centered',

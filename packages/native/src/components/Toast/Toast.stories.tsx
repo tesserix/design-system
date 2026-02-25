@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Toast } from '@tesserix/native'
 
 const meta: Meta<typeof Toast> = {
-  title: 'Native/Toast',
+  title: 'Native/Feedback/Toast',
   component: Toast,
   parameters: {
     layout: 'centered',

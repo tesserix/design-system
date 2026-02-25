@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Portal } from '@tesserix/native'
 
 const meta: Meta<typeof Portal> = {
-  title: 'Native/Portal',
+  title: 'Native/Overlays/Portal',
   component: Portal,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { LocationPicker } from '@tesserix/native'
 
 const meta: Meta<typeof LocationPicker> = {
-  title: 'Native/LocationPicker',
+  title: 'Native/Utilities/LocationPicker',
   component: LocationPicker,
   parameters: {
     layout: 'centered',

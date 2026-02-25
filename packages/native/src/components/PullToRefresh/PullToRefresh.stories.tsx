@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { PullToRefresh } from '@tesserix/native'
 
 const meta: Meta<typeof PullToRefresh> = {
-  title: 'Native/PullToRefresh',
+  title: 'Native/Utilities/PullToRefresh',
   component: PullToRefresh,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Rating } from '@tesserix/native'
 
 const meta: Meta<typeof Rating> = {
-  title: 'Native/Rating',
+  title: 'Native/Feedback/Rating',
   component: Rating,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Autocomplete } from '@tesserix/native'
 
 const meta: Meta<typeof Autocomplete> = {
-  title: 'Native/Autocomplete',
+  title: 'Native/Forms/Autocomplete',
   component: Autocomplete,
   parameters: {
     layout: 'centered',

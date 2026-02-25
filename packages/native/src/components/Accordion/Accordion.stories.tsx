@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Accordion } from '@tesserix/native'
 
 const meta: Meta<typeof Accordion> = {
-  title: 'Native/Accordion',
+  title: 'Native/Components/Accordion',
   component: Accordion,
   parameters: {
     layout: 'centered',

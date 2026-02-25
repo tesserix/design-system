@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Stepper } from '@tesserix/native'
 
 const meta: Meta<typeof Stepper> = {
-  title: 'Native/Stepper',
+  title: 'Native/Navigation/Stepper',
   component: Stepper,
   parameters: {
     layout: 'centered',

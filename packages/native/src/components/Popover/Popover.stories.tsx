@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Popover } from '@tesserix/native'
 
 const meta: Meta<typeof Popover> = {
-  title: 'Native/Popover',
+  title: 'Native/Overlays/Popover',
   component: Popover,
   parameters: {
     layout: 'centered',

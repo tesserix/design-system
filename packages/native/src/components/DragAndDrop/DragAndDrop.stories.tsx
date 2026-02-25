@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { DragAndDrop } from '@tesserix/native'
 
 const meta: Meta<typeof DragAndDrop> = {
-  title: 'Native/DragAndDrop',
+  title: 'Native/Utilities/DragAndDrop',
   component: DragAndDrop,
   parameters: {
     layout: 'centered',

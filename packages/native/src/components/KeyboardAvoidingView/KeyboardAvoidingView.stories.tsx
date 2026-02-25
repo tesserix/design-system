@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { KeyboardAvoidingView } from '@tesserix/native'
 
 const meta: Meta<typeof KeyboardAvoidingView> = {
-  title: 'Native/KeyboardAvoidingView',
+  title: 'Native/Layout/KeyboardAvoidingView',
   component: KeyboardAvoidingView,
   parameters: {
     layout: 'centered',

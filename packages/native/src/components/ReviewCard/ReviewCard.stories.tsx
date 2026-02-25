@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { ReviewCard } from '@tesserix/native'
 
 const meta: Meta<typeof ReviewCard> = {
-  title: 'Native/ReviewCard',
+  title: 'Native/DataDisplay/ReviewCard',
   component: ReviewCard,
   parameters: {
     layout: 'centered',

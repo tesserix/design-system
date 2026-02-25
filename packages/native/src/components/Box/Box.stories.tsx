@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Box } from '@tesserix/native'
 
 const meta: Meta<typeof Box> = {
-  title: 'Native/Box',
+  title: 'Native/Layout/Box',
   component: Box,
   parameters: {
     layout: 'centered',

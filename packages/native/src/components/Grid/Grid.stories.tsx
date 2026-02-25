@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Grid } from '@tesserix/native'
 
 const meta: Meta<typeof Grid> = {
-  title: 'Native/Grid',
+  title: 'Native/Layout/Grid',
   component: Grid,
   parameters: {
     layout: 'centered',

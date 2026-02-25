@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { Container } from '@tesserix/native'
 
 const meta: Meta<typeof Container> = {
-  title: 'Native/Container',
+  title: 'Native/Layout/Container',
   component: Container,
   parameters: {
     layout: 'centered',
