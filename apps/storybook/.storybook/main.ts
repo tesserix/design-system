@@ -22,18 +22,20 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
-  async viteFinal(config) {
+  async viteFinal(config, { configType }) {
     config.plugins = config.plugins || []
     config.plugins.push(tailwindcss())
 
     // Ensure esbuild handles JSX properly with automatic React runtime
     config.esbuild = config.esbuild || {}
     config.esbuild.jsx = 'automatic'
-    config.esbuild.jsxDev = true
+    config.esbuild.jsxDev = configType === 'DEVELOPMENT'
 
     // Make React available globally for react-native-web
     config.define = config.define || {}
     config.define.global = 'globalThis'
+    config.define['process.env.NODE_ENV'] =
+      configType === 'PRODUCTION' ? '"production"' : '"development"'
 
     // Allow Storybook/Vite to load stories and source files from monorepo packages.
     config.server = config.server || {}
