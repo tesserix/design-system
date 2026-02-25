@@ -51,7 +51,7 @@ describe("Toast", () => {
     const AutoDismissHarness = () => {
       const { toast } = useToast()
       return (
-        <Button onClick={() => toast({ title: "Temp", duration: 10 })}>
+        <Button onClick={() => toast({ title: "Temp", duration: 200 })}>
           Open short toast
         </Button>
       )
@@ -67,8 +67,11 @@ describe("Toast", () => {
     fireEvent.click(screen.getByRole("button", { name: /open short toast/i }))
     expect(await screen.findByRole("status")).toBeInTheDocument()
 
-    await waitFor(() => {
-      expect(screen.queryByRole("status")).not.toBeInTheDocument()
-    })
+    await waitFor(
+      () => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument()
+      },
+      { timeout: 1000 }
+    )
   })
 })
