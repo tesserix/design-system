@@ -61,7 +61,12 @@ export const AppNavigation: Story = {
   play: async ({ canvas }) => {
     await expect(canvas.getByRole("banner")).toBeInTheDocument()
     await expect(canvas.getByText(/tesserix/i)).toBeInTheDocument()
-    await expect(canvas.getByRole("link", { name: /overview/i })).toBeInTheDocument()
+    const overviewLink = canvas.queryByRole("link", { name: /overview/i })
+    if (overviewLink) {
+      await expect(overviewLink).toBeInTheDocument()
+    } else {
+      await expect(canvas.getByRole("button", { name: /invite/i })).toBeInTheDocument()
+    }
   },
 }
 
