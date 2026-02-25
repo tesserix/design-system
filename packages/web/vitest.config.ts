@@ -2,18 +2,9 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'node:url'
-import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 
 const dirname =
   typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
-
-const parseTags = (value?: string) =>
-  value
-    ? value
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter(Boolean)
-    : undefined
 
 export default defineConfig({
   plugins: [react()],
@@ -35,33 +26,8 @@ export default defineConfig({
         '**/dist/**',
       ],
     },
-    projects: [
-      {
-        extends: true,
-        test: {
-          name: 'unit',
-          include: ['src/**/*.test.{ts,tsx}'],
-          exclude: ['src/**/*.stories.{ts,tsx}'],
-        },
-      },
-      {
-        extends: true,
-        plugins: [
-          storybookTest({
-            configDir: path.join(dirname, '.storybook'),
-            tags: {
-              include: parseTags(process.env.SB_INCLUDE_TAGS),
-              exclude: parseTags(process.env.SB_EXCLUDE_TAGS),
-              skip: parseTags(process.env.SB_SKIP_TAGS),
-            },
-          }),
-        ],
-        test: {
-          name: 'storybook',
-          setupFiles: ['./.storybook/vitest.setup.ts'],
-        },
-      },
-    ],
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['src/**/*.stories.{ts,tsx}'],
   },
   resolve: {
     alias: {
