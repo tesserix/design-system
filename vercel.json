@@ -1,0 +1,37 @@
+{
+  "buildCommand": "pnpm build && pnpm --filter @tesserix/storybook build-storybook",
+  "outputDirectory": "apps/storybook/storybook-static",
+  "framework": null,
+  "installCommand": "pnpm install",
+  "devCommand": "pnpm --filter @tesserix/storybook dev",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
