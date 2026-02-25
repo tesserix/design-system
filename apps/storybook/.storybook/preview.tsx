@@ -187,24 +187,17 @@ const preview: Preview = {
     a11y: {
       config: {
         rules: [
-          {
-            // Disable color-contrast for react-native-web components
-            // as they often use custom theming
-            id: 'color-contrast',
-            enabled: false,
-          },
-          {
-            // Disable region rule for stories as they're not full pages
-            id: 'region',
-            enabled: false,
-          },
+          // Disable page-level rules - stories are isolated components, not full pages
+          { id: 'page-has-heading-one', enabled: false },
+          { id: 'landmark-one-main', enabled: false },
+          { id: 'region', enabled: false },
+          { id: 'document-title', enabled: false },
+          { id: 'html-has-lang', enabled: false },
+          { id: 'landmark-unique', enabled: false },
+          // Disable color-contrast - components use CSS custom properties and theme tokens
+          // Color contrast should be validated in the context of real applications
+          { id: 'color-contrast', enabled: false },
         ],
-      },
-      options: {
-        runOnly: {
-          type: 'tag',
-          values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
-        },
       },
     },
     chromatic: {
