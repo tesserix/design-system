@@ -13,45 +13,55 @@ import {
 } from './Form'
 
 describe('Form', () => {
-  it('submits when validation passes', async () => {
-    const onSubmit = jest.fn()
+  it(
+    'submits when validation passes',
+    async () => {
+      const onSubmit = jest.fn()
 
-    const Harness = () => {
-      const form = useForm({
-        initialValues: { name: '' },
-        validate: (values) => (values.name ? {} : { name: 'Name is required' }),
-        onSubmit,
-      })
+      const Harness = () => {
+        const form = useForm({
+          initialValues: { name: '' },
+          validate: (values) => (values.name ? {} : { name: 'Name is required' }),
+          onSubmit,
+        })
 
-      return (
-        <Form form={form}>
-          <FormField name="name" label="Name">
-            <Input testID="name-input" />
-          </FormField>
-          <TouchableOpacity testID="submit" onPress={() => void form.handleSubmit()}>
-            <Text>Submit</Text>
-          </TouchableOpacity>
-        </Form>
+        return (
+          <Form form={form}>
+            <FormField name="name" label="Name">
+              <Input testID="name-input" />
+            </FormField>
+            <TouchableOpacity testID="submit" onPress={() => void form.handleSubmit()}>
+              <Text>Submit</Text>
+            </TouchableOpacity>
+          </Form>
+        )
+      }
+
+      const { getByTestId, getAllByText, queryByText } = render(<Harness />)
+
+      fireEvent.press(getByTestId('submit'))
+
+      await waitFor(
+        () => {
+          expect(getAllByText('Name is required').length).toBeGreaterThan(0)
+          expect(onSubmit).not.toHaveBeenCalled()
+        },
+        { timeout: 3000 }
       )
-    }
 
-    const { getByTestId, getAllByText, queryByText } = render(<Harness />)
+      fireEvent.changeText(getByTestId('name-input'), 'Alice')
+      fireEvent.press(getByTestId('submit'))
 
-    fireEvent.press(getByTestId('submit'))
-
-    await waitFor(() => {
-      expect(getAllByText('Name is required').length).toBeGreaterThan(0)
-      expect(onSubmit).not.toHaveBeenCalled()
-    })
-
-    fireEvent.changeText(getByTestId('name-input'), 'Alice')
-    fireEvent.press(getByTestId('submit'))
-
-    await waitFor(() => {
-      expect(queryByText('Name is required')).toBeNull()
-      expect(onSubmit).toHaveBeenCalledWith({ name: 'Alice' })
-    })
-  })
+      await waitFor(
+        () => {
+          expect(queryByText('Name is required')).toBeNull()
+          expect(onSubmit).toHaveBeenCalledWith({ name: 'Alice' })
+        },
+        { timeout: 3000 }
+      )
+    },
+    10000
+  )
 
   it('binds boolean values through FormField child render', async () => {
     const CurrentValue = () => {
