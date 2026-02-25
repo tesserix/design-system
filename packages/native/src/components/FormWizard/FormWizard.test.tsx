@@ -110,4 +110,17 @@ describe('FormWizard', () => {
     const wizard = getByTestId('form-wizard')
     expect(wizard.props.style).toContainEqual(expect.objectContaining(customStyle))
   })
+
+  it('handles empty steps without crashing', () => {
+    const onComplete = jest.fn()
+    const { getByText } = render(<FormWizard steps={[]} onComplete={onComplete} />)
+
+    fireEvent.press(getByText('Next'))
+    expect(onComplete).not.toHaveBeenCalled()
+  })
+
+  it('clamps initialStep when it is larger than available steps', () => {
+    const { getByText } = render(<FormWizard steps={mockSteps} initialStep={999} />)
+    expect(getByText('Step 3 Content')).toBeTruthy()
+  })
 })

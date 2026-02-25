@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity, ViewStyle, TextStyle } from 'react-native'
 import { spacing } from '@tesserix/tokens/spacing'
 import { fontSize, fontWeight } from '@tesserix/tokens/typography'
@@ -47,9 +47,20 @@ export const FormWizard: React.FC<FormWizardProps> = ({
   style,
   testID,
 }) => {
-  const [currentStep, setCurrentStep] = useState(initialStep)
+  const safeInitialStep =
+    steps.length > 0 ? Math.min(Math.max(initialStep, 0), steps.length - 1) : 0
+  const [currentStep, setCurrentStep] = useState(safeInitialStep)
+
+  useEffect(() => {
+    const maxStep = Math.max(steps.length - 1, 0)
+    if (currentStep > maxStep) {
+      setCurrentStep(maxStep)
+    }
+  }, [currentStep, steps.length])
 
   const handleNext = () => {
+    if (steps.length === 0) return
+
     if (currentStep < steps.length - 1) {
       const newStep = currentStep + 1
       setCurrentStep(newStep)
@@ -58,6 +69,9 @@ export const FormWizard: React.FC<FormWizardProps> = ({
       onComplete?.()
     }
   }
+
+  const isFirstStep = currentStep === 0
+  const isLastStep = steps.length > 0 && currentStep === steps.length - 1
 
   const handlePrevious = () => {
     if (currentStep > 0) {
@@ -211,20 +225,20 @@ export const FormWizard: React.FC<FormWizardProps> = ({
       </View>
 
       {/* Current Step Content */}
-      <View style={contentStyle}>{steps[currentStep].component}</View>
+      <View style={contentStyle}>{steps.length > 0 ? steps[currentStep]?.component : null}</View>
 
       {/* Navigation Buttons */}
       <View style={buttonsContainerStyle}>
         <TouchableOpacity
           style={secondaryButtonStyle}
           onPress={handlePrevious}
-          disabled={currentStep === 0}
+          disabled={isFirstStep}
           accessible
           accessibilityRole="button"
           accessibilityLabel="Previous step"
-          accessibilityState={{ disabled: currentStep === 0 }}
+          accessibilityState={{ disabled: isFirstStep }}
         >
-          <Text style={[secondaryButtonTextStyle, currentStep === 0 && { opacity: 0.5 }]}>
+          <Text style={[secondaryButtonTextStyle, isFirstStep && { opacity: 0.5 }]}>
             Previous
           </Text>
         </TouchableOpacity>
@@ -232,12 +246,14 @@ export const FormWizard: React.FC<FormWizardProps> = ({
         <TouchableOpacity
           style={primaryButtonStyle}
           onPress={handleNext}
+          disabled={steps.length === 0}
           accessible
           accessibilityRole="button"
-          accessibilityLabel={currentStep === steps.length - 1 ? 'Complete' : 'Next step'}
+          accessibilityLabel={isLastStep ? 'Complete' : 'Next step'}
+          accessibilityState={{ disabled: steps.length === 0 }}
         >
-          <Text style={buttonTextStyle}>
-            {currentStep === steps.length - 1 ? 'Complete' : 'Next'}
+          <Text style={[buttonTextStyle, steps.length === 0 && { opacity: 0.5 }]}>
+            {isLastStep ? 'Complete' : 'Next'}
           </Text>
         </TouchableOpacity>
       </View>

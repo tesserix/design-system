@@ -322,82 +322,32 @@ export type { CommentItemProps } from './components/CommentItem'
 export { UserCard } from './components/UserCard'
 export type { UserCardProps } from './components/UserCard'
 
-// Data Visualization Components
-export { BarChart } from './components/BarChart'
-export type { BarChartProps, BarChartData } from './components/BarChart'
-
-export { LineChart } from './components/LineChart'
-export type { LineChartProps, LineChartData } from './components/LineChart'
-
-export { Gauge } from './components/Gauge'
-export type { GaugeProps } from './components/Gauge'
-
-// E-Commerce Components
-export { ProductCard } from './components/ProductCard'
-export type { ProductCardProps } from './components/ProductCard'
-
-export { ProductGrid } from './components/ProductGrid'
-export type { ProductGridProps, ProductGridItem } from './components/ProductGrid'
-
 export { CartItem } from './components/CartItem'
 export type { CartItemProps } from './components/CartItem'
 
-export { PricingCard } from './components/PricingCard'
-export type { PricingCardProps, PricingFeature } from './components/PricingCard'
-
-export { ReviewCard } from './components/ReviewCard'
-export type { ReviewCardProps } from './components/ReviewCard'
-
-export { WishlistButton } from './components/WishlistButton'
-export type { WishlistButtonProps } from './components/WishlistButton'
-
-export { OrderSummary } from './components/OrderSummary'
-export type { OrderSummaryProps, OrderItem } from './components/OrderSummary'
-
-// Advanced Pattern Components
-export { DragAndDrop } from './components/DragAndDrop'
-export type { DragAndDropProps } from './components/DragAndDrop'
-
-export { KanbanBoard } from './components/KanbanBoard'
-export type { KanbanBoardProps, KanbanColumn, KanbanCard } from './components/KanbanBoard'
-
-export { TreeView } from './components/TreeView'
-export type { TreeViewProps, TreeNode } from './components/TreeView'
-
-export { SortableList } from './components/SortableList'
-export type { SortableListProps, SortableItem } from './components/SortableList'
-
 export { CommandPalette } from './components/CommandPalette'
-export type { CommandPaletteProps, Command } from './components/CommandPalette'
-
-export { DataGrid } from './components/DataGrid'
-export type { DataGridProps, DataGridColumn, SortOrder } from './components/DataGrid'
-
-export { FormWizard } from './components/FormWizard'
-export type { FormWizardProps, FormWizardStep } from './components/FormWizard'
-
-// Business Components
-export { Invoice } from './components/Invoice'
-export type { InvoiceProps, InvoiceItem, InvoiceParty } from './components/Invoice'
-
-export { DashboardCard } from './components/DashboardCard'
-export type { DashboardCardProps } from './components/DashboardCard'
-
-export { MetricCard } from './components/MetricCard'
-export type { MetricCardProps } from './components/MetricCard'
-
-export { PricingTable } from './components/PricingTable'
-export type { PricingTableProps, PricingPlan, PricingFeature as PricingTableFeature } from './components/PricingTable'
+export type { CommandPaletteProps, CommandItem } from './components/CommandPalette'
 
 export { ContactCard } from './components/ContactCard'
 export type { ContactCardProps } from './components/ContactCard'
 
-export { TaskCard } from './components/TaskCard'
-export type { TaskCardProps } from './components/TaskCard'
+export { DashboardCard } from './components/DashboardCard'
+export type { DashboardCardProps } from './components/DashboardCard'
 
-// Maps & Location Components
-export { MapView } from './components/MapView'
-export type { MapViewProps, MapMarkerData, MapRegion } from './components/MapView'
+export { DataGrid } from './components/DataGrid'
+export type { DataGridProps, DataGridColumn, DataGridRow } from './components/DataGrid'
+
+export { DragAndDrop } from './components/DragAndDrop'
+export type { DragAndDropProps } from './components/DragAndDrop'
+
+export { FormWizard } from './components/FormWizard'
+export type { FormWizardProps, FormStep } from './components/FormWizard'
+
+export { Invoice } from './components/Invoice'
+export type { InvoiceProps, InvoiceItem } from './components/Invoice'
+
+export { KanbanBoard } from './components/KanbanBoard'
+export type { KanbanBoardProps, KanbanColumn, KanbanCard } from './components/KanbanBoard'
 
 export { LocationPicker } from './components/LocationPicker'
 export type { LocationPickerProps, Location } from './components/LocationPicker'
@@ -407,3 +357,49 @@ export type { MapMarkerProps } from './components/MapMarker'
 
 export { GeofenceDisplay } from './components/GeofenceDisplay'
 export type { GeofenceDisplayProps, Geofence } from './components/GeofenceDisplay'
+
+export { MapView } from './components/MapView'
+export type { MapViewProps } from './components/MapView'
+
+export { MetricCard } from './components/MetricCard'
+export type { MetricCardProps } from './components/MetricCard'
+
+export { OrderSummary } from './components/OrderSummary'
+export type { OrderSummaryProps, OrderItem } from './components/OrderSummary'
+
+export { PricingCard } from './components/PricingCard'
+export type { PricingCardProps, PricingFeature } from './components/PricingCard'
+
+export { PricingTable } from './components/PricingTable'
+export type { PricingTableProps, PricingPlan } from './components/PricingTable'
+
+export { ProductCard } from './components/ProductCard'
+export type { ProductCardProps } from './components/ProductCard'
+
+export { ProductGrid } from './components/ProductGrid'
+export type { ProductGridProps, ProductGridItem } from './components/ProductGrid'
+
+export { ReviewCard } from './components/ReviewCard'
+export type { ReviewCardProps } from './components/ReviewCard'
+
+export { SortableList } from './components/SortableList'
+export type { SortableListProps, SortableItem } from './components/SortableList'
+
+export { TaskCard } from './components/TaskCard'
+export type { TaskCardProps } from './components/TaskCard'
+
+export { TreeView } from './components/TreeView'
+export type { TreeViewProps, TreeNode } from './components/TreeView'
+
+export { WishlistButton } from './components/WishlistButton'
+export type { WishlistButtonProps } from './components/WishlistButton'
+
+// Data Visualization Components
+export { BarChart } from './components/BarChart'
+export type { BarChartProps, BarChartData } from './components/BarChart'
+
+export { LineChart } from './components/LineChart'
+export type { LineChartProps, LineChartData } from './components/LineChart'
+
+export { Gauge } from './components/Gauge'
+export type { GaugeProps } from './components/Gauge'

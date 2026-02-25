@@ -1,5 +1,14 @@
 import React from 'react'
-import { FlatList, StyleSheet, StyleProp, ViewStyle, ListRenderItem } from 'react-native'
+import {
+  FlatList,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  ListRenderItem,
+  ListRenderItemInfo,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import { semanticSpacing } from '@tesserix/tokens/spacing'
 
 export interface ProductGridItem {
@@ -35,6 +44,7 @@ export const ProductGrid = <T extends ProductGridItem>({
   data,
   numColumns = 2,
   renderItem,
+  onProductPress,
   onEndReached,
   loading = false,
   onRefresh,
@@ -43,10 +53,31 @@ export const ProductGrid = <T extends ProductGridItem>({
   columnWrapperStyle,
 }: ProductGridProps<T>) => {
   void loading
+
+  const renderProductItem = (info: ListRenderItemInfo<T>) => {
+    const content = renderItem(info)
+
+    if (!onProductPress) {
+      return <View style={styles.itemContainer}>{content}</View>
+    }
+
+    return (
+      <TouchableOpacity
+        style={styles.itemContainer}
+        onPress={() => onProductPress(info.item)}
+        accessibilityRole="button"
+        accessibilityLabel={`Open ${String(info.item.id)}`}
+        testID={`product-grid-item-${info.item.id}`}
+      >
+        {content}
+      </TouchableOpacity>
+    )
+  }
+
   return (
     <FlatList
       data={data}
-      renderItem={renderItem}
+      renderItem={renderProductItem}
       keyExtractor={(item) => item.id}
       numColumns={numColumns}
       columnWrapperStyle={[
@@ -75,5 +106,8 @@ const styles = StyleSheet.create({
   columnWrapper: {
     justifyContent: 'space-between',
     marginBottom: semanticSpacing.md,
+  },
+  itemContainer: {
+    flex: 1,
   },
 })

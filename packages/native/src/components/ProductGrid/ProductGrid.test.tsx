@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@testing-library/react-native'
+import { render, fireEvent } from '@testing-library/react-native'
 import { Text, View } from 'react-native'
 import { ProductGrid } from './ProductGrid'
 
@@ -58,5 +58,23 @@ describe('ProductGrid', () => {
       />
     )
     expect(getByLabelText('Product grid')).toBeTruthy()
+  })
+
+  it('calls onProductPress when an item is pressed', () => {
+    const onProductPress = jest.fn()
+    const { getByTestId } = render(
+      <ProductGrid
+        data={mockData}
+        onProductPress={onProductPress}
+        renderItem={({ item }) => (
+          <View>
+            <Text>{item.name}</Text>
+          </View>
+        )}
+      />
+    )
+
+    fireEvent.press(getByTestId('product-grid-item-2'))
+    expect(onProductPress).toHaveBeenCalledWith(mockData[1])
   })
 })

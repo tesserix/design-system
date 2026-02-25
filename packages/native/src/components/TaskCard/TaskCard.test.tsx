@@ -80,9 +80,7 @@ describe('TaskCard', () => {
   it('applies strikethrough to completed task title', () => {
     const { getByText } = render(<TaskCard title="Completed Task" completed />)
     const title = getByText('Completed Task')
-    expect(title.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ textDecorationLine: 'line-through' })])
-    )
+    expect(title.props.style).toEqual(expect.objectContaining({ textDecorationLine: 'line-through' }))
   })
 
   it('exposes proper accessibility properties', () => {

@@ -197,7 +197,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
               {priority && (
                 <View style={priorityBadgeStyle}>
-                  <Text style={priorityTextStyle}>{priority}</Text>
+                  <Text style={priorityTextStyle}>{priority.toUpperCase()}</Text>
                 </View>
               )}
             </View>
