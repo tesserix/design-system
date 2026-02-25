@@ -10,6 +10,7 @@ import {
 import { spacing } from '@tesserix/tokens/spacing'
 import { fontSize, fontWeight } from '@tesserix/tokens/typography'
 import { getThemeColor } from '../../utils/getThemeColor'
+import { useStorybookThemeVersion } from '../../utils/useStorybookThemeVersion'
 
 export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   /** Button variant */
@@ -56,6 +57,8 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
     },
     ref
   ) => {
+    useStorybookThemeVersion()
+
     const sizeStyle = sizeStyles[size]
     const resolvedColorScheme = colorScheme === 'danger' ? 'error' : colorScheme
     const computedAccessibilityLabel =
@@ -83,7 +86,7 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
     // Get theme colors (uses CSS variables in Storybook, fallback to hardcoded values in native)
     const primaryColor = getThemeColor('--primary', '#3b82f6')
     const errorColor = getThemeColor('--destructive', '#ef4444')
-    const successColor = getThemeColor('--success', '#10b981')
+    const successColor = getThemeColor('--primary', '#10b981')
     const secondaryColor = getThemeColor('--secondary', '#6b7280')
     const foregroundColor = getThemeColor('--primary-foreground', '#ffffff')
 

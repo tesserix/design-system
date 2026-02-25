@@ -157,7 +157,7 @@ if (typeof document !== 'undefined') {
 const withTheme: Decorator = (Story, context) => {
   const theme = context.globals.theme || 'default'
   const mode = context.globals.mode || 'light'
-  const resolvedTheme = theme === 'default' ? 'slate' : theme
+  const resolvedTheme = theme
 
   // Set theme BEFORE first render (synchronously)
   if (typeof document !== 'undefined') {
@@ -165,11 +165,16 @@ const withTheme: Decorator = (Story, context) => {
     root.setAttribute('data-theme', resolvedTheme)
     root.classList.toggle('dark', mode === 'dark')
     root.classList.toggle('light', mode !== 'dark')
+
+    if (typeof window !== 'undefined') {
+      ;(window as any).__TESSERIX_STORYBOOK_THEME__ = resolvedTheme
+      ;(window as any).__TESSERIX_STORYBOOK_MODE__ = mode
+    }
   }
 
   // Force re-render when theme changes by using key
   // This ensures React Native components pick up new CSS variable values
-  return <div key={`${resolvedTheme}-${mode}`}><Story /></div>
+  return <div key={`${resolvedTheme}-${mode}`}><Story key={`${resolvedTheme}-${mode}`} /></div>
 }
 
 const withErrorBoundary: Decorator = (Story) => (
