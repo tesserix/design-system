@@ -1,0 +1,46 @@
+{
+  "name": "@tesserix/storybook",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Unified Storybook for Tesserix Design System - showcases web and native components",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "chromatic": "chromatic",
+    "chromatic:build": "npm run build-storybook && chromatic --exit-zero-on-changes"
+  },
+  "dependencies": {
+    "@tesserix/icons": "workspace:*",
+    "@tesserix/native": "workspace:*",
+    "@tesserix/tokens": "workspace:*",
+    "@tesserix/web": "workspace:*",
+    "inline-style-prefixer": "^7.0.1",
+    "postcss-value-parser": "^4.2.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-native-web": "^0.21.2"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^5.0.1",
+    "@storybook/addon-a11y": "^10.2.8",
+    "@storybook/addon-docs": "^10.2.8",
+    "@storybook/addon-links": "^10.2.8",
+    "@storybook/addon-vitest": "^10.2.8",
+    "@storybook/react": "^10.2.8",
+    "@storybook/react-vite": "^10.2.8",
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "babel-plugin-react-native-web": "^0.21.2",
+    "chromatic": "^15.1.0",
+    "storybook": "^10.2.8",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.7.3",
+    "vite": "^7.3.1"
+  },
+  "author": "Tesserix",
+  "license": "MIT"
+}

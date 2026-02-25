@@ -403,3 +403,9 @@ export type { LineChartProps, LineChartData } from './components/LineChart'
 
 export { Gauge } from './components/Gauge'
 export type { GaugeProps } from './components/Gauge'
+
+// Hooks
+export * from './hooks'
+
+// Utilities
+export * from './utils'

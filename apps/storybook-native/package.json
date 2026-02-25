@@ -1,0 +1,33 @@
+{
+  "name": "@tesserix/storybook-native",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Native Storybook app for Tesserix Design System (Expo)",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "expo start -c",
+    "android": "expo start --android -c",
+    "ios": "expo start --ios -c",
+    "web": "expo start --web -c",
+    "storybook": "STORYBOOK_ENABLED=true expo start -c",
+    "storybook:web": "STORYBOOK_ENABLED=true expo start --web -c",
+    "build:web": "expo export --platform web"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~4.0.1",
+    "@storybook/addon-ondevice-actions": "^10.2.3",
+    "@storybook/addon-ondevice-controls": "^10.2.3",
+    "@storybook/react-native": "^10.2.3",
+    "@tesserix/native": "workspace:*",
+    "expo": "~52.0.0",
+    "react": "^18.3.1",
+    "react-native": "0.76.9",
+    "react-native-web": "^0.19.13"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@types/react": "^18.3.18",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.9.3"
+  }
+}

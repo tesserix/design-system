@@ -1,3 +1,27 @@
+// Re-export core cross-platform utilities from @tesserix/utils
+export {
+  ErrorBoundary,
+  LoadingProvider,
+  useLoading,
+  ThemeProvider,
+  useTheme,
+} from "@tesserix/utils"
+export type {
+  ErrorBoundaryProps,
+  LoadingProviderProps,
+  ThemeProviderProps,
+} from "@tesserix/utils"
+
+// Re-export web-specific loading components from the web loading utility
+export { LoadingSpinner, LoadingDots, LoadingOverlay, LoadingSkeleton } from "./loading"
+export type {
+  LoadingSpinnerProps,
+  LoadingDotsProps,
+  LoadingOverlayProps,
+  LoadingSkeletonProps,
+} from "./loading"
+
+// Web-specific utilities
 export { Portal } from "./portal"
 export type { PortalProps } from "./portal"
 
@@ -7,15 +31,8 @@ export type { VisuallyHiddenProps } from "./visually-hidden"
 export { FocusTrap } from "./focus-trap"
 export type { FocusTrapProps } from "./focus-trap"
 
-export { ErrorBoundary } from "./error-boundary"
-export type { ErrorBoundaryProps } from "./error-boundary"
-
-export { ThemeProvider, useTheme } from "./theme-provider"
-export type { ThemeProviderProps } from "./theme-provider"
-
 export {
   useBreakpoint,
-  useMediaQuery,
   Show,
   Hide,
 } from "./responsive"
@@ -28,19 +45,3 @@ export {
   useAnimatedValue,
 } from "./animation"
 export type { FadeInProps, SlideInProps, ScaleInProps } from "./animation"
-
-export {
-  LoadingProvider,
-  useLoading,
-  LoadingSpinner,
-  LoadingDots,
-  LoadingOverlay,
-  LoadingSkeleton,
-} from "./loading"
-export type {
-  LoadingProviderProps,
-  LoadingSpinnerProps,
-  LoadingDotsProps,
-  LoadingOverlayProps,
-  LoadingSkeletonProps,
-} from "./loading"
