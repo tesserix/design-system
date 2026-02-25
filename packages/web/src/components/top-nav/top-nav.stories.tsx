@@ -19,6 +19,14 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AppNavigation: Story = {
+  parameters: {
+    viewport: {
+      defaultViewport: "tablet",
+    },
+    chromatic: {
+      viewports: [768, 1200],
+    },
+  },
   render: () => (
     <div className="min-h-screen bg-background">
       <TopNav>
