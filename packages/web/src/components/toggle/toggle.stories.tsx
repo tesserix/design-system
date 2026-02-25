@@ -93,6 +93,7 @@ export const Default: Story = {
 export const Basic: Story = {
   args: {
     children: 'Toggle',
+    'aria-label': 'Toggle button',
   },
 }
 
@@ -100,6 +101,7 @@ export const Outline: Story = {
   args: {
     variant: 'outline',
     children: 'Toggle',
+    'aria-label': 'Toggle button outline variant',
   },
 }
 
@@ -107,6 +109,7 @@ export const Small: Story = {
   args: {
     size: 'sm',
     children: 'Toggle',
+    'aria-label': 'Small toggle button',
   },
 }
 
@@ -114,6 +117,7 @@ export const Large: Story = {
   args: {
     size: 'lg',
     children: 'Toggle',
+    'aria-label': 'Large toggle button',
   },
 }
 

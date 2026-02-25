@@ -154,7 +154,7 @@ export const WithLabel: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <Select disabled defaultValue="1">
+    <Select disabled defaultValue="1" aria-label="Disabled select dropdown">
       <option value="1">Option 1</option>
       <option value="2">Option 2</option>
     </Select>
@@ -163,7 +163,7 @@ export const Disabled: Story = {
 
 export const WithOptgroups: Story = {
   render: () => (
-    <Select className="w-[300px]">
+    <Select className="w-[300px]" aria-label="Fruit selection">
       <option value="">Select a fruit</option>
       <optgroup label="Citrus">
         <option value="orange">Orange</option>

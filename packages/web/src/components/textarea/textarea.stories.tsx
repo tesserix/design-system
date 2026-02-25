@@ -118,6 +118,7 @@ export const Disabled: Story = {
   args: {
     placeholder: 'This textarea is disabled',
     disabled: true,
+    'aria-label': 'Disabled text area',
   },
 }
 
@@ -125,6 +126,7 @@ export const WithValue: Story = {
   args: {
     defaultValue: 'This is a pre-filled textarea with some content that spans multiple lines.\n\nYou can edit this text or replace it entirely.',
     readOnly: false,
+    'aria-label': 'Pre-filled text area',
   },
 }
 

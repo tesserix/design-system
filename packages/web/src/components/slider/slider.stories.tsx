@@ -107,15 +107,15 @@ export const Default: Story = {
 }
 
 export const Basic: Story = {
-  render: () => <Slider defaultValue={50} className="w-[300px]" />,
+  render: () => <Slider defaultValue={50} className="w-[300px]" aria-label="Basic slider" />,
 }
 
 export const WithSteps: Story = {
-  render: () => <Slider min={0} max={100} step={10} defaultValue={30} className="w-[300px]" />,
+  render: () => <Slider min={0} max={100} step={10} defaultValue={30} className="w-[300px]" aria-label="Slider with steps of 10" />,
 }
 
 export const Disabled: Story = {
-  render: () => <Slider defaultValue={50} disabled className="w-[300px]" />,
+  render: () => <Slider defaultValue={50} disabled className="w-[300px]" aria-label="Disabled slider" />,
 }
 
 export const SmokeTest: Story = {

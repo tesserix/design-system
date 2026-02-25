@@ -157,6 +157,7 @@ export const Email: Story = {
   args: {
     type: 'email',
     placeholder: 'Enter your email',
+    'aria-label': 'Email address',
   },
 }
 
@@ -164,6 +165,7 @@ export const Password: Story = {
   args: {
     type: 'password',
     placeholder: 'Enter your password',
+    'aria-label': 'Password',
   },
 }
 
@@ -171,6 +173,7 @@ export const Disabled: Story = {
   args: {
     placeholder: 'Disabled input',
     disabled: true,
+    'aria-label': 'Disabled input field',
   },
   play: async ({ canvas }) => {
     const input = canvas.getByPlaceholderText(/disabled input/i)
@@ -182,6 +185,7 @@ export const WithValue: Story = {
   args: {
     value: 'Pre-filled value',
     readOnly: true,
+    'aria-label': 'Pre-filled value',
   },
 }
 
@@ -189,6 +193,7 @@ export const Number: Story = {
   args: {
     type: 'number',
     placeholder: 'Enter a number',
+    'aria-label': 'Number input',
   },
 }
 
@@ -196,6 +201,7 @@ export const Search: Story = {
   args: {
     type: 'search',
     placeholder: 'Search...',
+    'aria-label': 'Search',
   },
 }
 

@@ -140,12 +140,14 @@ export const WithLabel: Story = {
 export const Checked: Story = {
   args: {
     defaultChecked: true,
+    'aria-label': 'Checked option',
   },
 }
 
 export const Disabled: Story = {
   args: {
     disabled: true,
+    'aria-label': 'Disabled option',
   },
 }
 
@@ -153,6 +155,7 @@ export const DisabledChecked: Story = {
   args: {
     disabled: true,
     defaultChecked: true,
+    'aria-label': 'Disabled and checked option',
   },
 }
 
