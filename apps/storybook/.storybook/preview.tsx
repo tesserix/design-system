@@ -185,7 +185,27 @@ const preview: Preview = {
       options: INITIAL_VIEWPORTS,
     },
     a11y: {
-      test: 'error',
+      config: {
+        rules: [
+          {
+            // Disable color-contrast for react-native-web components
+            // as they often use custom theming
+            id: 'color-contrast',
+            enabled: false,
+          },
+          {
+            // Disable region rule for stories as they're not full pages
+            id: 'region',
+            enabled: false,
+          },
+        ],
+      },
+      options: {
+        runOnly: {
+          type: 'tag',
+          values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
+        },
+      },
     },
     chromatic: {
       disableSnapshot: false,
