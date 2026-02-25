@@ -1,7 +1,6 @@
 {
   "buildCommand": "pnpm build && pnpm --filter @tesserix/docs build",
   "outputDirectory": "apps/docs/.next",
-  "framework": "nextjs",
   "installCommand": "pnpm install",
   "devCommand": "pnpm --filter @tesserix/docs dev",
   "cleanUrls": true,
