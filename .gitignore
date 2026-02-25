@@ -25,3 +25,4 @@ test-results
 *~
 .vscode/
 pnpm-lock.yaml
+.vercel
