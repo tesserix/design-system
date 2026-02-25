@@ -24,5 +24,4 @@ test-results
 *.swo
 *~
 .vscode/
-pnpm-lock.yaml
 .vercel
