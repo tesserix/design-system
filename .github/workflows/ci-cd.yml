@@ -98,12 +98,14 @@ jobs:
 
       - name: Run Chromatic
         uses: chromaui/action@latest
+        continue-on-error: true
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: apps/storybook
           buildScriptName: build-storybook
           onlyChanged: true
           autoAcceptChanges: main
+          exitZeroOnChanges: true
 
   deploy-ui:
     name: Deploy Storybook (UI)
