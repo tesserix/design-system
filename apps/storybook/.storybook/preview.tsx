@@ -159,14 +159,13 @@ const withTheme: Decorator = (Story, context) => {
   const mode = context.globals.mode || 'light'
   const resolvedTheme = theme === 'default' ? 'slate' : theme
 
-  React.useEffect(() => {
-    if (typeof document !== 'undefined') {
-      const root = document.documentElement
-      root.setAttribute('data-theme', resolvedTheme)
-      root.classList.toggle('dark', mode === 'dark')
-      root.classList.toggle('light', mode !== 'dark')
-    }
-  }, [resolvedTheme, mode])
+  // Set theme BEFORE first render (synchronously)
+  if (typeof document !== 'undefined') {
+    const root = document.documentElement
+    root.setAttribute('data-theme', resolvedTheme)
+    root.classList.toggle('dark', mode === 'dark')
+    root.classList.toggle('light', mode !== 'dark')
+  }
 
   // Force re-render when theme changes by using key
   // This ensures React Native components pick up new CSS variable values

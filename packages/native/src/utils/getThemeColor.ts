@@ -14,9 +14,14 @@ export function getThemeColor(cssVar: string, fallback: string): string {
         if (value.match(/^[\d.]+\s+[\d.]+%\s+[\d.]+%$/)) {
           return `hsl(${value})`
         }
+        // If it already has hsl() wrapper, return as-is
+        if (value.startsWith('hsl(')) {
+          return value
+        }
         return value
       }
     } catch (e) {
+      console.warn(`Failed to read CSS variable ${cssVar}:`, e)
       // Fall back to default if CSS var reading fails
     }
   }
