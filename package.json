@@ -11,9 +11,14 @@
     "test": "turbo run test",
     "storybook": "turbo run storybook",
     "build-storybook": "turbo run build-storybook",
+    "docs:generate": "pnpm --filter @tesserix/docs generate:components",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish"
+    "release": "turbo run build && changeset publish",
+    "docs": "pnpm --filter @tesserix/docs dev",
+    "dev:docs": "pnpm --filter @tesserix/docs dev",
+    "build:docs": "pnpm --filter @tesserix/docs build",
+    "start:docs": "pnpm --filter @tesserix/docs start"
   },
   "workspaces": [
     "packages/*",

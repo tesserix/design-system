@@ -1,0 +1,26 @@
+# usePrevious
+
+Package: `@tesserix/hooks`
+
+Hook that returns the previous value from the last render.
+
+## Import
+
+```tsx
+import { usePrevious } from '@tesserix/hooks'
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-previous.ts`
+
+## Usage
+
+```tsx
+import { usePrevious } from '@tesserix/hooks'
+
+export function DemousePrevious() {
+  const prevValue = usePrevious(value)
+  return null
+}
+```

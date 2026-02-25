@@ -1,0 +1,32 @@
+# useOnUnmount
+
+Package: `@tesserix/hooks`
+
+Hook that runs a callback once when the component unmounts.
+
+## Import
+
+```tsx
+import { useOnUnmount } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useOnUnmount(callback: ()
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-on-unmount.ts`
+
+## Usage
+
+```tsx
+import { useOnUnmount } from '@tesserix/hooks'
+
+export function DemouseOnUnmount() {
+  const result = useOnUnmount()
+  return null
+}
+```

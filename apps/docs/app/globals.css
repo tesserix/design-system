@@ -1,0 +1,9 @@
+:root {
+  --nextra-content-width: 120rem !important;
+}
+
+@media (max-width: 1536px) {
+  :root {
+    --nextra-content-width: 96rem !important;
+  }
+}

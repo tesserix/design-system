@@ -1,0 +1,26 @@
+# useThrottle
+
+Package: `@tesserix/hooks`
+
+Hook that throttles a value
+
+## Import
+
+```tsx
+import { useThrottle } from '@tesserix/hooks'
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-throttle.ts`
+
+## Usage
+
+```tsx
+import { useThrottle } from '@tesserix/hooks'
+
+export function DemouseThrottle() {
+  const throttled = useThrottle(scrollY, 200)
+  return null
+}
+```

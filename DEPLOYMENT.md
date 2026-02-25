@@ -1,6 +1,6 @@
 # Tesserix Design System - Deployment Guide
 
-This document describes how to deploy the Tesserix Design System Storybook to Vercel and integrate with Chromatic for visual testing.
+This document describes how to deploy the Tesserix Design System Storybook and Documentation site to Vercel and integrate with Chromatic for visual testing.
 
 ## Prerequisites
 
@@ -25,14 +25,19 @@ CHROMATIC_PROJECT_TOKEN=your_chromatic_token_here
 
 ## Vercel Deployment
 
-### Automatic Deployment (Recommended)
+We have two separate Vercel deployments:
 
-The Storybook is automatically deployed to Vercel on every push to the `main` branch.
+1. **Storybook** - Interactive component playground at `ui.tesserix.app`
+2. **Documentation** - Comprehensive docs site at `docs.tesserix.app`
 
-**Setup:**
+### Storybook Deployment
+
+**Automatic Deployment (Recommended):**
 
 1. Connect your GitHub repository to Vercel
 2. Configure the project settings:
+   - **Project Name:** `tesserix-storybook`
+   - **Root Directory:** `./` (repository root)
    - **Framework Preset:** Other
    - **Build Command:** `pnpm build && pnpm --filter @tesserix/storybook build-storybook`
    - **Output Directory:** `apps/storybook/storybook-static`
@@ -42,6 +47,21 @@ The Storybook is automatically deployed to Vercel on every push to the `main` br
    - `CHROMATIC_PROJECT_TOKEN` (optional, for Chromatic integration)
 
 4. Deploy!
+
+### Documentation Site Deployment
+
+**Automatic Deployment (Recommended):**
+
+1. Add a second project in Vercel from the same repository
+2. Configure the project settings:
+   - **Project Name:** `tesserix-docs`
+   - **Root Directory:** `apps/docs`
+   - **Framework Preset:** Next.js
+   - **Build Command:** `cd ../.. && pnpm build && pnpm --filter @tesserix/docs build`
+   - **Output Directory:** `.next`
+   - **Install Command:** `cd ../.. && pnpm install`
+
+3. Deploy!
 
 ### Manual Deployment
 
@@ -54,7 +74,12 @@ npm i -g vercel
 # Login to Vercel
 vercel login
 
-# Deploy to production
+# Deploy Storybook to production
+cd /path/to/design-system
+vercel --prod
+
+# Deploy Docs to production
+cd apps/docs
 vercel --prod
 ```
 
@@ -89,12 +114,15 @@ Add the Chromatic project token to your GitHub repository secrets:
 
 ## Project URLs
 
-After deployment, your Storybook will be available at:
+After deployment, your projects will be available at:
 
-- **Production:** https://design-system.vercel.app (or your custom domain)
+- **Storybook:** https://ui.tesserix.app
+- **Documentation:** https://docs.tesserix.app
 - **Chromatic:** https://www.chromatic.com/builds?appId=your-app-id
 
 ## Build Scripts
+
+### Storybook
 
 ```bash
 # Development
@@ -113,7 +141,25 @@ pnpm --filter @tesserix/storybook chromatic
 pnpm --filter @tesserix/storybook chromatic:build
 ```
 
-## Storybook Features
+### Documentation Site
+
+```bash
+# Development
+pnpm --filter @tesserix/docs dev
+
+# Build docs
+pnpm --filter @tesserix/docs build
+
+# Start production server locally
+pnpm --filter @tesserix/docs start
+
+# Build all packages first (required before docs build)
+pnpm build
+```
+
+## Deployment Features
+
+### Storybook
 
 The deployed Storybook includes:
 
@@ -123,6 +169,19 @@ The deployed Storybook includes:
 - ✅ **Accessibility testing** with @storybook/addon-a11y
 - ✅ **Interactive controls** for all component props
 - ✅ **Auto-generated documentation** from JSDoc comments
+
+### Documentation Site
+
+The deployed documentation site includes:
+
+- ✅ **123+ component documentation pages** with examples and API references
+- ✅ **15 hook documentation pages** with usage examples
+- ✅ **11 utility documentation pages**
+- ✅ **Full-text search** powered by Nextra
+- ✅ **Dark mode support**
+- ✅ **Mobile-responsive design**
+- ✅ **Code syntax highlighting**
+- ✅ **Interactive examples**
 
 ## Troubleshooting
 
@@ -141,6 +200,17 @@ Verify the component is exported from the package index:
 - Web: `packages/web/src/index.ts`
 - Native: `packages/native/src/index.ts`
 
+### Documentation Site Build Fails
+
+Ensure all packages are built before building docs:
+
+```bash
+pnpm build
+pnpm --filter @tesserix/docs build
+```
+
+Check that the Next.js version is compatible (requires Next.js 16+)
+
 ### Chromatic Upload Fails
 
 Check your Chromatic project token is set correctly:
@@ -154,4 +224,5 @@ echo $CHROMATIC_PROJECT_TOKEN
 For issues or questions:
 
 - GitHub Issues: https://github.com/tesserix/design-system/issues
-- Documentation: https://design-system.vercel.app
+- Documentation: https://docs.tesserix.app
+- Storybook: https://ui.tesserix.app

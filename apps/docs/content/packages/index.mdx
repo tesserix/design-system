@@ -1,0 +1,30 @@
+# Packages
+
+The design system is split into focused packages so web and native apps can install only what they need.
+
+## Package map
+
+- `@tesserix/web`: React web components built with Tailwind + Radix patterns
+- `@tesserix/native`: React Native components built for Expo and bare RN
+- `@tesserix/tokens`: color, spacing, typography, radius, shadow, breakpoint, z-index, animation tokens
+- `@tesserix/icons`: Lucide wrappers for web/native and custom icon set
+- `@tesserix/hooks`: cross-platform hooks
+- `@tesserix/utils`: loading, theme, and error-boundary utilities
+
+## Install by target
+
+```bash
+# Web app
+pnpm add @tesserix/web @tesserix/tokens @tesserix/icons @tesserix/hooks @tesserix/utils
+
+# React Native app
+pnpm add @tesserix/native @tesserix/tokens @tesserix/icons @tesserix/hooks @tesserix/utils
+```
+
+## Internal dependencies
+
+- `@tesserix/web` depends on hooks, tokens, utils
+- `@tesserix/native` depends on hooks, tokens, utils
+- `@tesserix/utils` depends on hooks
+
+Use package-level docs in this section for API details and setup.

@@ -1,0 +1,32 @@
+# useTimeout
+
+Package: `@tesserix/hooks`
+
+Hook that runs a callback once after the provided delay.
+
+## Import
+
+```tsx
+import { useTimeout } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useTimeout(callback: ()
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-timeout.ts`
+
+## Usage
+
+```tsx
+import { useTimeout } from '@tesserix/hooks'
+
+export function DemouseTimeout() {
+  useTimeout(() => setReady(true), 1000)
+  return null
+}
+```

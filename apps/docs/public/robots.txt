@@ -1,0 +1,29 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://docs.tesserix.app/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Disallow admin/private areas (if any)
+Disallow: /api/
+Disallow: /_next/static/
+
+# Allow AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /

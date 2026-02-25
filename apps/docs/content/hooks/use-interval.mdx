@@ -1,0 +1,32 @@
+# useInterval
+
+Package: `@tesserix/hooks`
+
+Hook that runs a callback repeatedly with the provided delay.
+
+## Import
+
+```tsx
+import { useInterval } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useInterval(callback: ()
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-interval.ts`
+
+## Usage
+
+```tsx
+import { useInterval } from '@tesserix/hooks'
+
+export function DemouseInterval() {
+  useInterval(() => refresh(), 5000)
+  return null
+}
+```

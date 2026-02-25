@@ -1,0 +1,32 @@
+# useOnMount
+
+Package: `@tesserix/hooks`
+
+Hook that runs a callback once when the component mounts.
+
+## Import
+
+```tsx
+import { useOnMount } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useOnMount(callback: ()
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-on-mount.ts`
+
+## Usage
+
+```tsx
+import { useOnMount } from '@tesserix/hooks'
+
+export function DemouseOnMount() {
+  const result = useOnMount()
+  return null
+}
+```

@@ -1,0 +1,32 @@
+# useUpdateEffect
+
+Package: `@tesserix/hooks`
+
+Hook that runs an effect only on updates (skips first render)
+
+## Import
+
+```tsx
+import { useUpdateEffect } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useUpdateEffect(effect: EffectCallback, deps?: DependencyList): void
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-update-effect.ts`
+
+## Usage
+
+```tsx
+import { useUpdateEffect } from '@tesserix/hooks'
+
+export function DemouseUpdateEffect() {
+  const result = useUpdateEffect()
+  return null
+}
+```

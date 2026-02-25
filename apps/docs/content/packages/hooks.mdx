@@ -1,0 +1,22 @@
+# @tesserix/hooks
+
+Cross-platform hook package for shared state, lifecycle, and timing patterns.
+
+## Install
+
+```bash
+pnpm add @tesserix/hooks
+```
+
+## Exported hooks
+
+- State: `useToggle`, `useBoolean`, `useCounter`, `useArray`, `useMap`, `useSet`, `useAsync`, `usePrevious`
+- Timing: `useDebounce`, `useThrottle`, `useDebouncedCallback`, `useThrottledCallback`, `useInterval`, `useTimeout`
+- Lifecycle: `useOnMount`, `useOnUnmount`, `useEffectOnce`, `useUpdateEffect`, `useIsomorphicLayoutEffect`, `useMounted`
+- Forms: `useForm`
+
+## Example
+
+```tsx
+import { useToggle, useDebounce } from '@tesserix/hooks'
+```

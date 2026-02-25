@@ -1,0 +1,32 @@
+# useMounted
+
+Package: `@tesserix/hooks`
+
+Hook that returns whether the component is currently mounted
+
+## Import
+
+```tsx
+import { useMounted } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useMounted(): ()
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-mounted.ts`
+
+## Usage
+
+```tsx
+import { useMounted } from '@tesserix/hooks'
+
+export function DemouseMounted() {
+  const result = useMounted()
+  return null
+}
+```

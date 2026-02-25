@@ -1,0 +1,32 @@
+# useToggle
+
+Package: `@tesserix/hooks`
+
+Boolean state helper with toggle, setTrue, and setFalse actions.
+
+## Import
+
+```tsx
+import { useToggle } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+const useToggle = (initialValue = false): UseToggleReturn =>
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-toggle.ts`
+
+## Usage
+
+```tsx
+import { useToggle } from '@tesserix/hooks'
+
+export function DemouseToggle() {
+  const { value, toggle } = useToggle(false)
+  return null
+}
+```

@@ -1,0 +1,25 @@
+{
+  "name": "Tesserix Design System Documentation",
+  "short_name": "Tesserix Docs",
+  "description": "Complete documentation for Tesserix Design System with 123+ cross-platform UI components",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0066FF",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["development", "productivity", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

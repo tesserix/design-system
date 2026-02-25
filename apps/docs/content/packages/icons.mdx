@@ -1,0 +1,36 @@
+# @tesserix/icons
+
+Shared icon package with platform-specific exports.
+
+## Exports
+
+- `@tesserix/icons/web`
+- `@tesserix/icons/native`
+- `@tesserix/icons/custom`
+
+## Install
+
+```bash
+pnpm add @tesserix/icons
+```
+
+Peer dependencies depend on your target:
+
+```bash
+# web
+pnpm add lucide-react
+
+# native
+pnpm add lucide-react-native react-native-svg
+```
+
+## Usage
+
+```tsx
+import { Home } from '@tesserix/icons/web'
+import { TesserixLogo } from '@tesserix/icons/custom'
+```
+
+```tsx
+import { Home } from '@tesserix/icons/native'
+```

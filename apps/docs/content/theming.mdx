@@ -1,0 +1,318 @@
+# Theming
+
+Theming is token-driven and shared across web and native packages.
+
+## Available token themes
+
+Total themes: **23**
+
+- `default`
+- `emerald`
+- `sapphire`
+- `rose`
+- `amber`
+- `violet`
+- `teal`
+- `slate`
+- `zinc`
+- `stone`
+- `indigo`
+- `cyan`
+- `lime`
+- `orange`
+- `pink`
+- `crimson`
+- `forest`
+- `ocean`
+- `sunset`
+- `lavender`
+- `neon`
+- `midnight`
+- `mocha`
+
+## Theme color previews
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>default</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(215 25% 27%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(215 25% 27%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(210 20% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(243 50% 11%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(239 84% 76%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(243 75% 28%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>emerald</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(160 84% 39%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(160 84% 39%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(138 76% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(160 50% 5%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(160 84% 52%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(160 45% 22%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>sapphire</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(221 83% 53%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(221 83% 53%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(214 95% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(222 47% 7%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(217 91% 60%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(224 76% 48%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>rose</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(346 77% 50%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(346 77% 50%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(350 100% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(346 40% 8%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(346 77% 62%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(346 50% 25%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>amber</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(32 95% 44%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(32 95% 44%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(48 100% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(25 40% 8%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(38 92% 58%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(35 55% 25%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>violet</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(262 83% 58%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(262 83% 58%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(270 100% 98%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(262 45% 9%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(265 89% 68%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(262 50% 28%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>teal</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(173 80% 40%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(173 80% 40%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(180 100% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(173 50% 6%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(173 85% 55%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(173 55% 25%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>slate</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(215 16% 47%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(215 16% 47%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(210 11% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(217 33% 7%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(210 40% 70%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(215 30% 22%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>zinc</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(240 6% 50%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(240 6% 50%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(240 5% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(240 10% 4%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(240 6% 65%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(240 6% 20%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>stone</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(25 6% 45%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(25 6% 45%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(30 5% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(20 14% 4%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(25 6% 60%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(24 6% 20%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>indigo</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(239 84% 67%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(239 84% 67%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(235 100% 98%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(240 20% 8%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(239 84% 70%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(238 40% 25%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>cyan</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(199 89% 48%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(199 89% 48%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(204 100% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(200 50% 6%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(199 89% 58%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(199 55% 25%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>lime</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(84 81% 44%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(84 81% 44%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(90 95% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(85 50% 6%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(84 81% 54%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(84 55% 25%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>orange</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(24 100% 50%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(24 100% 50%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(30 100% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(20 45% 8%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(24 100% 60%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(22 50% 25%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>pink</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(328 86% 70%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(328 86% 70%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(326 100% 98%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(330 45% 9%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(328 86% 72%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(328 50% 28%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>crimson</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(348 83% 47%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(348 83% 47%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(350 100% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(348 50% 7%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(348 83% 60%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(348 55% 24%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>forest</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(142 76% 36%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(142 76% 36%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(145 85% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(142 55% 5%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(142 76% 48%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(142 55% 22%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>ocean</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(207 90% 54%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(207 90% 54%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(210 100% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(208 65% 6%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(207 90% 61%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(207 60% 23%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>sunset</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(14 100% 57%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(14 100% 57%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(20 100% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(15 50% 7%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(14 100% 64%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(14 55% 24%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>lavender</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(275 70% 72%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(275 70% 72%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(280 100% 98%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(275 45% 10%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(275 70% 75%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(275 45% 27%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>neon</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(158 94% 51%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(158 94% 51%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(160 100% 97%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(0 0% 8%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(158 94% 55%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(158 100% 35%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>midnight</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(230 35% 28%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(230 35% 28%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(228 15% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(231 45% 6%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(230 35% 45%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(230 35% 20%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+<div style={{ border: '1px solid var(--nextra-border)', borderRadius: 8, padding: 12 }}>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}><code>mocha</code></div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+    <div style={{ background: 'hsl(0 0% 100%)', color: 'hsl(28 45% 42%)', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light bg</div>
+    <div style={{ background: 'hsl(28 45% 42%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light primary</div>
+    <div style={{ background: 'hsl(35 20% 96%)', color: '#111', border: '1px solid #ddd', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>light accent</div>
+    <div style={{ background: 'hsl(28 30% 8%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark bg</div>
+    <div style={{ background: 'hsl(28 45% 55%)', color: '#111', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark primary</div>
+    <div style={{ background: 'hsl(28 35% 23%)', color: '#fff', borderRadius: 6, padding: '10px 6px', fontSize: 11, textAlign: 'center' }}>dark accent</div>
+  </div>
+</div>
+</div>
+
+## Platform behavior
+
+The same token theme names are intended to be used across both platforms:
+
+- Web: apply a matching theme strategy in your app styling layer.
+- Native: resolve tokens via `getThemeColors(themeName, mode)`.
+
+## Tokens usage
+
+```ts
+import { getThemeColors } from '@tesserix/tokens/colors'
+
+const light = getThemeColors('default', 'light')
+const dark = getThemeColors('default', 'dark')
+```
+
+## Web setup
+
+```tsx
+import '@tesserix/web/themes/default'
+import '@tesserix/web/styles'
+```
+
+## Native setup
+
+```tsx
+import { getThemeColors, hslToRgba } from '@tesserix/tokens/colors'
+```

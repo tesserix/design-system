@@ -1,0 +1,32 @@
+# useCounter
+
+Package: `@tesserix/hooks`
+
+Hook for managing counter state
+
+## Import
+
+```tsx
+import { useCounter } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useCounter(initialValue = 0): UseCounterReturn
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-counter.ts`
+
+## Usage
+
+```tsx
+import { useCounter } from '@tesserix/hooks'
+
+export function DemouseCounter() {
+  const { count, inc, dec, reset } = useCounter(0)
+  return null
+}
+```

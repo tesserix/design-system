@@ -1,0 +1,32 @@
+# useBoolean
+
+Package: `@tesserix/hooks`
+
+Hook for managing boolean state with semantic helpers
+
+## Import
+
+```tsx
+import { useBoolean } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useBoolean(initialValue = false): UseBooleanReturn
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-boolean.ts`
+
+## Usage
+
+```tsx
+import { useBoolean } from '@tesserix/hooks'
+
+export function DemouseBoolean() {
+  const { value, setTrue, setFalse } = useBoolean(false)
+  return null
+}
+```

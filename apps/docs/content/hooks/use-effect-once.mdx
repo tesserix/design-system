@@ -1,0 +1,32 @@
+# useEffectOnce
+
+Package: `@tesserix/hooks`
+
+Hook that runs an effect only once on mount
+
+## Import
+
+```tsx
+import { useEffectOnce } from '@tesserix/hooks'
+```
+
+## Signature
+
+```ts
+function useEffectOnce(effect: EffectCallback): void
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-effect-once.ts`
+
+## Usage
+
+```tsx
+import { useEffectOnce } from '@tesserix/hooks'
+
+export function DemouseEffectOnce() {
+  const result = useEffectOnce()
+  return null
+}
+```

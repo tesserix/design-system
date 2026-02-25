@@ -1,0 +1,26 @@
+# useAsync
+
+Package: `@tesserix/hooks`
+
+Hook for managing async operations state
+
+## Import
+
+```tsx
+import { useAsync } from '@tesserix/hooks'
+```
+
+## Source
+
+- Hook: `packages/hooks/src/use-async.ts`
+
+## Usage
+
+```tsx
+import { useAsync } from '@tesserix/hooks'
+
+export function DemouseAsync() {
+  const { execute, isLoading, data } = useAsync(fetchUsers)
+  return null
+}
+```

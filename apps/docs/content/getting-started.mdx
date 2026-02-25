@@ -1,0 +1,46 @@
+# Getting Started
+
+Setup guide for the Tesserix design-system monorepo packages.
+
+## Install packages
+
+Pick your target:
+
+```bash
+# Web
+pnpm add @tesserix/web @tesserix/tokens @tesserix/icons @tesserix/hooks @tesserix/utils
+
+# React Native
+pnpm add @tesserix/native @tesserix/tokens @tesserix/icons @tesserix/hooks @tesserix/utils
+```
+
+## Web setup
+
+1. Add `@tesserix/web/tailwind` preset in `tailwind.config`.
+2. Include `@tesserix/web` dist files in Tailwind content globs.
+3. Import `@tesserix/web/styles` once in the app root.
+
+```tsx
+import '@tesserix/web/styles'
+```
+
+## React Native setup
+
+Use with Expo or bare RN:
+
+```bash
+pnpm add react react-native
+```
+
+Then import components:
+
+```tsx
+import { Button, Box, Text } from '@tesserix/native'
+```
+
+## Storybook and docs
+
+- `apps/storybook`: interactive component demos
+- `apps/docs`: static product and package documentation
+
+Use docs for setup and API references, and Storybook for behavior testing and visual QA.

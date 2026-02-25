@@ -1,0 +1,38 @@
+# @tesserix/tokens
+
+Platform-agnostic token package shared by web and native layers.
+
+## Exports
+
+- `@tesserix/tokens` (main entry)
+- `@tesserix/tokens/colors`
+- `@tesserix/tokens/spacing`
+- `@tesserix/tokens/typography`
+- `@tesserix/tokens/radius`
+- `@tesserix/tokens/shadows`
+- `@tesserix/tokens/breakpoints`
+- `@tesserix/tokens/z-index`
+- `@tesserix/tokens/animations`
+
+## Install
+
+```bash
+pnpm add @tesserix/tokens
+```
+
+## Usage
+
+```ts
+import { getThemeColors } from '@tesserix/tokens/colors'
+import { spacing } from '@tesserix/tokens/spacing'
+import { getTypographyPreset } from '@tesserix/tokens/typography'
+
+const colors = getThemeColors('default', 'light')
+const gap = spacing[4]
+const text = getTypographyPreset('body', 'web')
+```
+
+## Notes
+
+- Prefer subpath imports for best tree-shaking.
+- Tokens are compatible with both web and React Native consumers.
