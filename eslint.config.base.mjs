@@ -36,4 +36,10 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
+  {
+    files: ['**/*.stories.{ts,tsx}'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  },
 ]
