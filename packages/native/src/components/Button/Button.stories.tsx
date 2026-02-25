@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import { Button } from '@tesserix/native'
 
 const meta: Meta<typeof Button> = {

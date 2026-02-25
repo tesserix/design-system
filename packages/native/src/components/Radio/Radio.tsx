@@ -53,7 +53,7 @@ export const Radio = React.forwardRef<React.ElementRef<typeof TouchableOpacity>,
       colorScheme = 'primary',
       disabled = false,
       isDisabled,
-      value,
+      value: _value,
       style,
       accessibilityLabel,
       ...props

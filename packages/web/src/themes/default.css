@@ -1,7 +1,4 @@
 @import "tailwindcss";
-@source "../components/**/*.{ts,tsx,js,jsx}";
-@source "../utilities/**/*.{ts,tsx,js,jsx}";
-@source "../hooks/**/*.{ts,tsx,js,jsx}";
 
 @theme inline {
   --color-background: hsl(var(--background));
