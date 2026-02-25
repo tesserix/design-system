@@ -2,6 +2,9 @@ import type { Preview, Decorator } from '@storybook/react'
 import React, { useEffect, Component, ReactNode } from 'react'
 import { AppRegistry, Platform } from 'react-native'
 
+// Import Tailwind base styles
+import './globals.css'
+
 // Error Boundary for Chromatic safety
 class ErrorBoundary extends Component<
   { children: ReactNode },
