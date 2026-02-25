@@ -10,10 +10,8 @@ export function getThemeColor(cssVar: string, fallback: string): string {
     try {
       const value = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim()
 
-      // Debug logging
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`getThemeColor(${cssVar}):`, { value, fallback })
-      }
+      // Debug logging (always on in web/Storybook for now)
+      console.log(`getThemeColor(${cssVar}):`, { value, fallback })
 
       if (value) {
         // If it's an HSL value like "222.2 47.4% 11.2%", convert to hsl()
