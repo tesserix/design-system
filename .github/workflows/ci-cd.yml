@@ -184,17 +184,19 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DOCS }}
 
   changeset:
-    name: Create Release PR or Publish
+    name: Version and Publish Packages
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
-      pull-requests: write
       packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -215,51 +217,31 @@ jobs:
       - name: Build packages
         run: pnpm build
 
-      - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
-        with:
-          version: pnpm version-packages
-          publish: pnpm release
-          commit: 'chore: version packages'
-          title: 'chore: version packages'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-  publish:
-    name: Publish to GitHub Packages
-    runs-on: ubuntu-latest
-    needs: changeset
-    if: github.event_name == 'workflow_dispatch' && inputs.publish == true
-    environment:
-      name: github-packages
-    permissions:
-      contents: write
-      packages: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Check for changesets
+        id: check-changesets
+        run: |
+          if [ -n "$(find .changeset -name '*.md' -not -name 'README.md' -print -quit)" ]; then
+            echo "has_changesets=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@tesserix'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build packages
-        run: pnpm build
+      - name: Version packages
+        if: steps.check-changesets.outputs.has_changesets == 'true'
+        run: |
+          pnpm version-packages
+          git add .
+          git commit -m "chore: version packages" || echo "No version changes"
+          git push
 
       - name: Publish packages
+        if: steps.check-changesets.outputs.has_changesets == 'true'
         run: pnpm release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
