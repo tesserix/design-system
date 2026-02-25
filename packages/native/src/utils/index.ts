@@ -16,7 +16,9 @@ export type {
   ThemeProviderProps,
 } from "@tesserix/utils"
 
-// React Native specific utilities and UI components should be added here
+// React Native specific utilities
+export { getThemeColor } from './getThemeColor'
+
 // Platform-specific implementations of:
 // - LoadingSpinner (using ActivityIndicator)
 // - LoadingDots (custom React Native animation)
