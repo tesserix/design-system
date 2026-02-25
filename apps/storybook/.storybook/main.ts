@@ -5,8 +5,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(__dirname, '..', '..', '..')
-const isProductionStorybook = process.env.NODE_ENV === 'production'
-
 const config: StorybookConfig = {
   stories: [
     '../../../packages/web/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
@@ -18,7 +16,6 @@ const config: StorybookConfig = {
     'storybook/viewport',
     '@storybook/addon-a11y',
     '@chromatic-com/storybook',
-    ...(!isProductionStorybook ? ['@storybook/addon-vitest'] : []),
   ],
   framework: {
     name: '@storybook/react-vite',
