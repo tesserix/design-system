@@ -18,7 +18,10 @@
     "docs": "pnpm --filter @tesserix/docs dev",
     "dev:docs": "pnpm --filter @tesserix/docs dev",
     "build:docs": "pnpm --filter @tesserix/docs build",
-    "start:docs": "pnpm --filter @tesserix/docs start"
+    "start:docs": "pnpm --filter @tesserix/docs start",
+    "deploy:ui": "vercel deploy --prod --yes --local-config vercel-ui.json",
+    "deploy:docs": "vercel deploy --prod --yes --local-config vercel-docs.json",
+    "deploy:all": "pnpm deploy:ui && pnpm deploy:docs"
   },
   "workspaces": [
     "packages/*",

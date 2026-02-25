@@ -1,8 +1,8 @@
 {
-  "buildCommand": "pnpm build && pnpm --filter @tesserix/storybook build-storybook",
+  "buildCommand": "pnpm --filter @tesserix/storybook build-storybook",
   "outputDirectory": "apps/storybook/storybook-static",
   "framework": null,
-  "installCommand": "pnpm install",
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "devCommand": "pnpm --filter @tesserix/storybook dev",
   "cleanUrls": true,
   "trailingSlash": false,
