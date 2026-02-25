@@ -78,4 +78,40 @@
   button[aria-label*='shortcuts' i] {
     display: none !important;
   }
+
+  #sidebar-bottom-wrapper,
+  [id='sidebar-bottom-wrapper'],
+  [data-testid='sidebar-bottom-wrapper'],
+  .sidebar-bottom-wrapper,
+  [class*='sidebar-bottom-wrapper'] {
+    display: none !important;
+  }
+
+  #storybook-testing-module,
+  [id='storybook-testing-module'] {
+    display: none !important;
+  }
 </style>
+
+<script>
+  (function hideStorybookTestingModule() {
+    function hide() {
+      const module = document.getElementById('storybook-testing-module')
+      const sidebarBottom =
+        document.getElementById('sidebar-bottom-wrapper') ||
+        document.querySelector("[data-testid='sidebar-bottom-wrapper']")
+      if (sidebarBottom) {
+        sidebarBottom.style.setProperty('display', 'none', 'important')
+      }
+      if (module) {
+        module.style.setProperty('display', 'none', 'important')
+        const wrapper = module.closest("[data-testid='sidebar-bottom-wrapper']")
+        if (wrapper) wrapper.style.setProperty('display', 'none', 'important')
+      }
+    }
+
+    hide()
+    const observer = new MutationObserver(hide)
+    observer.observe(document.documentElement, { childList: true, subtree: true })
+  })()
+</script>

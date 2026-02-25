@@ -21,6 +21,9 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
+  features: {
+    sidebarOnboardingChecklist: false,
+  },
   async viteFinal(config, { configType }) {
     config.plugins = config.plugins || []
     config.plugins.push(tailwindcss())
