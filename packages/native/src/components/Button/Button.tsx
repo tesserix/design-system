@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { spacing } from '@tesserix/tokens/spacing'
 import { fontSize, fontWeight } from '@tesserix/tokens/typography'
+import { getThemeColor } from '../../utils/getThemeColor'
 
 export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   /** Button variant */
@@ -79,38 +80,35 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
       ...(disabled && { opacity: 0.5 }),
     }
 
+    // Get theme colors (uses CSS variables in Storybook, fallback to hardcoded values in native)
+    const primaryColor = getThemeColor('--primary', '#3b82f6')
+    const errorColor = getThemeColor('--destructive', '#ef4444')
+    const successColor = getThemeColor('--success', '#10b981')
+    const secondaryColor = getThemeColor('--secondary', '#6b7280')
+    const foregroundColor = getThemeColor('--primary-foreground', '#ffffff')
+
+    const schemeColor =
+      resolvedColorScheme === 'primary' ? primaryColor :
+      resolvedColorScheme === 'error' ? errorColor :
+      resolvedColorScheme === 'success' ? successColor :
+      secondaryColor
+
     // Variant styles
     const variantStyles: ViewStyle =
       variant === 'solid'
-        ? {
-            backgroundColor: resolvedColorScheme === 'primary' ? '#3b82f6' :
-              resolvedColorScheme === 'error' ? '#ef4444' :
-              resolvedColorScheme === 'success' ? '#10b981' :
-              '#6b7280',
-          }
+        ? { backgroundColor: schemeColor }
         : variant === 'outline'
         ? {
             borderWidth: 1,
-            borderColor: resolvedColorScheme === 'primary' ? '#3b82f6' :
-              resolvedColorScheme === 'error' ? '#ef4444' :
-              resolvedColorScheme === 'success' ? '#10b981' :
-              '#6b7280',
+            borderColor: schemeColor,
             backgroundColor: 'transparent',
           }
-        : {
-            backgroundColor: 'transparent',
-          }
+        : { backgroundColor: 'transparent' }
 
     const textStyles: TextStyle = {
       fontSize: sizeStyle.fontSize,
       fontWeight: String(fontWeight.medium) as TextStyle['fontWeight'],
-      color:
-        variant === 'solid'
-          ? '#ffffff'
-          : resolvedColorScheme === 'primary' ? '#3b82f6' :
-          resolvedColorScheme === 'error' ? '#ef4444' :
-          resolvedColorScheme === 'success' ? '#10b981' :
-          '#6b7280',
+      color: variant === 'solid' ? foregroundColor : schemeColor,
     }
 
     return (
@@ -127,7 +125,7 @@ export const Button = React.forwardRef<React.ElementRef<typeof TouchableOpacity>
       >
         {isLoading ? (
           <ActivityIndicator
-            color={variant === 'solid' ? '#ffffff' : textStyles.color}
+            color={textStyles.color}
             size="small"
           />
         ) : (
