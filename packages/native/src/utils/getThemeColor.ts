@@ -9,17 +9,29 @@ export function getThemeColor(cssVar: string, fallback: string): string {
   if (Platform.OS === 'web' && typeof window !== 'undefined' && typeof document !== 'undefined') {
     try {
       const value = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim()
+
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`getThemeColor(${cssVar}):`, { value, fallback })
+      }
+
       if (value) {
         // If it's an HSL value like "222.2 47.4% 11.2%", convert to hsl()
         if (value.match(/^[\d.]+\s+[\d.]+%\s+[\d.]+%$/)) {
-          return `hsl(${value})`
+          const result = `hsl(${value})`
+          console.log(`  -> Converted to: ${result}`)
+          return result
         }
         // If it already has hsl() wrapper, return as-is
         if (value.startsWith('hsl(')) {
+          console.log(`  -> Already hsl(): ${value}`)
           return value
         }
+        console.log(`  -> Raw value: ${value}`)
         return value
       }
+
+      console.log(`  -> Empty, using fallback: ${fallback}`)
     } catch (e) {
       console.warn(`Failed to read CSS variable ${cssVar}:`, e)
       // Fall back to default if CSS var reading fails
