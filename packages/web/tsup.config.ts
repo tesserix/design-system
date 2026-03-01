@@ -3,12 +3,19 @@ import { copyFileSync, mkdirSync } from 'fs'
 import { join } from 'path'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: [
+    'src/**/*.ts',
+    'src/**/*.tsx',
+    '!src/**/*.test.*',
+    '!src/**/*.stories.*',
+    '!src/**/*.spec.*',
+    '!src/themes/**',
+  ],
   format: ['esm', 'cjs'],
-  dts: true,
+  bundle: false,
+  dts: false,
   sourcemap: true,
   clean: true,
-  external: ['react', 'react-dom', 'tailwindcss'],
   outDir: 'dist',
   banner: {
     js: '"use client";',
