@@ -1,6 +1,6 @@
 {
   "name": "@tesserix/web",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Tesserix Design System - Web UI components built with shadcn/ui",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

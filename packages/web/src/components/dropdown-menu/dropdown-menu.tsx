@@ -117,8 +117,12 @@ const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTrig
 )
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 
-const DropdownMenuContent = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<"div">>(
-  ({ className, children, onKeyDown, ...props }, ref) => {
+export interface DropdownMenuContentProps extends React.ComponentPropsWithoutRef<"div"> {
+  align?: "start" | "center" | "end"
+}
+
+const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContentProps>(
+  ({ className, children, onKeyDown, align = "end", ...props }, ref) => {
     const { open, onOpenChange, triggerRef, contentId } = useDropdownMenu()
     const contentRef = React.useRef<HTMLDivElement>(null)
 
@@ -190,7 +194,10 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, React.ComponentProp
           tabIndex={-1}
           aria-orientation="vertical"
           className={cn(
-            "absolute right-0 top-full z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            "absolute top-full z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            align === "end" && "right-0",
+            align === "start" && "left-0",
+            align === "center" && "left-1/2 -translate-x-1/2",
             className
           )}
           data-state={open ? "open" : "closed"}
@@ -242,24 +249,30 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, React.ComponentProp
 )
 DropdownMenuContent.displayName = "DropdownMenuContent"
 
+export interface DropdownMenuItemProps extends React.ComponentPropsWithoutRef<"button"> {
+  disabled?: boolean
+  asChild?: boolean
+}
+
 const DropdownMenuItem = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentPropsWithoutRef<"button"> & { disabled?: boolean }
->(({ className, disabled, onClick, ...props }, ref) => {
+  DropdownMenuItemProps
+>(({ className, disabled, onClick, asChild = false, ...props }, ref) => {
   const { onOpenChange } = useDropdownMenu()
+  const Comp = asChild ? Slot : "button"
 
   return (
-    <button
+    <Comp
       ref={ref}
       role="menuitem"
-      type="button"
+      {...(!asChild && { type: "button" })}
       disabled={disabled}
       className={cn(
         "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-left text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50",
         !disabled && "hover:bg-accent hover:text-accent-foreground",
         className
       )}
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
         if (!disabled) {
           onClick?.(e)
           onOpenChange(false)
