@@ -91,6 +91,7 @@ export default {
   "separator": "Separator",
   "settings-panel": "Settings Panel",
   "sheet": "Sheet",
+  "sidebar": "Sidebar",
   "sidebar-nav": "Sidebar Nav",
   "skeleton": "Skeleton",
   "slider": "Slider",
