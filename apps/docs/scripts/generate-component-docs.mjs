@@ -512,7 +512,7 @@ import '@tesserix/web/styles'
 ## Native setup
 
 \`\`\`tsx
-import { getThemeColors, hslToRgba } from '@tesserix/tokens/colors'
+import { getThemeColors, oklchToRgba } from '@tesserix/tokens/colors'
 \`\`\`
 `
 

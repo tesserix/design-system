@@ -44,7 +44,7 @@ export type {
 
 // Re-export commonly used utilities and constants
 // Users can import these or use direct imports for better tree-shaking
-export { getThemeColors, hslToRgba, hslToRgb, hslToHsla, themes } from './colors'
+export { getThemeColors, oklchToRgba, oklchToRgb, oklchWithAlpha, themes } from './colors'
 export { getSpacing, spacingToRem } from './spacing'
 export { getTypographyPreset, fontSizeToRem, getFontFamily } from './typography'
 export { getRadius } from './radius'

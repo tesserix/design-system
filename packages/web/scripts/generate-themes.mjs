@@ -13,7 +13,7 @@ const themes = input.themes
 
 const cssThemeInline = [
   '@theme inline {',
-  ...tokens.map((token) => `  --color-${token}: hsl(var(--${token}));`),
+  ...tokens.map((token) => `  --color-${token}: var(--${token});`),
   '}',
   '',
 ].join('\n')
@@ -51,12 +51,12 @@ const buildThemeCss = (themeName, config) => {
   if (config.includeBaseStyles) {
     lines.push(
       '* {',
-      '  border-color: hsl(var(--border));',
+      '  border-color: var(--border);',
       '}',
       '',
       'body {',
-      '  background-color: hsl(var(--background));',
-      '  color: hsl(var(--foreground));',
+      '  background-color: var(--background);',
+      '  color: var(--foreground);',
       '}',
       ''
     )

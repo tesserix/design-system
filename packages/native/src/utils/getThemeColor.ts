@@ -1,4 +1,4 @@
-import { getThemeColors, hslToRgba, themes, type ColorMode, type ThemeName } from '@tesserix/tokens'
+import { getThemeColors, oklchToRgba, themes, type ColorMode, type ThemeName } from '@tesserix/tokens'
 
 const cssVarTokenMap = {
   '--background': 'background',
@@ -36,7 +36,7 @@ export function getThemeColor(cssVar: string, fallback: string): string {
       const mode: ColorMode = root.classList.contains('dark') ? 'dark' : 'light'
       const tokenValue = getThemeColors(domTheme as ThemeName, mode)[tokenKey]
       if (tokenValue) {
-        return hslToRgba(tokenValue)
+        return oklchToRgba(tokenValue)
       }
     }
   }
@@ -53,7 +53,7 @@ export function getThemeColor(cssVar: string, fallback: string): string {
       const themeColors = getThemeColors(activeTheme, activeMode)
       const tokenValue = themeColors[tokenKey]
       if (tokenValue) {
-        return hslToRgba(tokenValue)
+        return oklchToRgba(tokenValue)
       }
     }
   }
@@ -64,18 +64,10 @@ export function getThemeColor(cssVar: string, fallback: string): string {
       const value = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim()
 
       if (value) {
-        // Theme CSS variables are stored as HSL triplets (e.g. "215 16% 47%").
+        // Theme CSS variables are stored as OKLCH values (e.g. "oklch(0.37 0.04 253)").
         // Convert them to rgba(...) for reliable React Native Web color parsing.
-        if (value.match(/^[\d.]+\s+[\d.]+%\s+[\d.]+%$/)) {
-          return hslToRgba(value)
-        }
-
-        const hslFunction = value.match(/^hsl\((.+)\)$/i)
-        if (hslFunction) {
-          const normalized = hslFunction[1].replace(/,/g, ' ').replace(/\s+/g, ' ').trim()
-          if (normalized.match(/^[\d.]+\s+[\d.]+%\s+[\d.]+%$/)) {
-            return hslToRgba(normalized)
-          }
+        if (value.match(/^oklch\(/i)) {
+          return oklchToRgba(value)
         }
 
         return value

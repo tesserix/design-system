@@ -17,13 +17,13 @@ yarn add @tesserix/tokens
 ### Colors
 
 ```typescript
-import { defaultColors, themes, getThemeColors, hslToRgba } from '@tesserix/tokens/colors'
+import { defaultColors, themes, getThemeColors, oklchToRgba } from '@tesserix/tokens/colors'
 
 // Get theme colors
 const colors = getThemeColors('default', 'light')
 
-// Convert HSL to RGBA for React Native
-const primaryColor = hslToRgba(colors.primary) // 'rgba(70, 82, 99, 1)'
+// Convert OKLCH to RGBA for React Native
+const primaryColor = oklchToRgba(colors.primary) // 'rgba(70, 82, 99, 1)'
 ```
 
 Available themes (23 total):
@@ -158,7 +158,7 @@ const styles = {
 ### React Native Example
 
 ```typescript
-import { hslToRgba, spacing, getTypographyPreset } from '@tesserix/tokens'
+import { oklchToRgba, spacing, getTypographyPreset } from '@tesserix/tokens'
 import { StyleSheet } from 'react-native'
 
 const colors = getThemeColors('default', 'light')
@@ -166,7 +166,7 @@ const colors = getThemeColors('default', 'light')
 const styles = StyleSheet.create({
   container: {
     padding: spacing[4], // 16
-    backgroundColor: hslToRgba(colors.primary),
+    backgroundColor: oklchToRgba(colors.primary),
     ...getTypographyPreset('body', 'native'),
   },
 })

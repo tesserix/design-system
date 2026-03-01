@@ -1,4 +1,4 @@
-import { hslToRgba } from '@tesserix/tokens'
+import { oklchToRgba } from '@tesserix/tokens'
 import { getThemeColor } from './getThemeColor'
 
 describe('getThemeColor', () => {
@@ -21,14 +21,14 @@ describe('getThemeColor', () => {
     expect(getThemeColor('--primary', '#3b82f6')).toBe('#3b82f6')
   })
 
-  it('converts HSL triplet CSS variable values to rgba', () => {
+  it('converts OKLCH CSS variable values to rgba', () => {
     testGlobal.window = {} as Window
     testGlobal.document = { documentElement: {} as HTMLElement } as Document
     testGlobal.getComputedStyle = jest.fn(() => ({
-      getPropertyValue: jest.fn(() => '215 16% 47%'),
+      getPropertyValue: jest.fn(() => 'oklch(0.5271 0.0266 248.66)'),
     })) as unknown as typeof getComputedStyle
 
-    expect(getThemeColor('--primary', '#3b82f6')).toBe(hslToRgba('215 16% 47%'))
+    expect(getThemeColor('--primary', '#3b82f6')).toBe(oklchToRgba('oklch(0.5271 0.0266 248.66)'))
   })
 
   it('returns non-HSL values as-is', () => {
@@ -53,6 +53,6 @@ describe('getThemeColor', () => {
       __TESSERIX_STORYBOOK_MODE__: 'dark',
     } as unknown as Window
 
-    expect(getThemeColor('--primary', '#3b82f6')).toBe(hslToRgba('239 84% 76%'))
+    expect(getThemeColor('--primary', '#3b82f6')).toBe(oklchToRgba('oklch(0.6959 0.1435 280.77)'))
   })
 })
