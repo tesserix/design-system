@@ -1,6 +1,5 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { cn } from "../../lib/utils"
 
 import {
   Sidebar,
@@ -19,6 +18,7 @@ import {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  TwoRailSidebar,
 } from "./sidebar"
 
 // --- Icons (inline SVG to avoid external deps) ---
@@ -521,66 +521,39 @@ const TwoPanelDemo = () => {
     Settings: ["General", "Security", "Billing"],
   }
 
+  const twoRailSections = sections.map((section) => ({
+    id: section.label,
+    label: section.label,
+    icon: section.icon,
+    items: (subItems[section.label] ?? []).map((item, i) => ({
+      id: item,
+      label: item,
+      isActive: section.label === activeSection && i === 0,
+    })),
+  }))
+
   return (
     <SidebarProvider>
-      <div className="flex h-svh">
-        {/* Icon Rail */}
-        <div className="flex w-14 flex-col items-center gap-2 border-r bg-sidebar py-4">
+      <TwoRailSidebar
+        sections={twoRailSections}
+        activeSectionId={activeSection}
+        onActiveSectionChange={setActiveSection}
+        brand={
           <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
             T
           </div>
-          <div className="my-2 h-px w-8 bg-sidebar-border" />
-          {sections.map((section) => (
-            <button
-              key={section.label}
-              type="button"
-              onClick={() => setActiveSection(section.label)}
-              className={cn(
-                "flex size-10 items-center justify-center rounded-lg transition-colors",
-                activeSection === section.label
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-              )}
-              title={section.label}
-            >
-              <section.icon />
-            </button>
-          ))}
-        </div>
-
-        {/* Nav Panel */}
-        <Sidebar collapsible="none">
-          <SidebarHeader>
-            <h2 className="px-2 text-lg font-semibold">{activeSection}</h2>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {(subItems[activeSection] ?? []).map((item, i) => (
-                    <SidebarMenuItem key={item}>
-                      <SidebarMenuButton isActive={i === 0}>
-                        <span>{item}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <UserIcon />
-                  <span>John Doe</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-      </div>
-
+        }
+        panelFooter={
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <UserIcon />
+                <span>John Doe</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        }
+      />
       <SidebarInset>
         <MainContent title={`Two Panel - ${activeSection}`} />
       </SidebarInset>

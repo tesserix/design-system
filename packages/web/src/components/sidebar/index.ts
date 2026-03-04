@@ -22,6 +22,7 @@ export {
   sidebarMenuButtonVariants,
   useSidebar,
 } from "./sidebar"
+export { TwoRailSidebar } from "./two-rail-sidebar"
 
 export type {
   SidebarProps,
@@ -44,3 +45,4 @@ export type {
   SidebarMenuSubItemProps,
   SidebarMenuSubButtonProps,
 } from "./sidebar"
+export type { TwoRailSidebarProps, TwoRailSection, TwoRailNavItem } from "./two-rail-sidebar"
