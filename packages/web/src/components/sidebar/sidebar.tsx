@@ -8,7 +8,7 @@ import { cn } from "../../lib/utils"
 import { useMediaQuery } from "../../hooks/use-media-query"
 import { Sheet, SheetContent } from "../sheet/sheet"
 import { Separator } from "../separator/separator"
-import { Tooltip } from "../tooltip/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../tooltip/tooltip"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
@@ -542,7 +542,7 @@ interface SidebarMenuButtonProps
     VariantProps<typeof sidebarMenuButtonVariants> {
   asChild?: boolean
   isActive?: boolean
-  tooltip?: string | React.ComponentPropsWithoutRef<typeof Tooltip>
+  tooltip?: string | { content: React.ReactNode }
 }
 
 const SidebarMenuButton = React.forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
@@ -578,20 +578,22 @@ const SidebarMenuButton = React.forwardRef<HTMLButtonElement, SidebarMenuButtonP
     }
 
     const tooltipContent = typeof tooltip === "string" ? tooltip : tooltip.content
-    const tooltipProps = typeof tooltip === "string" ? {} : tooltip
 
     if (state !== "collapsed" || isMobile) {
       return button
     }
 
     return (
-      <Tooltip
-        content={tooltipContent}
-        side="right"
-        {...tooltipProps}
-      >
-        {button}
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {button}
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {tooltipContent}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     )
   }
 )

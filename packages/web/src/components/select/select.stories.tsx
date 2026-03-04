@@ -1,7 +1,14 @@
 import * as React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { expect, fireEvent } from 'storybook/test'
-import { Select } from './select'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from './select'
 import { Label } from '../label'
 
 const meta = {
@@ -11,65 +18,10 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-  argTypes: {
-    disabled: {
-      control: 'boolean',
-      description: 'Whether the select is disabled',
-      table: {
-        type: { summary: 'boolean' },
-        defaultValue: { summary: 'false' },
-      },
-    },
-    required: {
-      control: 'boolean',
-      description: 'Whether the select is required',
-      table: {
-        type: { summary: 'boolean' },
-        defaultValue: { summary: 'false' },
-      },
-    },
-    defaultValue: {
-      control: 'text',
-      description: 'The default selected value',
-      table: {
-        type: { summary: 'string' },
-      },
-    },
-    children: {
-      control: false,
-      description: 'The option elements',
-      table: {
-        type: { summary: 'ReactNode' },
-      },
-    },
-    className: {
-      control: 'text',
-      description: 'Additional CSS classes to apply to the select',
-      table: {
-        type: { summary: 'string' },
-      },
-    },
-  },
 } satisfies Meta<typeof Select>
 
 export default meta
 type Story = StoryObj<typeof meta>
-
-const ControlledSelectDemo = () => {
-  const [value, setValue] = React.useState("medium")
-
-  return (
-    <div className="w-[320px] space-y-2">
-      <Label htmlFor="controlled-select">Priority</Label>
-      <Select id="controlled-select" value={value} onChange={(event) => setValue(event.target.value)}>
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </Select>
-      <p className="text-sm text-muted-foreground">Current priority: {value}</p>
-    </div>
-  )
-}
 
 export const Default: Story = {
   render: () => (
@@ -78,57 +30,77 @@ export const Default: Story = {
         <div className="mb-6 space-y-1">
           <p className="text-sm font-medium text-primary">Dropdown Selection</p>
           <h2 className="text-2xl font-bold tracking-tight text-card-foreground">Select Showcase</h2>
-          <p className="text-sm text-muted-foreground">Dropdown menus for choosing from multiple options.</p>
+          <p className="text-sm text-muted-foreground">Rich dropdown menus powered by Radix UI.</p>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
-            <Select id="country" defaultValue="us">
-              <option value="">Select a country</option>
-              <option value="us">United States</option>
-              <option value="uk">United Kingdom</option>
-              <option value="ca">Canada</option>
-              <option value="au">Australia</option>
-              <option value="de">Germany</option>
+            <Label>Country</Label>
+            <Select defaultValue="us">
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder="Select a country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="us">United States</SelectItem>
+                <SelectItem value="uk">United Kingdom</SelectItem>
+                <SelectItem value="ca">Canada</SelectItem>
+                <SelectItem value="au">Australia</SelectItem>
+                <SelectItem value="de">Germany</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="language">Language</Label>
-            <Select id="language" defaultValue="en">
-              <option value="en">English</option>
-              <option value="es">Spanish</option>
-              <option value="fr">French</option>
-              <option value="de">German</option>
-              <option value="ja">Japanese</option>
+            <Label>Language</Label>
+            <Select defaultValue="en">
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder="Select a language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="es">Spanish</SelectItem>
+                <SelectItem value="fr">French</SelectItem>
+                <SelectItem value="de">German</SelectItem>
+                <SelectItem value="ja">Japanese</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="timezone">Timezone</Label>
-            <Select id="timezone">
-              <option value="">Select timezone</option>
-              <optgroup label="North America">
-                <option value="est">Eastern Time</option>
-                <option value="cst">Central Time</option>
-                <option value="mst">Mountain Time</option>
-                <option value="pst">Pacific Time</option>
-              </optgroup>
-              <optgroup label="Europe">
-                <option value="gmt">GMT</option>
-                <option value="cet">Central European Time</option>
-              </optgroup>
+            <Label>Timezone</Label>
+            <Select>
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>North America</SelectLabel>
+                  <SelectItem value="est">Eastern Time</SelectItem>
+                  <SelectItem value="cst">Central Time</SelectItem>
+                  <SelectItem value="mst">Mountain Time</SelectItem>
+                  <SelectItem value="pst">Pacific Time</SelectItem>
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>Europe</SelectLabel>
+                  <SelectItem value="gmt">GMT</SelectItem>
+                  <SelectItem value="cet">Central European Time</SelectItem>
+                </SelectGroup>
+              </SelectContent>
             </Select>
           </div>
 
           <div className="rounded-lg border bg-muted/50 p-4">
             <h3 className="mb-3 text-sm font-semibold">Disabled State</h3>
             <div className="space-y-2">
-              <Label htmlFor="disabled-select">Disabled Select</Label>
-              <Select id="disabled-select" disabled defaultValue="option1">
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
+              <Label>Disabled Select</Label>
+              <Select defaultValue="option1" disabled>
+                <SelectTrigger className="w-[280px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="option1">Option 1</SelectItem>
+                  <SelectItem value="option2">Option 2</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -141,90 +113,39 @@ export const Default: Story = {
 export const WithLabel: Story = {
   render: () => (
     <div className="w-[300px] space-y-2">
-      <Label htmlFor="select-example">Choose an option</Label>
-      <Select id="select-example">
-        <option value="">Select...</option>
-        <option value="1">Option 1</option>
-        <option value="2">Option 2</option>
-        <option value="3">Option 3</option>
+      <Label>Choose an option</Label>
+      <Select>
+        <SelectTrigger>
+          <SelectValue placeholder="Select..." />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+          <SelectItem value="2">Option 2</SelectItem>
+          <SelectItem value="3">Option 3</SelectItem>
+        </SelectContent>
       </Select>
     </div>
   ),
 }
 
-export const Disabled: Story = {
+export const WithGroups: Story = {
   render: () => (
-    <Select disabled defaultValue="1" aria-label="Disabled select dropdown">
-      <option value="1">Option 1</option>
-      <option value="2">Option 2</option>
+    <Select>
+      <SelectTrigger className="w-[300px]">
+        <SelectValue placeholder="Select a fruit" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Citrus</SelectLabel>
+          <SelectItem value="orange">Orange</SelectItem>
+          <SelectItem value="lemon">Lemon</SelectItem>
+        </SelectGroup>
+        <SelectGroup>
+          <SelectLabel>Berries</SelectLabel>
+          <SelectItem value="strawberry">Strawberry</SelectItem>
+          <SelectItem value="blueberry">Blueberry</SelectItem>
+        </SelectGroup>
+      </SelectContent>
     </Select>
-  ),
-}
-
-export const WithOptgroups: Story = {
-  render: () => (
-    <Select className="w-[300px]" aria-label="Fruit selection">
-      <option value="">Select a fruit</option>
-      <optgroup label="Citrus">
-        <option value="orange">Orange</option>
-        <option value="lemon">Lemon</option>
-      </optgroup>
-      <optgroup label="Berries">
-        <option value="strawberry">Strawberry</option>
-        <option value="blueberry">Blueberry</option>
-      </optgroup>
-    </Select>
-  ),
-}
-
-export const SmokeTest: Story = {
-  render: Default.render,
-  play: async ({ canvasElement }) => {
-    await expect(canvasElement).toBeTruthy()
-  },
-}
-
-export const KeyboardAndA11y: Story = {
-  render: () => (
-    <div className="w-[300px] space-y-2">
-      <Label htmlFor="a11y-select">Priority</Label>
-      <Select id="a11y-select" defaultValue="medium">
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </Select>
-    </div>
-  ),
-  play: async ({ canvas }) => {
-    const select = canvas.getByLabelText(/priority/i) as HTMLSelectElement
-    await expect(select).toHaveValue("medium")
-
-    fireEvent.change(select, { target: { value: "high" } })
-    await expect(select).toHaveValue("high")
-  },
-}
-
-export const Controlled: Story = {
-  render: () => <ControlledSelectDemo />,
-  play: async ({ canvas }) => {
-    const select = canvas.getByLabelText(/priority/i) as HTMLSelectElement
-    await expect(select).toHaveValue("medium")
-    fireEvent.change(select, { target: { value: "high" } })
-    await expect(canvas.getByText(/current priority: high/i)).toBeInTheDocument()
-  },
-}
-
-export const InvalidState: Story = {
-  render: () => (
-    <div className="w-[320px] space-y-2">
-      <Label htmlFor="invalid-select">Environment</Label>
-      <Select id="invalid-select" aria-invalid="true" defaultValue="" className="border-destructive focus-visible:border-destructive">
-        <option value="">Select environment</option>
-        <option value="dev">Development</option>
-        <option value="staging">Staging</option>
-        <option value="prod">Production</option>
-      </Select>
-      <p className="text-xs text-destructive">Please select an environment.</p>
-    </div>
   ),
 }

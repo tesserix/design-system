@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { expect, fireEvent } from "storybook/test"
 
-import { Avatar } from "../avatar"
+import { Avatar, AvatarFallback } from "../avatar"
 import { Badge } from "../badge"
 import { Button } from "../button"
 import { TopNav, TopNavActions, TopNavBrand, TopNavContainer, TopNavLink, TopNavLinks } from "./top-nav"
@@ -52,7 +52,7 @@ export const AppNavigation: Story = {
             <Button variant="outline" size="sm">
               Invite
             </Button>
-            <Avatar className="h-8 w-8" fallback="MS" />
+            <Avatar className="h-8 w-8"><AvatarFallback>MS</AvatarFallback></Avatar>
           </TopNavActions>
         </TopNavContainer>
       </TopNav>

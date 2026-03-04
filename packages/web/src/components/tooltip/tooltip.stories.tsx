@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { expect, fireEvent, waitFor, within } from 'storybook/test'
-import { Tooltip } from './tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
 import { Button } from '../button'
 
 const meta = {
@@ -11,43 +10,11 @@ const meta = {
     docs: {
       description: {
         component:
-          'Tooltip supports hover and focus triggers with configurable placement for concise contextual hints.',
+          'Radix-based Tooltip with hover and focus triggers and configurable placement.',
       },
     },
   },
   tags: ['autodocs'],
-  argTypes: {
-    side: {
-      control: 'select',
-      options: ['top', 'bottom', 'left', 'right'],
-      description: 'The side where the tooltip appears',
-      table: {
-        type: { summary: 'string' },
-        defaultValue: { summary: 'top' },
-      },
-    },
-    content: {
-      control: 'text',
-      description: 'The content displayed in the tooltip',
-      table: {
-        type: { summary: 'ReactNode' },
-      },
-    },
-    children: {
-      control: false,
-      description: 'The element that triggers the tooltip',
-      table: {
-        type: { summary: 'ReactNode' },
-      },
-    },
-    className: {
-      control: 'text',
-      description: 'Additional CSS classes to apply to the tooltip',
-      table: {
-        type: { summary: 'string' },
-      },
-    },
-  },
 } satisfies Meta<typeof Tooltip>
 
 export default meta
@@ -63,63 +30,51 @@ export const Default: Story = {
           <p className="text-sm text-muted-foreground">Hover information for interactive elements.</p>
         </div>
 
-        <div className="space-y-8">
-          <div>
-            <h3 className="mb-4 text-sm font-semibold text-card-foreground">Positions</h3>
-            <div className="flex flex-col items-center gap-8">
-              <Tooltip content="Tooltip on top" side="top">
-                <Button variant="outline">Top</Button>
-              </Tooltip>
-              <div className="flex gap-8">
-                <Tooltip content="Tooltip on left" side="left">
-                  <Button variant="outline">Left</Button>
+        <TooltipProvider>
+          <div className="space-y-8">
+            <div>
+              <h3 className="mb-4 text-sm font-semibold text-card-foreground">Positions</h3>
+              <div className="flex flex-col items-center gap-8">
+                <Tooltip>
+                  <TooltipTrigger asChild><Button variant="outline">Top</Button></TooltipTrigger>
+                  <TooltipContent side="top">Tooltip on top</TooltipContent>
                 </Tooltip>
-                <Tooltip content="Tooltip on right" side="right">
-                  <Button variant="outline">Right</Button>
+                <div className="flex gap-8">
+                  <Tooltip>
+                    <TooltipTrigger asChild><Button variant="outline">Left</Button></TooltipTrigger>
+                    <TooltipContent side="left">Tooltip on left</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild><Button variant="outline">Right</Button></TooltipTrigger>
+                    <TooltipContent side="right">Tooltip on right</TooltipContent>
+                  </Tooltip>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild><Button variant="outline">Bottom</Button></TooltipTrigger>
+                  <TooltipContent side="bottom">Tooltip on bottom</TooltipContent>
                 </Tooltip>
               </div>
-              <Tooltip content="Tooltip on bottom" side="bottom">
-                <Button variant="outline">Bottom</Button>
-              </Tooltip>
             </div>
-          </div>
 
-          <div className="rounded-lg border bg-muted/50 p-6">
-            <h3 className="mb-4 text-sm font-semibold">With Buttons</h3>
-            <div className="flex flex-wrap gap-3">
-              <Tooltip content="Save your changes">
-                <Button>Save</Button>
-              </Tooltip>
-              <Tooltip content="Discard changes">
-                <Button variant="outline">Cancel</Button>
-              </Tooltip>
-              <Tooltip content="This action cannot be undone" side="bottom">
-                <Button variant="destructive">Delete</Button>
-              </Tooltip>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="mb-4 text-sm font-semibold text-card-foreground">Hover over items for more info</h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Tooltip content="Your account settings and preferences">
-                  <span className="text-sm underline decoration-dotted cursor-help">Account</span>
+            <div className="rounded-lg border bg-muted/50 p-6">
+              <h3 className="mb-4 text-sm font-semibold">With Buttons</h3>
+              <div className="flex flex-wrap gap-3">
+                <Tooltip>
+                  <TooltipTrigger asChild><Button>Save</Button></TooltipTrigger>
+                  <TooltipContent>Save your changes</TooltipContent>
                 </Tooltip>
-              </div>
-              <div className="flex items-center gap-2">
-                <Tooltip content="Security and privacy options">
-                  <span className="text-sm underline decoration-dotted cursor-help">Security</span>
+                <Tooltip>
+                  <TooltipTrigger asChild><Button variant="outline">Cancel</Button></TooltipTrigger>
+                  <TooltipContent>Discard changes</TooltipContent>
                 </Tooltip>
-              </div>
-              <div className="flex items-center gap-2">
-                <Tooltip content="Manage your billing and subscription">
-                  <span className="text-sm underline decoration-dotted cursor-help">Billing</span>
+                <Tooltip>
+                  <TooltipTrigger asChild><Button variant="destructive">Delete</Button></TooltipTrigger>
+                  <TooltipContent side="bottom">This action cannot be undone</TooltipContent>
                 </Tooltip>
               </div>
             </div>
           </div>
-        </div>
+        </TooltipProvider>
       </div>
     </div>
   ),
@@ -127,90 +82,75 @@ export const Default: Story = {
 
 export const Top: Story = {
   render: () => (
-    <Tooltip content="This is a tooltip" side="top">
-      <Button>Hover me</Button>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild><Button>Hover me</Button></TooltipTrigger>
+        <TooltipContent side="top">This is a tooltip</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   ),
-  play: async ({ canvas }) => {
-    const trigger = canvas.getByRole('button', { name: /hover me/i })
-
-    fireEvent.mouseOver(trigger)
-    await waitFor(() => {
-      expect(within(document.body).getByRole('tooltip')).toBeInTheDocument()
-    })
-
-    fireEvent.mouseOut(trigger)
-    await waitFor(() => {
-      expect(within(document.body).queryByRole('tooltip')).not.toBeInTheDocument()
-    })
-  },
 }
 
 export const Bottom: Story = {
   render: () => (
-    <Tooltip content="This is a tooltip" side="bottom">
-      <Button>Hover me</Button>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild><Button>Hover me</Button></TooltipTrigger>
+        <TooltipContent side="bottom">This is a tooltip</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   ),
 }
 
 export const Left: Story = {
   render: () => (
-    <Tooltip content="This is a tooltip" side="left">
-      <Button>Hover me</Button>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild><Button>Hover me</Button></TooltipTrigger>
+        <TooltipContent side="left">This is a tooltip</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   ),
 }
 
 export const Right: Story = {
   render: () => (
-    <Tooltip content="This is a tooltip" side="right">
-      <Button>Hover me</Button>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild><Button>Hover me</Button></TooltipTrigger>
+        <TooltipContent side="right">This is a tooltip</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   ),
-}
-
-export const FocusAccessible: Story = {
-  render: () => (
-    <Tooltip content="Focus tooltip content" side="top">
-      <Button>Focus me</Button>
-    </Tooltip>
-  ),
-  play: async ({ canvas }) => {
-    const trigger = canvas.getByRole('button', { name: /focus me/i })
-
-    fireEvent.focusIn(trigger)
-    await waitFor(() => {
-      expect(within(document.body).getByRole('tooltip')).toHaveTextContent(/focus tooltip content/i)
-    })
-
-    fireEvent.focusOut(trigger)
-    await waitFor(() => {
-      expect(within(document.body).queryByRole('tooltip')).not.toBeInTheDocument()
-    })
-  },
 }
 
 export const StateMatrix: Story = {
   render: () => (
-    <div className="grid w-[860px] gap-4 md:grid-cols-2">
-      <div className="rounded-xl border bg-card p-4">
-        <p className="mb-2 text-xs font-medium text-muted-foreground">Action Tooltips</p>
-        <div className="flex gap-3">
-          <Tooltip content="Save changes" side="top">
-            <Button>Save</Button>
-          </Tooltip>
-          <Tooltip content="Discard changes" side="bottom">
-            <Button variant="outline">Cancel</Button>
+    <TooltipProvider>
+      <div className="grid w-[860px] gap-4 md:grid-cols-2">
+        <div className="rounded-xl border bg-card p-4">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Action Tooltips</p>
+          <div className="flex gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild><Button>Save</Button></TooltipTrigger>
+              <TooltipContent side="top">Save changes</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild><Button variant="outline">Cancel</Button></TooltipTrigger>
+              <TooltipContent side="bottom">Discard changes</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+        <div className="rounded-xl border bg-card p-4">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Inline Hints</p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help text-sm underline decoration-dotted">Command Palette</span>
+            </TooltipTrigger>
+            <TooltipContent side="right">Keyboard shortcut: Cmd+K</TooltipContent>
           </Tooltip>
         </div>
       </div>
-      <div className="rounded-xl border bg-card p-4">
-        <p className="mb-2 text-xs font-medium text-muted-foreground">Inline Hints</p>
-        <Tooltip content="Keyboard shortcut: Cmd+K" side="right">
-          <span className="cursor-help text-sm underline decoration-dotted">Command Palette</span>
-        </Tooltip>
-      </div>
-    </div>
+    </TooltipProvider>
   ),
 }

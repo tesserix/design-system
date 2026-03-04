@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { Avatar } from "../avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "../avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +27,10 @@ const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(
     <div ref={ref} {...props}>
       <DropdownMenu>
         <DropdownMenuTrigger className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-          <Avatar src={avatarSrc} fallback={name.slice(0, 2).toUpperCase()} size="sm" />
+          <Avatar className="h-8 w-8">
+            {avatarSrc && <AvatarImage src={avatarSrc} alt={name} />}
+            <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>

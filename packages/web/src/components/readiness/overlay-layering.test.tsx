@@ -5,7 +5,7 @@ import { Button } from "../button"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "../popover"
 import { ToastProvider, ToastViewport, useToast } from "../toast"
-import { Tooltip } from "../tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../tooltip"
 
 const ToastTrigger = () => {
   const { toast } = useToast()
@@ -35,9 +35,14 @@ describe("Overlay layering readiness", () => {
               <PopoverTrigger>Open popover</PopoverTrigger>
               <PopoverContent>Popover layer</PopoverContent>
             </Popover>
-            <Tooltip content="Tooltip layer">
-              <button type="button">Tooltip trigger</button>
-            </Tooltip>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button">Tooltip trigger</button>
+                </TooltipTrigger>
+                <TooltipContent>Tooltip layer</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </DialogContent>
         </Dialog>
       </ToastProvider>

@@ -15,7 +15,7 @@ import { Input } from "../input"
 import { Textarea } from "../textarea"
 import { Button } from "../button"
 import { Checkbox } from "../checkbox"
-import { Select } from "../select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../select"
 
 const meta = {
   title: "Layout/Form",
@@ -218,14 +218,18 @@ export const ComplexForm: Story = {
               <FormControl>
                 <Select
                   value={formData.role}
-                  onChange={(e) =>
-                    setFormData({ ...formData, role: e.target.value })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, role: value })
                   }
                 >
-                  <option value="">Select a role</option>
-                  <option value="developer">Developer</option>
-                  <option value="designer">Designer</option>
-                  <option value="manager">Manager</option>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="developer">Developer</SelectItem>
+                    <SelectItem value="designer">Designer</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                  </SelectContent>
                 </Select>
               </FormControl>
             </FormItem>

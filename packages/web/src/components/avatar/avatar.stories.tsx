@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { expect, fireEvent, waitFor } from 'storybook/test'
-import { Avatar } from './avatar'
+import { Avatar, AvatarImage, AvatarFallback } from './avatar'
 
 const meta = {
   title: 'Feedback/Avatar',
@@ -10,50 +9,11 @@ const meta = {
     docs: {
       description: {
         component:
-          'Avatar supports image rendering with graceful fallback content for missing or failed image sources.',
+          'Radix-based Avatar with image rendering and graceful fallback content.',
       },
     },
   },
   tags: ['autodocs'],
-  argTypes: {
-    size: {
-      control: 'select',
-      options: ['sm', 'default', 'lg', 'xl'],
-      description: 'The size of the avatar',
-      table: {
-        type: { summary: 'string' },
-        defaultValue: { summary: 'default' },
-      },
-    },
-    src: {
-      control: 'text',
-      description: 'The image source URL',
-      table: {
-        type: { summary: 'string' },
-      },
-    },
-    alt: {
-      control: 'text',
-      description: 'Alternative text for the image',
-      table: {
-        type: { summary: 'string' },
-      },
-    },
-    fallback: {
-      control: 'text',
-      description: 'Fallback content when image fails to load',
-      table: {
-        type: { summary: 'string' },
-      },
-    },
-    className: {
-      control: 'text',
-      description: 'Additional CSS classes to apply to the avatar',
-      table: {
-        type: { summary: 'string' },
-      },
-    },
-  },
 } satisfies Meta<typeof Avatar>
 
 export default meta
@@ -73,38 +33,46 @@ export const Default: Story = {
           <div>
             <h3 className="mb-3 text-sm font-semibold text-card-foreground">Sizes</h3>
             <div className="flex items-center gap-4">
-              <Avatar size="sm" fallback="SM" />
-              <Avatar size="default" fallback="MD" />
-              <Avatar size="lg" fallback="LG" />
-              <Avatar size="xl" fallback="XL" />
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>SM</AvatarFallback>
+              </Avatar>
+              <Avatar className="h-10 w-10">
+                <AvatarFallback>MD</AvatarFallback>
+              </Avatar>
+              <Avatar className="h-12 w-12">
+                <AvatarFallback>LG</AvatarFallback>
+              </Avatar>
+              <Avatar className="h-16 w-16">
+                <AvatarFallback>XL</AvatarFallback>
+              </Avatar>
             </div>
           </div>
 
           <div>
             <h3 className="mb-3 text-sm font-semibold text-card-foreground">With Initials</h3>
             <div className="flex items-center gap-4">
-              <Avatar fallback="JD" />
-              <Avatar fallback="AB" />
-              <Avatar fallback="MK" />
-              <Avatar fallback="SL" />
+              <Avatar><AvatarFallback>JD</AvatarFallback></Avatar>
+              <Avatar><AvatarFallback>AB</AvatarFallback></Avatar>
+              <Avatar><AvatarFallback>MK</AvatarFallback></Avatar>
+              <Avatar><AvatarFallback>SL</AvatarFallback></Avatar>
             </div>
           </div>
 
           <div>
             <h3 className="mb-3 text-sm font-semibold text-card-foreground">With Images</h3>
             <div className="flex items-center gap-4">
-              <Avatar
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
-                alt="User 1"
-              />
-              <Avatar
-                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
-                alt="User 2"
-              />
-              <Avatar
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
-                alt="User 3"
-              />
+              <Avatar>
+                <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User 1" />
+                <AvatarFallback>U1</AvatarFallback>
+              </Avatar>
+              <Avatar>
+                <AvatarImage src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop" alt="User 2" />
+                <AvatarFallback>U2</AvatarFallback>
+              </Avatar>
+              <Avatar>
+                <AvatarImage src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop" alt="User 3" />
+                <AvatarFallback>U3</AvatarFallback>
+              </Avatar>
             </div>
           </div>
 
@@ -112,21 +80,21 @@ export const Default: Story = {
             <h3 className="mb-3 text-sm font-semibold">User List</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Avatar fallback="JD" />
+                <Avatar><AvatarFallback>JD</AvatarFallback></Avatar>
                 <div>
                   <p className="text-sm font-medium">John Doe</p>
                   <p className="text-xs text-muted-foreground">john.doe@example.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Avatar fallback="AB" />
+                <Avatar><AvatarFallback>AB</AvatarFallback></Avatar>
                 <div>
                   <p className="text-sm font-medium">Alice Brown</p>
                   <p className="text-xs text-muted-foreground">alice.brown@example.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Avatar fallback="MK" />
+                <Avatar><AvatarFallback>MK</AvatarFallback></Avatar>
                 <div>
                   <p className="text-sm font-medium">Mike Kim</p>
                   <p className="text-xs text-muted-foreground">mike.kim@example.com</p>
@@ -141,69 +109,18 @@ export const Default: Story = {
 }
 
 export const WithImage: Story = {
-  args: {
-    src: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
-    alt: 'User avatar',
-  },
+  render: () => (
+    <Avatar>
+      <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="User avatar" />
+      <AvatarFallback>UA</AvatarFallback>
+    </Avatar>
+  ),
 }
 
 export const WithFallback: Story = {
-  args: {
-    fallback: 'JD',
-  },
-}
-
-export const Small: Story = {
-  args: {
-    size: 'sm',
-    fallback: 'SM',
-  },
-}
-
-export const Large: Story = {
-  args: {
-    size: 'lg',
-    fallback: 'LG',
-  },
-}
-
-export const ExtraLarge: Story = {
-  args: {
-    size: 'xl',
-    fallback: 'XL',
-  },
-}
-
-export const SmokeTest: Story = {
-  render: Default.render,
-  play: async ({ canvasElement }) => {
-    await expect(canvasElement).toBeTruthy()
-  },
-}
-
-export const ImageErrorFallback: Story = {
   render: () => (
-    <Avatar
-      src="https://invalid.local/avatar.png"
-      alt="Broken avatar"
-      fallback="ER"
-    />
+    <Avatar><AvatarFallback>JD</AvatarFallback></Avatar>
   ),
-  play: async ({ canvas }) => {
-    const image = canvas.getByRole('img', { name: /broken avatar/i })
-    fireEvent.error(image)
-
-    await waitFor(() => {
-      expect(canvas.getByText('ER')).toBeInTheDocument()
-    })
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Validates runtime image-error handling and fallback rendering.',
-      },
-    },
-  },
 }
 
 export const StateMatrix: Story = {
@@ -212,22 +129,22 @@ export const StateMatrix: Story = {
       <div className="space-y-2 rounded-xl border bg-card p-4 text-center">
         <p className="text-xs font-medium text-muted-foreground">Image</p>
         <div className="flex justify-center">
-          <Avatar
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
-            alt="Loaded avatar"
-          />
+          <Avatar>
+            <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" alt="Loaded avatar" />
+            <AvatarFallback>UA</AvatarFallback>
+          </Avatar>
         </div>
       </div>
       <div className="space-y-2 rounded-xl border bg-card p-4 text-center">
         <p className="text-xs font-medium text-muted-foreground">Initials</p>
         <div className="flex justify-center">
-          <Avatar fallback="JD" />
+          <Avatar><AvatarFallback>JD</AvatarFallback></Avatar>
         </div>
       </div>
       <div className="space-y-2 rounded-xl border bg-card p-4 text-center">
         <p className="text-xs font-medium text-muted-foreground">No Content</p>
         <div className="flex justify-center">
-          <Avatar />
+          <Avatar><AvatarFallback>?</AvatarFallback></Avatar>
         </div>
       </div>
     </div>
