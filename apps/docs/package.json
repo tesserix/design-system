@@ -5,7 +5,7 @@
   "description": "Documentation site for Tesserix Design System",
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "next start -p 3001",
     "generate:components": "node scripts/generate-component-docs.mjs"
   },
