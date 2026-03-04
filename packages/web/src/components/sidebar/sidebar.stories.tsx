@@ -18,8 +18,8 @@ import {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  TwoRailSidebar,
 } from "./sidebar"
+import { TwoRailSidebar } from "./two-rail-sidebar"
 
 // --- Icons (inline SVG to avoid external deps) ---
 
