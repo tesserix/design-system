@@ -52,12 +52,15 @@ describe("Overlay layering readiness", () => {
     fireEvent.focus(screen.getByRole("button", { name: /tooltip trigger/i }))
 
     const dialog = screen.getByRole("dialog")
-    const tooltip = await screen.findByRole("tooltip")
+    const tooltipEl = await screen.findByRole("tooltip")
     const status = await screen.findByRole("status")
     const popover = screen.getByText("Popover layer")
 
     expect(dialog.className).toContain("z-50")
-    expect(tooltip.className).toContain("z-50")
+    // Radix v1.2+ renders role="tooltip" on a visually-hidden <span>;
+    // the z-50 class is on the parent Content element
+    const tooltipContent = tooltipEl.parentElement ?? tooltipEl
+    expect(tooltipContent.className).toContain("z-50")
     expect(popover.className).toContain("z-50")
     expect(screen.getByTestId("toast-viewport").className).toContain("z-[100]")
     expect(status).toHaveAttribute("aria-live", "polite")
