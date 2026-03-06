@@ -2,28 +2,46 @@
 
 A comprehensive design system for web and React Native applications, built with TypeScript, Tailwind CSS, and shadcn/ui principles.
 
-## 🔗 Links
+## Links
 
-- **📚 Documentation**: [docs.tesserix.app](https://docs.tesserix.app)
-- **🎨 Storybook**: [ui.tesserix.app](https://ui.tesserix.app)
-- **📦 Chromatic**: [chromatic.com/library?appId=699e8c384ce106a70ccc4c6d](https://www.chromatic.com/library?appId=699e8c384ce106a70ccc4c6d)
+- **Documentation**: [docs.tesserix.app](https://docs.tesserix.app)
+- **Storybook**: [ui.tesserix.app](https://ui.tesserix.app)
+- **Chromatic**: [chromatic.com/library?appId=699e8c384ce106a70ccc4c6d](https://www.chromatic.com/library?appId=699e8c384ce106a70ccc4c6d)
 
-## 🏗️ Monorepo Structure
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Build System | Turborepo + pnpm workspaces |
+| Language | TypeScript 5.9 |
+| Web | React 19, Tailwind CSS, Radix UI |
+| Native | React Native 0.76, Expo |
+| Animations | Framer Motion |
+| Testing | Jest, Vitest, React Testing Library |
+| Docs | Storybook 10 |
+| Visual Regression | Chromatic |
+| Versioning | Changesets |
+| CI/CD | GitHub Actions |
+
+## Monorepo Structure
 
 ```
-tesserix/design-system
+design-system/
 ├── packages/
 │   ├── tokens/          # @tesserix/tokens - Design tokens (colors, spacing, typography)
 │   ├── web/             # @tesserix/web - Web components (React + Tailwind)
-│   └── native/          # @tesserix/native - React Native components
+│   └── native/          # @tesserix/native - React Native components (30+ components)
 ├── apps/
-│   └── docs/            # Documentation site
-└── MONOREPO_MIGRATION_PLAN.md
+│   └── storybook/       # Storybook app with a11y addon
+├── turbo.json           # Turborepo pipeline config
+├── pnpm-workspace.yaml  # Workspace definition
+└── tsconfig.base.json   # Shared TypeScript config
 ```
 
-## 📦 Packages
+## Packages
 
 ### @tesserix/tokens
+
 Platform-agnostic design tokens shared across web and native.
 
 ```bash
@@ -31,6 +49,7 @@ pnpm add @tesserix/tokens
 ```
 
 ### @tesserix/web
+
 React components for web applications built with Tailwind CSS.
 
 ```bash
@@ -38,13 +57,14 @@ pnpm add @tesserix/web
 ```
 
 ### @tesserix/native
-React Native components for iOS and Android (Expo-first).
+
+React Native components for iOS and Android (Expo-first). Includes 30+ components: SafeAreaView, DataGrid, Form, Tabs, DragAndDrop, InfiniteScroll, and more.
 
 ```bash
 pnpm add @tesserix/native
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -54,45 +74,26 @@ pnpm add @tesserix/native
 ### Installation
 
 ```bash
-# Clone the repository
 git clone git@github.com:tesserix/design-system.git
 cd design-system
 
-# Install dependencies
 pnpm install
-
-# Build all packages
 pnpm build
-
-# Run development mode
 pnpm dev
 ```
 
-## 🛠️ Development
+## Development
 
 ### Available Scripts
 
 ```bash
-# Build all packages
-pnpm build
-
-# Run in development mode
-pnpm dev
-
-# Lint all packages
-pnpm lint
-
-# Type check all packages
-pnpm type-check
-
-# Run tests
-pnpm test
-
-# Run Storybook
-pnpm storybook
-
-# Build Storybook
-pnpm build-storybook
+pnpm build            # Build all packages
+pnpm dev              # Run in development mode
+pnpm lint             # Lint all packages
+pnpm type-check       # Type check all packages
+pnpm test             # Run tests
+pnpm storybook        # Run Storybook
+pnpm build-storybook  # Build Storybook
 ```
 
 ### Adding a Changeset
@@ -106,18 +107,11 @@ pnpm changeset
 ### Publishing
 
 ```bash
-# Version packages based on changesets
-pnpm version-packages
-
-# Build and publish to registry
-pnpm release
+pnpm version-packages   # Version packages based on changesets
+pnpm release             # Build and publish to registry
 ```
 
-## 📚 Documentation
-
-Comprehensive documentation will be available at the docs site (coming soon).
-
-## 🎨 Design Principles
+## Design Principles
 
 - **Consistent**: Unified design language across web and mobile
 - **Accessible**: WCAG 2.1 AA compliant
@@ -125,20 +119,6 @@ Comprehensive documentation will be available at the docs site (coming soon).
 - **Flexible**: Theming and customization support
 - **Type-safe**: Full TypeScript support
 
-## 🤝 Contributing
+## License
 
-Contributions are welcome! Please read our contributing guidelines (coming soon).
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 🔗 Links
-
-- [GitHub Repository](https://github.com/tesserix/design-system)
-- [Documentation](https://design-system.tesserix.dev) (coming soon)
-- [Storybook](https://storybook.tesserix.dev) (coming soon)
-
----
-
-Built with ❤️ by Tesserix
+MIT
