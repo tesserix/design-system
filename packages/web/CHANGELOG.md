@@ -1,5 +1,11 @@
 # @tesserix/web
 
+## 1.4.0
+
+### Minor Changes
+
+- 6f91c55: Enhance Combobox with description, icon, searchTerms, error, loading, and renderOption support. Add unit tests (20 cases) and comprehensive documentation.
+
 ## 1.3.0
 
 ### Minor Changes
