@@ -300,6 +300,95 @@ export const OutsideClickAndQueryReset: Story = {
   },
 }
 
+export const WithDescriptionAndIcon: Story = {
+  render: () => {
+    const currencyOptions = [
+      { value: "USD", label: "$ USD", description: "United States Dollar", searchTerms: ["dollar", "america"] },
+      { value: "EUR", label: "€ EUR", description: "Euro", searchTerms: ["europe"] },
+      { value: "GBP", label: "£ GBP", description: "British Pound Sterling", searchTerms: ["uk", "britain", "pound"] },
+      { value: "INR", label: "₹ INR", description: "Indian Rupee", searchTerms: ["india", "rupee"] },
+      { value: "JPY", label: "¥ JPY", description: "Japanese Yen", searchTerms: ["japan", "yen"] },
+    ]
+
+    return (
+      <div className="w-[420px] space-y-2">
+        <label className="text-sm font-medium text-card-foreground">Currency</label>
+        <Combobox
+          aria-label="Currency selector"
+          options={currencyOptions}
+          placeholder="Select currency"
+          searchPlaceholder="Search by name or code..."
+        />
+      </div>
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Options with description text and searchTerms for enhanced filtering. Search by currency name, code, or custom terms.",
+      },
+    },
+  },
+}
+
+export const WithCustomRenderOption: Story = {
+  render: () => {
+    const countryOptions = [
+      { value: "US", label: "+1", icon: <span className="text-base">🇺🇸</span> },
+      { value: "GB", label: "+44", icon: <span className="text-base">🇬🇧</span> },
+      { value: "IN", label: "+91", icon: <span className="text-base">🇮🇳</span> },
+      { value: "AU", label: "+61", icon: <span className="text-base">🇦🇺</span> },
+    ]
+
+    return (
+      <div className="w-[200px] space-y-2">
+        <label className="text-sm font-medium text-card-foreground">Country Code</label>
+        <Combobox
+          aria-label="Country code"
+          options={countryOptions}
+          placeholder="Code"
+        />
+      </div>
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Options with icon support for visual identifiers like flags or logos.",
+      },
+    },
+  },
+}
+
+export const WithErrorState: Story = {
+  render: () => (
+    <div className="w-[420px] space-y-2">
+      <label className="text-sm font-medium text-card-foreground">Required field</label>
+      <Combobox
+        aria-label="Error state combobox"
+        options={frameworkOptions}
+        error
+        placeholder="Please select a framework"
+      />
+      <p className="text-sm text-destructive">This field is required</p>
+    </div>
+  ),
+}
+
+export const WithLoading: Story = {
+  render: () => (
+    <div className="w-[420px] space-y-2">
+      <label className="text-sm font-medium text-card-foreground">Loading options</label>
+      <Combobox
+        aria-label="Loading combobox"
+        options={[]}
+        loading
+        placeholder="Loading..."
+      />
+    </div>
+  ),
+}
+
 export const StateMatrix: Story = {
   render: () => (
     <div className="grid w-[880px] gap-4 md:grid-cols-2">
