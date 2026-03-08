@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
 
 import { cn } from "../../lib/utils"
 
@@ -50,18 +51,23 @@ const Collapsible = React.forwardRef<HTMLDivElement, CollapsibleProps>(
 )
 Collapsible.displayName = "Collapsible"
 
+interface CollapsibleTriggerProps extends React.ComponentPropsWithoutRef<"button"> {
+  asChild?: boolean
+}
+
 const CollapsibleTrigger = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentPropsWithoutRef<"button">
->(({ className, children, onClick, ...props }, ref) => {
+  CollapsibleTriggerProps
+>(({ className, children, onClick, asChild = false, ...props }, ref) => {
   const { open, onOpenChange } = useCollapsible()
+  const Comp = asChild ? Slot : "button"
 
   return (
-    <button
+    <Comp
       ref={ref}
-      type="button"
+      {...(!asChild && { type: "button" })}
       className={cn("flex w-full items-center justify-between", className)}
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
         onOpenChange(!open)
         onClick?.(e)
       }}
@@ -69,7 +75,7 @@ const CollapsibleTrigger = React.forwardRef<
       {...props}
     >
       {children}
-    </button>
+    </Comp>
   )
 })
 CollapsibleTrigger.displayName = "CollapsibleTrigger"

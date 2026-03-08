@@ -2,16 +2,24 @@ import * as React from "react"
 
 import { cn } from "../../lib/utils"
 
-export interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {}
+export interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  onCheckedChange?: (checked: boolean) => void
+}
 
 const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, onChange, onCheckedChange, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange?.(e)
+      onCheckedChange?.(e.target.checked)
+    }
+
     return (
       <label className={cn("relative inline-flex cursor-pointer items-center", className)}>
         <input
           type="checkbox"
           className="peer sr-only"
           ref={ref}
+          onChange={handleChange}
           {...props}
         />
         <div className={cn(

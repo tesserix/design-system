@@ -6,12 +6,16 @@ import { Input } from "../input"
 import { Label } from "../label"
 import {
   AuthCard,
+  AuthCardCentered,
   AuthCardDivider,
   AuthCardDescription,
+  AuthCardFooter,
   AuthCardHeader,
   AuthCardTitle,
   AuthLayout,
+  AuthLayoutBackground,
   AuthLayoutBrand,
+  AuthLayoutCentered,
   AuthLayoutContent,
   AuthSocialButton,
   AuthSocialProviders,
@@ -183,4 +187,32 @@ export const SocialButtonModes: Story = {
     await expect(canvas.getAllByRole("button", { name: /continue with google/i })).toHaveLength(2)
     await expect(canvas.getByRole("button", { name: /continue with github/i })).toBeInTheDocument()
   },
+}
+
+export const CenteredLayout: Story = {
+  render: () => (
+    <AuthLayoutCentered>
+      <AuthLayoutBackground src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800" />
+      <AuthCardCentered>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-1">Welcome Back</h1>
+          <p className="text-sm text-muted-foreground">Sign in to your account</p>
+        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Email</label>
+            <input className="w-full px-3 py-2 border rounded-lg" placeholder="you@example.com" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Password</label>
+            <input type="password" className="w-full px-3 py-2 border rounded-lg" placeholder="Enter password" />
+          </div>
+          <button className="w-full py-2 bg-primary text-white rounded-lg">Sign In</button>
+        </div>
+        <AuthCardFooter>
+          <p className="text-xs text-muted-foreground">Powered by Tesserix</p>
+        </AuthCardFooter>
+      </AuthCardCentered>
+    </AuthLayoutCentered>
+  ),
 }

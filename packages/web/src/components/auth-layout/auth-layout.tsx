@@ -160,6 +160,68 @@ const AuthSocialButton = React.forwardRef<HTMLButtonElement, AuthSocialButtonPro
 )
 AuthSocialButton.displayName = "AuthSocialButton"
 
+const AuthLayoutCentered = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "min-h-screen flex items-center justify-center relative overflow-hidden bg-background",
+        className
+      )}
+      {...props}
+    />
+  )
+)
+AuthLayoutCentered.displayName = "AuthLayoutCentered"
+
+const AuthLayoutBackground = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { src?: string }>(
+  ({ className, src, children, ...props }, ref) => (
+    <div ref={ref} className={cn("fixed inset-0 -z-20", className)} {...props}>
+      {src && (
+        <img
+          src={src}
+          alt=""
+          className="w-full h-full object-cover"
+          aria-hidden="true"
+        />
+      )}
+      <div className="absolute inset-0 bg-background/80" />
+      <div className="absolute inset-0 bg-black/20" />
+      {children}
+    </div>
+  )
+)
+AuthLayoutBackground.displayName = "AuthLayoutBackground"
+
+const AuthCardCentered = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "w-full max-w-md px-4 py-8 mx-auto",
+        className
+      )}
+      {...props}
+    >
+      <div className="bg-card/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 border border-border p-6 space-y-5">
+        {props.children}
+      </div>
+    </div>
+  )
+)
+AuthCardCentered.displayName = "AuthCardCentered"
+
+const AuthCardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("text-center pt-4 border-t border-border", className)}
+      {...props}
+    />
+  )
+)
+AuthCardFooter.displayName = "AuthCardFooter"
+
 export {
   AuthLayout,
   AuthLayoutBrand,
@@ -171,4 +233,8 @@ export {
   AuthCardDivider,
   AuthSocialProviders,
   AuthSocialButton,
+  AuthLayoutCentered,
+  AuthLayoutBackground,
+  AuthCardCentered,
+  AuthCardFooter,
 }

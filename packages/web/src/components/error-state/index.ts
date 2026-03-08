@@ -1,2 +1,2 @@
-export { ErrorState } from './error-state'
-export type { ErrorStateProps } from './error-state'
+export { ErrorState, detectErrorType } from './error-state'
+export type { ErrorStateProps, ErrorType, ErrorStateAction } from './error-state'
