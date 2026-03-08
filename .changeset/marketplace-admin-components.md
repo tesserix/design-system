@@ -13,6 +13,8 @@ New components:
 - PhoneInput: Country code selector with auto-detection
 - AlertDialog: Typed alert/confirm dialogs (success/error/warning/info/confirm)
 - AuthLayoutCentered, AuthLayoutBackground, AuthCardCentered, AuthCardFooter: Centered auth layout
+- TenantSwitcher: Generic workspace/org/tenant switcher with search, grouping, defaults
+- SidebarSearch: Fuzzy search for sidebar navigation items with keyboard nav and highlighting
 
 Enhanced components:
 - Slider: Upgraded to multi-thumb with value:number[] / onValueChange API
@@ -24,3 +26,4 @@ Enhanced components:
 - Checkbox: Added label, description, onCheckedChange props
 - Switch: Added onCheckedChange prop
 - Collapsible: Added asChild support to CollapsibleTrigger
+- UserMenu: Added icon, variant (destructive), and separator support to actions

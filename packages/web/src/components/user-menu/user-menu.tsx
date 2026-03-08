@@ -12,7 +12,10 @@ import {
 
 export interface UserMenuAction {
   label: string
+  icon?: React.ReactNode
   onSelect?: () => void
+  variant?: "default" | "destructive"
+  separator?: boolean
 }
 
 export interface UserMenuProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
@@ -41,9 +44,16 @@ const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           {actions.map((action) => (
-            <DropdownMenuItem key={action.label} onClick={action.onSelect}>
-              {action.label}
-            </DropdownMenuItem>
+            <React.Fragment key={action.label}>
+              {action.separator && <DropdownMenuSeparator />}
+              <DropdownMenuItem
+                onClick={action.onSelect}
+                className={action.variant === "destructive" ? "text-destructive focus:text-destructive" : undefined}
+              >
+                {action.icon && <span className="mr-2 h-4 w-4 flex-shrink-0">{action.icon}</span>}
+                {action.label}
+              </DropdownMenuItem>
+            </React.Fragment>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
