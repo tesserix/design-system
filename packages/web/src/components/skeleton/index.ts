@@ -1,2 +1,2 @@
-export { Skeleton, DataTableSkeleton, DataGridSkeleton, PanelSkeleton } from './skeleton'
+export { Skeleton, DataTableSkeleton, TableSkeleton, DataGridSkeleton, PanelSkeleton } from './skeleton'
 export type { SkeletonProps } from './skeleton'
