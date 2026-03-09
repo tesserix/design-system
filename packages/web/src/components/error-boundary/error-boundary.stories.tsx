@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
-import { ChartComponentErrorBoundary, ComponentErrorBoundary, WidgetComponentErrorBoundary } from "./error-boundary"
+import { ChartErrorBoundary, ComponentErrorBoundary, WidgetErrorBoundary } from "./error-boundary"
 
 function BrokenComponent() {
   throw new Error("Test error")
@@ -41,9 +41,9 @@ export const WithoutError: Story = {
 export const WidgetError: Story = {
   render: () => (
     <div className="w-64 h-64 border rounded-lg">
-      <WidgetComponentErrorBoundary title="Sales Widget">
+      <WidgetErrorBoundary title="Sales Widget">
         <BrokenComponent />
-      </WidgetComponentErrorBoundary>
+      </WidgetErrorBoundary>
     </div>
   ),
 }
@@ -51,9 +51,9 @@ export const WidgetError: Story = {
 export const ChartError: Story = {
   render: () => (
     <div className="w-96 h-64">
-      <ChartComponentErrorBoundary>
+      <ChartErrorBoundary>
         <BrokenComponent />
-      </ChartComponentErrorBoundary>
+      </ChartErrorBoundary>
     </div>
   ),
 }
