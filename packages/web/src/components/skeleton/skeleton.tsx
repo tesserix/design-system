@@ -19,18 +19,18 @@ Skeleton.displayName = "Skeleton"
 
 interface DataSurfaceSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   rows?: number
-  columns?: number
 }
 
 const DataTableSkeleton = React.forwardRef<HTMLDivElement, DataSurfaceSkeletonProps>(
-  ({ className, rows = 5, columns = 4, ...props }, ref) => (
+  ({ className, rows = 5, ...props }, ref) => (
     <div ref={ref} className={cn("space-y-2 rounded-lg border p-3", className)} {...props}>
       <Skeleton className="h-8 w-full" />
       {Array.from({ length: rows }).map((_, index) => (
-        <div key={index} className={cn("grid gap-2", `grid-cols-${columns}`)}>
-          {Array.from({ length: columns }).map((_, colIndex) => (
-            <Skeleton key={colIndex} className="h-6 w-full" />
-          ))}
+        <div key={index} className="grid grid-cols-4 gap-2">
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
         </div>
       ))}
     </div>
@@ -68,7 +68,4 @@ const PanelSkeleton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTML
 )
 PanelSkeleton.displayName = "PanelSkeleton"
 
-/** @deprecated Use DataTableSkeleton instead */
-const TableSkeleton = DataTableSkeleton
-
-export { Skeleton, DataTableSkeleton, TableSkeleton, DataGridSkeleton, PanelSkeleton }
+export { Skeleton, DataTableSkeleton, DataGridSkeleton, PanelSkeleton }
