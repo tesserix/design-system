@@ -176,10 +176,12 @@ const dialogContentVariants = cva(
 
 interface DialogContentProps
   extends React.ComponentPropsWithoutRef<"div">,
-    VariantProps<typeof dialogContentVariants> {}
+    VariantProps<typeof dialogContentVariants> {
+  showCloseButton?: boolean
+}
 
 const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
-  ({ className, variant, size, children, onKeyDown, ...props }, ref) => {
+  ({ className, variant, size, showCloseButton = false, children, onKeyDown, ...props }, ref) => {
     const { open, onOpenChange, triggerRef, titleId, descriptionId } = useDialog()
     const contentRef = React.useRef<HTMLDivElement>(null)
     const previousFocusRef = React.useRef<HTMLElement | null>(null)
@@ -254,6 +256,9 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
           {...props}
         >
           {children}
+          {showCloseButton && (
+            <DialogClose className="absolute right-4 top-4" />
+          )}
         </div>
       </DialogPortal>
     )

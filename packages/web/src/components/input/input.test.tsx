@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Input } from './input'
+import { Input, FloatingInput } from './input'
 
 describe('Input', () => {
   it('renders input correctly', () => {
@@ -132,5 +132,51 @@ describe('Input', () => {
     await user.type(input, 'test')
 
     expect(input.value).toBe('read only')
+  })
+
+  it('shows error text when isInvalid with errorText', () => {
+    render(<Input isInvalid errorText="This field is required" />)
+    expect(screen.getByRole('alert')).toHaveTextContent('This field is required')
+  })
+
+  it('shows helper text', () => {
+    render(<Input helperText="Enter your email" />)
+    expect(screen.getByText('Enter your email')).toBeInTheDocument()
+  })
+
+  it('error text takes precedence over helper text', () => {
+    render(<Input isInvalid errorText="Error" helperText="Helper" />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Error')
+    expect(screen.queryByText('Helper')).not.toBeInTheDocument()
+  })
+
+  it('sets aria-invalid when isInvalid', () => {
+    render(<Input isInvalid errorText="Error" data-testid="input" />)
+    const input = screen.getByTestId('input')
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('applies valid styles when isValid', () => {
+    render(<Input isValid data-testid="input" />)
+    const input = screen.getByTestId('input')
+    expect(input).toHaveClass('border-green-500')
+  })
+
+  it('returns bare input when no validation props', () => {
+    const { container } = render(<Input data-testid="input" />)
+    expect(container.firstChild?.nodeName).toBe('INPUT')
+  })
+})
+
+describe('FloatingInput', () => {
+  it('renders with label', () => {
+    render(<FloatingInput label="Email" />)
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
+  })
+
+  it('forwards ref correctly', () => {
+    const ref = vi.fn()
+    render(<FloatingInput ref={ref} label="Name" />)
+    expect(ref).toHaveBeenCalled()
   })
 })

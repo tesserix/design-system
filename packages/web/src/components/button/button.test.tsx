@@ -110,4 +110,25 @@ describe('Button', () => {
     render(<Button ref={ref}>Button</Button>)
     expect(ref).toHaveBeenCalled()
   })
+
+  it('shows loading state with spinner', () => {
+    render(<Button isLoading>Submit</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toBeDisabled()
+    expect(button).toHaveAttribute('aria-busy', 'true')
+    expect(button).toHaveTextContent('Loading...')
+  })
+
+  it('shows custom loading text', () => {
+    render(<Button isLoading loadingText="Saving...">Submit</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toHaveTextContent('Saving...')
+  })
+
+  it('does not show loading state when isLoading is false', () => {
+    render(<Button isLoading={false}>Submit</Button>)
+    const button = screen.getByRole('button')
+    expect(button).not.toBeDisabled()
+    expect(button).toHaveTextContent('Submit')
+  })
 })

@@ -94,6 +94,12 @@
   --sidebar-ring: oklch(0.6959 0.1435 280.77);
 }
 
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 * {
   border-color: var(--border);
 }

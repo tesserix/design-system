@@ -36,7 +36,7 @@ describe('CardHeader', () => {
   it('applies default header styles', () => {
     render(<CardHeader data-testid="card-header">Header</CardHeader>)
     const header = screen.getByTestId('card-header')
-    expect(header).toHaveClass('flex', 'flex-col', 'space-y-1.5', 'p-6')
+    expect(header).toHaveClass('grid', 'p-6')
   })
 
   it('applies custom className to header', () => {
