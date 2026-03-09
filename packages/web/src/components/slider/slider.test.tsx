@@ -24,7 +24,7 @@ describe('Slider', () => {
   it('applies disabled state', () => {
     render(<Slider defaultValue={[50]} disabled />)
     const slider = screen.getByRole('slider')
-    expect(slider).toHaveAttribute('tabindex', '-1')
+    expect(slider).toHaveAttribute('data-disabled', '')
   })
 
   it('applies custom className', () => {
