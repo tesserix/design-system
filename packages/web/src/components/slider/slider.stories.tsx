@@ -35,13 +35,6 @@ const meta = {
         defaultValue: { summary: '1' },
       },
     },
-    defaultValue: {
-      control: 'number',
-      description: 'Default value',
-      table: {
-        type: { summary: 'number' },
-      },
-    },
     disabled: {
       control: 'boolean',
       description: 'Whether the slider is disabled',
@@ -69,17 +62,17 @@ export const Default: Story = {
         <div className="space-y-6">
           <div className="space-y-2">
             <Label>Volume</Label>
-            <Slider defaultValue={50} />
+            <Slider defaultValue={[50]} />
           </div>
 
           <div className="space-y-2">
             <Label>Brightness</Label>
-            <Slider defaultValue={75} />
+            <Slider defaultValue={[75]} />
           </div>
 
           <div className="space-y-2">
             <Label>Temperature (15-30°C)</Label>
-            <Slider min={15} max={30} defaultValue={22} />
+            <Slider min={15} max={30} defaultValue={[22]} />
           </div>
 
           <div className="rounded-lg border bg-muted/50 p-4">
@@ -87,18 +80,18 @@ export const Default: Story = {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Steps of 10</Label>
-                <Slider min={0} max={100} step={10} defaultValue={50} />
+                <Slider min={0} max={100} step={10} defaultValue={[50]} />
               </div>
               <div className="space-y-2">
                 <Label>Steps of 25</Label>
-                <Slider min={0} max={100} step={25} defaultValue={50} />
+                <Slider min={0} max={100} step={25} defaultValue={[50]} />
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>Disabled</Label>
-            <Slider defaultValue={50} disabled />
+            <Slider defaultValue={[50]} disabled />
           </div>
         </div>
       </div>
@@ -107,15 +100,15 @@ export const Default: Story = {
 }
 
 export const Basic: Story = {
-  render: () => <Slider defaultValue={50} className="w-[300px]" aria-label="Basic slider" />,
+  render: () => <Slider defaultValue={[50]} className="w-[300px]" aria-label="Basic slider" />,
 }
 
 export const WithSteps: Story = {
-  render: () => <Slider min={0} max={100} step={10} defaultValue={30} className="w-[300px]" aria-label="Slider with steps of 10" />,
+  render: () => <Slider min={0} max={100} step={10} defaultValue={[30]} className="w-[300px]" aria-label="Slider with steps of 10" />,
 }
 
 export const Disabled: Story = {
-  render: () => <Slider defaultValue={50} disabled className="w-[300px]" aria-label="Disabled slider" />,
+  render: () => <Slider defaultValue={[50]} disabled className="w-[300px]" aria-label="Disabled slider" />,
 }
 
 export const SmokeTest: Story = {
