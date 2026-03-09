@@ -7,7 +7,8 @@ Add marketplace-admin components and enhance existing ones
 New components:
 - CircularProgress: SVG-based circular progress indicator
 - StatusBadge: Status badge with domain-specific mappings (order, payment, user, product, etc.)
-- TableSkeleton, CardGridSkeleton, ListSkeleton, DashboardSkeleton, FormSkeleton: Skeleton loaders
+- TableSkeleton (alias for DataTableSkeleton), CardGridSkeleton, ListSkeleton, DashboardSkeleton, FormSkeleton: Skeleton loaders
+- DataTableSkeleton: Added columns prop
 - ResponsiveTable: Desktop table / mobile card responsive layout
 - ComponentErrorBoundary, WidgetErrorBoundary, ChartErrorBoundary: Error boundary wrappers
 - PhoneInput: Country code selector with auto-detection
