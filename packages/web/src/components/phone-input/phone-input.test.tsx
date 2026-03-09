@@ -10,7 +10,7 @@ describe('PhoneInput', () => {
   })
 
   it('displays selected country dial code', () => {
-    render(<PhoneInput value="" onChange={vi.fn()} />)
+    render(<PhoneInput value="" onChange={vi.fn()} countryCode="AU" />)
     expect(screen.getByText('+61')).toBeInTheDocument()
   })
 
