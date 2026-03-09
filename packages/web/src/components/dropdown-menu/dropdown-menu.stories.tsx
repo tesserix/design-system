@@ -1,7 +1,6 @@
 import * as React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { expect, within } from 'storybook/test'
-import userEvent from '@testing-library/user-event'
+import { expect } from 'storybook/test'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
