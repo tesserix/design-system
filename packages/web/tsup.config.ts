@@ -33,6 +33,10 @@ export default defineConfig({
     copyFileSync('src/themes/violet.css', join(themesDir, 'violet.css'))
     copyFileSync('src/themes/teal.css', join(themesDir, 'teal.css'))
 
+    // Copy Tailwind v4 source registration file
+    copyFileSync('src/tailwind-source.css', join('dist', 'tailwind-source.css'))
+
     console.log('✓ Theme files copied to dist/themes')
+    console.log('✓ Tailwind source registration copied to dist/')
   },
 })

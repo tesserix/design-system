@@ -20,7 +20,8 @@
     "./themes/amber": "./dist/themes/amber.css",
     "./themes/violet": "./dist/themes/violet.css",
     "./themes/teal": "./dist/themes/teal.css",
-    "./tailwind": "./tailwind.config.js"
+    "./tailwind": "./tailwind.config.js",
+    "./tailwind-source": "./dist/tailwind-source.css"
   },
   "files": [
     "dist",

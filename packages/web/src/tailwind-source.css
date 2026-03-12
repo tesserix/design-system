@@ -1,0 +1,15 @@
+/*
+ * Tailwind v4 source registration for @tesserix/web
+ *
+ * Import this file in your app's CSS to tell Tailwind to scan
+ * @tesserix/web component files for utility classes.
+ *
+ * Usage in consuming apps:
+ *   @import "@tesserix/web/tailwind-source";
+ *
+ * Tailwind v4 excludes node_modules from automatic content detection,
+ * so this file explicitly registers the package's source paths.
+ */
+@source "../components";
+@source "../hooks";
+@source "../utilities";
