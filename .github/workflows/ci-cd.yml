@@ -245,21 +245,15 @@ jobs:
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
           rm -f packages/web/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          cp ~/.npmrc .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$NPM_CONFIG_USERCONFIG"
+          cp "$NPM_CONFIG_USERCONFIG" .npmrc
           pnpm release
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to GitHub Packages
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
-          cat > ~/.npmrc << 'NPMRC'
-          @tesserix:registry=https://npm.pkg.github.com
-          //npm.pkg.github.com/:_authToken=${GHPR_TOKEN}
-          NPMRC
-          cp ~/.npmrc .npmrc
+          echo "@tesserix:registry=https://npm.pkg.github.com" > "$NPM_CONFIG_USERCONFIG"
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.ADMIN_TOKEN }}" >> "$NPM_CONFIG_USERCONFIG"
+          cp "$NPM_CONFIG_USERCONFIG" .npmrc
           pnpm changeset publish
-        env:
-          GHPR_TOKEN: ${{ secrets.ADMIN_TOKEN }}
 
