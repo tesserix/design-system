@@ -15,7 +15,7 @@ on:
         type: boolean
         default: false
       publish:
-        description: 'Publish to GitHub Packages'
+        description: 'Publish packages (npm + GitHub Packages)'
         required: false
         type: boolean
         default: false
@@ -210,7 +210,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: 'https://registry.npmjs.org'
           scope: '@tesserix'
 
       - name: Install dependencies
@@ -241,9 +241,18 @@ jobs:
           git commit -m "chore: version packages" || echo "No version changes"
           git push
 
-      - name: Publish packages
+      - name: Publish to npm (public registry)
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: pnpm release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to GitHub Packages
+        if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+        run: |
+          echo "@tesserix:registry=https://npm.pkg.github.com" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+          pnpm changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
 
