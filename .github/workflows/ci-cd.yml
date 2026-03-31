@@ -244,7 +244,9 @@ jobs:
       - name: Publish to npm (public registry)
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+          rm -f packages/web/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          cp ~/.npmrc .npmrc
           pnpm release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -252,9 +254,12 @@ jobs:
       - name: Publish to GitHub Packages
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
-          echo "@tesserix:registry=https://npm.pkg.github.com" > .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
+          cat > ~/.npmrc << 'NPMRC'
+          @tesserix:registry=https://npm.pkg.github.com
+          //npm.pkg.github.com/:_authToken=${GHPR_TOKEN}
+          NPMRC
+          cp ~/.npmrc .npmrc
           pnpm changeset publish
         env:
-          GITHUB_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          GHPR_TOKEN: ${{ secrets.ADMIN_TOKEN }}
 
