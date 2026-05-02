@@ -224,7 +224,9 @@ RUN addgroup -g 1001 -S nginxuser && adduser -u 1001 -S nginxuser -G nginxuser &
     chown -R nginxuser:nginxuser /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx
 USER 1001
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:8080/ || exit 1
+# No HEALTHCHECK — Kubernetes liveness/readiness probes (defined in the Helm chart)
+# are the source of truth. The base nginx:alpine image has no wget/curl, and adding
+# them just to satisfy a HEALTHCHECK that k8s ignores is wasted bytes.
 ```
 
 - [ ] **Step 2: Build it locally**
@@ -482,7 +484,7 @@ git commit -m "feat(tesserix-docs): add chart skeleton (Chart, values, helpers)"
 
 - [ ] **Step 1: Write `deployment.yaml`**
 
-Model after `charts/apps/mark8ly-admin/templates/deployment.yaml` but trim env vars and external secret references. Key elements:
+Model after `charts/apps/company/templates/deployment.yaml` (uses `_helpers.tpl` includes the same way our chart does — `mark8ly-admin/templates/deployment.yaml` is a flat-values style and would mislead). Trim the company env vars and probes you don't need. Key elements:
 
 ```yaml
 apiVersion: apps/v1
@@ -684,10 +686,13 @@ Expected: `0 chart(s) failed`.
 
 - [ ] **Step 3: `helm template` and inspect**
 
+Mirror what ArgoCD will render — the app manifests in Task 13 reference `../global-config-prod.yaml`, so include it in local renders too:
+
 ```bash
 helm template tesserix-docs charts/apps/tesserix-docs \
   -f charts/apps/tesserix-docs/values.yaml \
   -f charts/apps/tesserix-docs/values-prod.yaml \
+  -f charts/apps/global-config-prod.yaml \
   --namespace tesserix > /tmp/tesserix-docs-rendered.yaml
 grep -E "kind:|name:|host:" /tmp/tesserix-docs-rendered.yaml
 ```
@@ -782,6 +787,7 @@ helm lint charts/apps/tesserix-storybook -f charts/apps/tesserix-storybook/value
 helm template tesserix-storybook charts/apps/tesserix-storybook \
   -f charts/apps/tesserix-storybook/values.yaml \
   -f charts/apps/tesserix-storybook/values-prod.yaml \
+  -f charts/apps/global-config-prod.yaml \
   --namespace tesserix > /tmp/tesserix-storybook-rendered.yaml
 grep -E "host:|containerPort:" /tmp/tesserix-storybook-rendered.yaml
 ```
@@ -926,14 +932,20 @@ Expected: pods in `ImagePullBackOff` against the placeholder. **This is the expe
 
 This is a **manual GitHub UI step**, not a code change. The CI workflow will fail without it.
 
-- [ ] **Step 1: Confirm token exists**
+- [ ] **Step 1: Create a fresh classic PAT**
 
-Find the existing PAT used by `mark8ly`. Inspect mark8ly's repo settings or ask the team. The PAT needs `repo` scope on `tesserix/tesserix-k8s`.
+GitHub secret values are write-only — you cannot read mark8ly's existing PAT to copy it. Create a new one instead:
+
+1. GitHub → click profile avatar → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic).
+2. Note: `tesserix-k8s bot for design-system CI`.
+3. Expiration: 90 days (rotate calendar reminder).
+4. Scopes: tick **`repo`** only (full `repo` scope is required to push to a private repo via Actions).
+5. Generate, copy the token immediately.
 
 - [ ] **Step 2: Add to design-system repo**
 
 GitHub UI: `tesserix/design-system` → Settings → Secrets and variables → Actions → New repository secret.
-Name: `TESSERIX_K8S_BOT`. Value: the classic PAT.
+Name: `TESSERIX_K8S_BOT`. Value: the PAT from Step 1.
 
 - [ ] **Step 3: Verify**
 
@@ -941,7 +953,7 @@ Name: `TESSERIX_K8S_BOT`. Value: the classic PAT.
 gh secret list --repo tesserix/design-system | grep TESSERIX_K8S_BOT
 ```
 
-Expected: secret listed.
+Expected: secret listed (value not shown — that's fine).
 
 ---
 
@@ -1047,6 +1059,15 @@ jobs:
         id: sha
         run: echo "tag=sha-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
 
+      - name: Install yq
+        # ubuntu-latest does not ship yq. Pre-install so we never fall back
+        # to sed (a bare `tag:` regex is ambiguous if the values file ever
+        # gains another `tag:` key).
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Checkout tesserix-k8s
         uses: actions/checkout@v4
         with:
@@ -1065,11 +1086,7 @@ jobs:
             if [ ! -f "$f" ]; then
               echo "WARN: $f does not exist — skipping"; continue
             fi
-            if command -v yq >/dev/null; then
-              yq -i ".image.tag = \"${{ steps.sha.outputs.tag }}\"" "$f"
-            else
-              sed -i "s|^\(\s*tag:\s*\).*|\1\"${{ steps.sha.outputs.tag }}\"|" "$f"
-            fi
+            yq -i ".image.tag = \"${{ steps.sha.outputs.tag }}\"" "$f"
           done
 
       - name: Commit & push (with rebase retry)
@@ -1378,42 +1395,46 @@ gh repo edit tesserix/design-system --visibility private --accept-visibility-cha
 
 ## Phase 7 — tesserix-home footer (PR #5)
 
-### Task 24: Add footer Resources column
+### Task 24: Update footer Resources column to surface design-system links
 
 **Files:**
 - Modify: `components/common/footer.tsx` (in `tesserix-home` repo)
+
+The footer **already has** a `resources` column with Documentation, API Reference, and Status. This task replaces "API Reference" with "Design System" so both design-system surfaces are reachable from the homepage. (The Documentation entry already points at `docs.tesserix.app` and stays as-is.)
 
 - [ ] **Step 1: Switch to `tesserix-home` repo and branch**
 
 ```bash
 cd /Users/Mahesh.Sangawar/personal/tesserix-new/tesserix-home
 git checkout main && git pull
-git checkout -b feat/footer-design-system-links
+git checkout -b feat/footer-design-system-link
 ```
 
-- [ ] **Step 2: Read current footer to find the column structure**
+- [ ] **Step 2: Edit the existing `resources` array**
 
-```bash
-cat components/common/footer.tsx
-```
-
-Identify the existing column pattern (likely an array of `{ title, links: [...] }` or repeated JSX blocks).
-
-- [ ] **Step 3: Add Resources column**
-
-Add a "Resources" column with:
+In `components/common/footer.tsx`, locate the existing `footerNavigation.resources` array:
 
 ```tsx
-{
-  title: 'Resources',
-  links: [
-    { label: 'Documentation', href: 'https://docs.tesserix.app', external: true },
-    { label: 'Design System', href: 'https://ui.tesserix.app', external: true },
-  ],
-}
+resources: [
+  { name: "Documentation", href: "https://docs.tesserix.app" },
+  { name: "API Reference", href: "https://docs.tesserix.app/api" },
+  { name: "Status", href: "/status" },
+],
 ```
 
-If the existing pattern doesn't have an `external` flag, ensure outbound `<a>` elements get `target="_blank" rel="noreferrer"`. Match the file's existing style and rendering exactly.
+Replace it with:
+
+```tsx
+resources: [
+  { name: "Documentation", href: "https://docs.tesserix.app" },
+  { name: "Design System", href: "https://ui.tesserix.app" },
+  { name: "Status", href: "/status" },
+],
+```
+
+- [ ] **Step 3: Outbound link target — match existing style**
+
+The current footer renders all entries via `next/link` (`<Link href={item.href}>`), which navigates same-tab even for external URLs. The Documentation entry already lives there and works fine same-tab; keep that style for parity (don't sprinkle `target="_blank"` on just the new entry — that creates inconsistency). No code change beyond Step 2.
 
 - [ ] **Step 4: Run dev server and verify**
 
@@ -1421,16 +1442,16 @@ If the existing pattern doesn't have an `external` flag, ensure outbound `<a>` e
 pnpm dev   # or appropriate dev command for tesserix-home
 ```
 
-Open `http://localhost:<port>` (likely 3000 or 3001), scroll to footer, confirm the new column is visually balanced with siblings, and clicks open the right URLs in a new tab.
+Open `http://localhost:<port>`, scroll to footer's "Resources" column, confirm: Documentation, **Design System** (replaces API Reference), Status. Click "Design System" — should navigate to `https://ui.tesserix.app` (same-tab, matching the existing pattern).
 
 - [ ] **Step 5: Commit and PR**
 
 ```bash
 git add components/common/footer.tsx
-git commit -m "feat(footer): add resources column linking docs and design system"
-git push -u origin feat/footer-design-system-links
-gh pr create --title "feat: footer links to docs and design system" \
-  --body "Adds 'Resources' column to homepage footer with links to docs.tesserix.app and ui.tesserix.app."
+git commit -m "feat(footer): replace API Reference link with Design System (ui.tesserix.app)"
+git push -u origin feat/footer-design-system-link
+gh pr create --title "feat: footer link to design system storybook" \
+  --body "Replaces the existing 'API Reference' entry in the Resources column with 'Design System' → ui.tesserix.app. Documentation entry (docs.tesserix.app) is unchanged."
 ```
 
 - [ ] **Step 6: Public→merge→private**
@@ -1445,7 +1466,7 @@ CI deploys the new `company` chart image automatically.
 
 - [ ] **Step 7: Verify on prod**
 
-Open `https://tesserix.app`, scroll to footer, click both links, confirm they open the new k8s-served sites.
+Open `https://tesserix.app`, scroll to footer's Resources column. Click "Documentation" → confirm it lands on `https://docs.tesserix.app` (k8s-served — no Vercel headers). Click "Design System" → confirm it lands on `https://ui.tesserix.app`.
 
 ---
 
@@ -1459,7 +1480,7 @@ Run these at the end of Phase 4 and again after Phase 7:
 - [ ] A manual `gh workflow run deploy-k8s.yml --repo tesserix/design-system` produces: 2 new GHCR images, 1 bump commit on `tesserix-k8s/main`, ArgoCD `Synced + Healthy` within 5 min.
 - [ ] After Phase 5 Day 7: `vercel projects ls` shows neither project.
 - [ ] In `design-system`: `git grep -i vercel` shows nothing in source/CI (lockfile/changelog matches OK).
-- [ ] On `https://tesserix.app`, the footer shows "Documentation" and "Design System" entries that open the k8s-served URLs.
+- [ ] On `https://tesserix.app`, the footer's Resources column shows "Documentation" and "Design System" entries (replacing the previous "API Reference") and both open the k8s-served URLs.
 
 ---
 
