@@ -167,8 +167,9 @@ FROM base AS builder
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
-RUN pnpm --filter '@tesserix/web' --filter '@tesserix/native' \
-        --filter '@tesserix/icons' --filter '@tesserix/tokens' build
+RUN pnpm --filter '@tesserix/utils' --filter '@tesserix/hooks' \
+        --filter '@tesserix/tokens' --filter '@tesserix/web' \
+        --filter '@tesserix/native' --filter '@tesserix/icons' build
 RUN pnpm --filter @tesserix/storybook build-storybook
 
 FROM nginx:1.27-alpine AS runner
