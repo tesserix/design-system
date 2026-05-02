@@ -15,10 +15,10 @@ RUN pnpm --filter @tesserix/storybook build-storybook
 
 # ---- runner ----
 FROM nginx:1.27-alpine AS runner
-RUN apk add --no-cache ca-certificates && rm /etc/nginx/conf.d/default.conf
+RUN rm /etc/nginx/conf.d/default.conf
 COPY apps/storybook/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/apps/storybook/storybook-static /usr/share/nginx/html
 RUN addgroup -g 1001 -S nginxuser && adduser -u 1001 -S nginxuser -G nginxuser && \
-    chown -R nginxuser:nginxuser /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx
+    chown -R nginxuser:nginxuser /usr/share/nginx/html /var/cache/nginx /etc/nginx
 USER 1001
 EXPOSE 8080
