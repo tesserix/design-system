@@ -73,14 +73,14 @@ User has already removed the custom domains from the Vercel projects, so the pro
 - **Namespace:** `tesserix` (alongside `company` (= tesserix-home), `tesserix-auth-bff`, `tesserix-postgres`).
 - **ArgoCD project:** `platform`. App manifests at `argocd/prod/apps/global/`.
 - **Image registry:** push to `ghcr.io/tesserix/<name>`; cluster pulls via the in-region GAR remote-repo mirror at `asia-south1-docker.pkg.dev/tesseracthub-480811/ghcr-remote/tesserix/<name>`.
-- **Image tag:** per-commit SHA, format `main-<short12>`. Same convention as `mark8ly-*` and `company`.
+- **Image tag:** per-commit SHA, format `sha-<short12>`. Matches the mark8ly pattern (`mark8ly-admin/values.yaml` shows `tag: "sha-01eedcce3655"`). Note: `company/values.yaml` uses `main-<short>` instead — the platform has both conventions; we deliberately follow mark8ly because we're adopting mark8ly's commit-to-k8s-repo CI flow, not company's `kubectl set image` flow.
 - **Pull secret:** `ghcr-secret` already exists in the `tesserix` namespace.
 - **TLS:** rides existing wildcard `*.tesserix.app` cert at the Istio gateway.
 - **Cloudflare tunnel:** existing `*.tesserix.app` ingress entry covers both new hosts. No tunnel config change needed.
 
 ### Workload choice: plain Deployment (not Knative)
 
-Both apps run as standard `Deployment` + `Service`. Knative scale-to-zero would add cold-start latency for sites that get steady documentation traffic, with no real cost benefit at this scale. This matches the `company` chart's pattern (it migrated off Knative to KEDA-scaled Deployments).
+Both apps run as standard `Deployment` + `Service`. Knative scale-to-zero would add cold-start latency for sites that get steady documentation traffic, with no real cost benefit at this scale. This matches the `company` chart's workload kind (Deployment, not Knative Service) — but **only the workload kind**. The CI/deploy mechanics follow mark8ly, not company; see Section 6 for the explicit divergence.
 
 ### What's deliberately omitted from these charts
 
@@ -126,22 +126,19 @@ FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 WORKDIR /app
 
-FROM base AS deps
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY apps/docs/package.json apps/docs/
-COPY packages/ packages/
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
-
+# ---- builder ----
+# Single-stage install. pnpm's frozen lockfile validates every workspace
+# package.json against pnpm-lock.yaml, so we MUST copy the whole tree
+# (or at least every workspace's package.json) before installing.
+# COPY . . is simplest and the .dockerignore keeps it cheap.
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages ./packages
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --offline
+    pnpm install --frozen-lockfile
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @tesserix/docs build
 
+# ---- runner ----
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000
@@ -153,6 +150,8 @@ USER nextjs
 EXPOSE 3000
 CMD ["node", "apps/docs/server.js"]
 ```
+
+We trade the multi-stage `deps` cache layer for simpler correctness. The pnpm BuildKit cache mount (`type=cache,id=pnpm`) preserves the package store across builds, which recovers most of the speed benefit. If install time becomes a problem we can revisit with the `pnpm fetch` + selective workspace-manifest copy pattern.
 
 ### `apps/storybook/Dockerfile` (static → nginx)
 
@@ -171,8 +170,8 @@ RUN pnpm --filter '@tesserix/web' --filter '@tesserix/native' \
 RUN pnpm --filter @tesserix/storybook build-storybook
 
 FROM nginx:1.27-alpine AS runner
-RUN apk add --no-cache ca-certificates
-COPY apps/storybook/nginx.conf /etc/nginx/conf.d/default.conf
+RUN apk add --no-cache ca-certificates && rm /etc/nginx/conf.d/default.conf
+COPY apps/storybook/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/apps/storybook/storybook-static /usr/share/nginx/html
 RUN addgroup -g 1001 -S nginxuser && adduser -u 1001 -S nginxuser -G nginxuser && \
     chown -R nginxuser:nginxuser /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx
@@ -183,12 +182,53 @@ HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:8080/ || 
 
 ### `apps/storybook/nginx.conf`
 
-Provides:
+Concrete config (mounted at `/etc/nginx/conf.d/default.conf` by the Dockerfile). The non-root user (UID 1001) means the pid file must move out of `/var/run`, and we also need to override the master config's `pid` directive — which is why we ship a full `nginx.conf` plus a stripped `default.conf`. For simplicity, the Dockerfile actually replaces both:
 
-- Listen on `:8080` (non-root container).
-- `try_files` SPA fallback (Storybook iframe routes resolve cleanly).
-- Long cache for `/assets/*` (immutable static).
-- Same security headers the Vercel `vercel-ui.json` currently sets: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `X-DNS-Prefetch-Control`, `Strict-Transport-Security`, `Permissions-Policy`.
+`apps/storybook/nginx.conf` (replaces the master config at `/etc/nginx/nginx.conf`):
+
+```nginx
+worker_processes auto;
+error_log /dev/stderr notice;
+pid /tmp/nginx.pid;
+events { worker_connections 1024; }
+http {
+  include       /etc/nginx/mime.types;
+  default_type  application/octet-stream;
+  sendfile      on;
+  access_log    /dev/stdout;
+
+  client_body_temp_path /tmp/client_body;
+  proxy_temp_path       /tmp/proxy;
+  fastcgi_temp_path     /tmp/fastcgi;
+  uwsgi_temp_path       /tmp/uwsgi;
+  scgi_temp_path        /tmp/scgi;
+
+  server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    add_header X-Frame-Options          "SAMEORIGIN" always;
+    add_header X-Content-Type-Options   "nosniff" always;
+    add_header Referrer-Policy          "origin-when-cross-origin" always;
+    add_header X-DNS-Prefetch-Control   "on" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header Permissions-Policy       "camera=(), microphone=(), geolocation=()" always;
+
+    location /assets/ {
+      add_header Cache-Control "public, max-age=31536000, immutable";
+      try_files $uri =404;
+    }
+
+    location / {
+      try_files $uri $uri/ /index.html;
+    }
+  }
+}
+```
+
+The Dockerfile's `COPY` line becomes `COPY apps/storybook/nginx.conf /etc/nginx/nginx.conf` (replacing the master config — Section 4 Dockerfile snippet is updated accordingly during implementation).
 
 ### Build-time auth
 
@@ -254,10 +294,13 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities: { drop: ["ALL"] }
 
-# Next.js writes prerender cache; emptyDirs satisfy readOnlyRootFilesystem
+# Next.js writes prerender cache; emptyDirs satisfy readOnlyRootFilesystem.
+# Per-chart deployment.yaml emits the matching volume + volumeMount pairs:
+#   /tmp                   <- tmp emptyDir
+#   /app/apps/docs/.next/cache <- cache emptyDir (Next.js writable cache)
 volumes:
-  tmp:   { enabled: true }
-  cache: { enabled: true }
+  tmp:   { enabled: true, mountPath: /tmp }
+  cache: { enabled: true, mountPath: /app/apps/docs/.next/cache }
 
 pdb:
   enabled: false   # overridden true in values-prod.yaml
@@ -271,7 +314,9 @@ pdb:
   minAvailable: 1
 ```
 
-`tesserix-storybook/values.yaml` mirrors the above with: `targetPort: 8080`, `host: ui.tesserix.app`, single emptyDir for `/var/cache/nginx`, lower memory limit (`256Mi`).
+`tesserix-storybook/values.yaml` mirrors the above with: `targetPort: 8080`, `host: ui.tesserix.app`, lower memory limit (`256Mi`), and emptyDirs at `/tmp` (for nginx pid + temp paths) and `/var/cache/nginx`. No `cache` Next.js mount.
+
+**Important divergences from `company/values.yaml` to avoid copy-paste errors:** do **not** carry over `ingress.className: kong` (we route via Istio VirtualService, not Kong) or `ingress.tls` (the gateway holds the wildcard cert). The `common` library chart at `charts/apps/common/` provides only `_helpers.tpl` and `_gcp-secrets.tpl` — it does **not** ship a generic deployment template, so each chart authors `deployment.yaml`, `service.yaml`, `serviceaccount.yaml`, `virtualservice.yaml`, `network-policy.yaml`, `pdb.yaml` from scratch (using helpers).
 
 ### `virtualservice.yaml` (single-route, no auth carve-outs)
 
@@ -282,7 +327,7 @@ metadata:
   name: {{ include "tesserix-docs.fullname" . }}-vs
   labels: {{- include "tesserix-docs.labels" . | nindent 4 }}
 spec:
-  gateways: [istio-ingress/tesseract-gateway]
+  gateways: [{{ .Values.ingress.gateway | quote }}]
   hosts: [{{ (index .Values.ingress.hosts 0).host | quote }}]
   http:
     - route:
@@ -352,7 +397,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-k8s-${{ github.ref }}
+  group: deploy-k8s-main   # workflow only runs on main + manual; one literal group serializes both
   cancel-in-progress: false
 
 env:
@@ -382,7 +427,7 @@ jobs:
 
       - name: Compute tag
         id: meta
-        run: echo "tag=main-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
+        run: echo "tag=sha-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -423,7 +468,7 @@ jobs:
     steps:
       - name: Compute short SHA
         id: sha
-        run: echo "tag=main-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
+        run: echo "tag=sha-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
 
       - name: Checkout tesserix-k8s
         uses: actions/checkout@v4
@@ -434,16 +479,21 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Bump image tags via yq
+      - name: Bump image tags
         working-directory: tesserix-k8s
         run: |
           set -euo pipefail
+          # ubuntu-latest does not ship yq; fall back to sed (mark8ly pattern).
           for svc in tesserix-docs tesserix-storybook; do
             f="charts/apps/$svc/values.yaml"
             if [ ! -f "$f" ]; then
               echo "WARN: $f does not exist — skipping"; continue
             fi
-            yq -i ".image.tag = \"${{ steps.sha.outputs.tag }}\"" "$f"
+            if command -v yq >/dev/null; then
+              yq -i ".image.tag = \"${{ steps.sha.outputs.tag }}\"" "$f"
+            else
+              sed -i "s|^\(\s*tag:\s*\).*|\1\"${{ steps.sha.outputs.tag }}\"|" "$f"
+            fi
           done
 
       - name: Commit & push (with rebase retry)
@@ -471,7 +521,7 @@ jobs:
 ### Required secrets
 
 - `GITHUB_TOKEN` — built-in, used for GHCR push.
-- `TESSERIX_K8S_BOT` — classic PAT with `repo` scope on `tesserix/tesserix-k8s`. Already exists at the org level (mark8ly's `bump-k8s` job uses it).
+- `TESSERIX_K8S_BOT` — classic PAT with `repo` scope on `tesserix/tesserix-k8s`. **Must be set at the `design-system` repo level**, not assumed from org. On GitHub Free private repos org-level secrets aren't always available; mark8ly works because it has its own per-repo copy. Confirm presence in `design-system` settings (Secrets and variables → Actions → Repository secrets) before merging the Phase 3 PR — otherwise the `bump-k8s` job fails with `fatal: could not read Username for 'https://github.com'`.
 
 ### Behaviors
 
@@ -506,12 +556,13 @@ Single commit to `design-system`: add `output: 'standalone'` to `apps/docs/next.
 4. Add `argocd/prod/apps/global/tesserix-storybook.yaml`.
 5. Append both to `argocd/prod/apps/global/kustomization.yaml`.
 6. `image.tag` in both `values.yaml` is the placeholder `"main-bootstrap"` — Phase 3's first CI run rewrites it.
-7. Public→build→private cycle on merge. ArgoCD will show both apps as `Missing` / `OutOfSync` until Phase 3 lands.
+7. Public→build→private cycle on merge.
+8. **Expected post-merge state:** ArgoCD shows both apps `Synced` (manifests applied) but `Degraded` because pods will be in `ImagePullBackOff` against the placeholder tag. This is correct — Phase 3 will replace the placeholder.
 
 ### Phase 3 — `design-system`: CI wiring (PR #3)
 
-1. Add `.github/workflows/deploy-k8s.yml`.
-2. Confirm org secret `TESSERIX_K8S_BOT` resolves in this workflow (it must — mark8ly already uses it).
+1. **Hard precondition:** add `TESSERIX_K8S_BOT` repository secret to the `design-system` repo (Settings → Secrets and variables → Actions). Classic PAT with `repo` scope on `tesserix/tesserix-k8s`. Same shape as the secret on `mark8ly`. Without this, the merge will trigger a failing run.
+2. Add `.github/workflows/deploy-k8s.yml`.
 3. Public→build→private cycle on merge. The merge commit triggers:
    - matrix builds two images, pushes to GHCR,
    - `bump-k8s` writes per-commit tags into `tesserix-k8s/charts/apps/tesserix-{docs,storybook}/values.yaml`, commits and pushes to `tesserix-k8s/main`,
@@ -530,7 +581,8 @@ Single commit to `design-system`: add `output: 'standalone'` to `apps/docs/next.
 
 1. Cloudflare DNS audit:
    - List records for `docs.tesserix.app` and `ui.tesserix.app`.
-   - If any per-host CNAMEs remain pointing at Vercel, **delete them** so the existing `*.tesserix.app` wildcard tunnel handles routing.
+   - If any per-host CNAMEs remain pointing at Vercel, **delete them**.
+   - **Desired final DNS state:** neither `docs.tesserix.app` nor `ui.tesserix.app` has a per-host record. Both resolve via the existing `*.tesserix.app` wildcard CNAME → Cloudflare tunnel → Istio.
 2. External validation:
    ```
    curl -I https://docs.tesserix.app    # expect 200, served from cluster
@@ -554,7 +606,7 @@ Single commit to `design-system`: add `output: 'standalone'` to `apps/docs/next.
 
 ### Phase 7 — `tesserix-home` footer entries (PR #5)
 
-1. Edit `components/common/footer.tsx` in the `tesserix-home` repo:
+1. Edit `components/common/footer.tsx` in the `tesserix-home` repo (verified to exist at `/Users/Mahesh.Sangawar/personal/tesserix-new/tesserix-home/components/common/footer.tsx` as of 2026-05-02):
    - Add a "Resources" (or "Developers") column.
    - Two entries: **Documentation** → `https://docs.tesserix.app`, **Design System** → `https://ui.tesserix.app`.
    - Outbound styling consistent with existing footer links. `target="_blank" rel="noreferrer"` since they leave the homepage domain.
@@ -565,20 +617,25 @@ This phase can run in parallel with Phases 5–6 (it doesn't depend on Vercel de
 
 ## 8. Rollback plan
 
+The ArgoCD app uses `automated: { prune: true, selfHeal: true }` and the source-of-truth for `image.tag` is `values.yaml` in `tesserix-k8s`. **`kubectl rollout undo` will be reverted by the next ArgoCD sync** (~3 min). All rollbacks must therefore happen at the git layer.
+
 | Failure | Rollback |
 |---|---|
-| Pod crashloop or bad image rolled out | `kubectl -n tesserix rollout undo deployment/tesserix-{docs,storybook}` |
-| Bad chart change in `tesserix-k8s` | `git revert` the offending commit on `tesserix-k8s/main`, push; ArgoCD reconciles to prior state |
-| Total cluster failure during Phase 4–5 window (≤ 7 days) | Vercel projects still exist (Git disconnected, runtime alive). Re-add `docs.tesserix.app` / `ui.tesserix.app` custom domains in Vercel; if Cloudflare wildcard interferes, add per-host CNAMEs pointing at Vercel. Realistic restoration: 30–60 min. |
+| Pod crashloop, bad image, or any regression after a CI bump | On `tesserix-k8s/main`, `git revert <bump-commit-sha>` and push. ArgoCD reconciles to the prior tag within one sync interval. (Optionally also `kubectl -n tesserix rollout undo deployment/tesserix-{docs,storybook}` to skip waiting for the sync — but the git revert is the durable fix.) |
+| Bad chart structure change in `tesserix-k8s` | `git revert` the chart commit on `tesserix-k8s/main`. Same mechanism. |
+| Total cluster failure during Phase 4–5 window (≤ 7 days) | Vercel projects still exist (Git disconnected, runtime alive). Re-add `docs.tesserix.app` / `ui.tesserix.app` custom domains in Vercel; the per-host CNAMEs Vercel creates will override the `*.tesserix.app` wildcard. Realistic restoration: 30–60 min. |
 | Total cluster failure after Day 7 | Vercel deleted, no fallback. Recover the cluster — by then we've had a week of soak time. |
 
 ## 9. Acceptance criteria
 
-- `https://docs.tesserix.app` and `https://ui.tesserix.app` both serve from cluster pods (verifiable via response headers and source).
-- A push to `design-system/main` results in: new image at `ghcr.io/tesserix/tesserix-{docs,storybook}:main-<sha>`, automatic update of `tesserix-k8s/charts/apps/tesserix-{docs,storybook}/values.yaml`, and a clean rolling deploy in cluster within ~5 minutes.
-- No Vercel deployment is reachable for either site (Day 7+).
-- No remaining Vercel references in `design-system` (`vercel-ui.json`, `vercel-docs.json`, `deploy:*` scripts all removed; `DEPLOYMENT.md` rewritten).
-- `tesserix.app` footer surfaces both new sites under a Resources/Developers column.
+Each criterion has a concrete observable signal so completion is unambiguous:
+
+- **Cluster-served:** `curl -sI https://docs.tesserix.app` and `curl -sI https://ui.tesserix.app` return `200`, and **neither response contains a `server: Vercel` or `x-vercel-id` header**. Pod logs (`kubectl -n tesserix logs deploy/tesserix-docs`, same for storybook) show requests landing.
+- **Pods healthy:** `kubectl -n tesserix get deploy tesserix-docs tesserix-storybook` shows `2/2 READY` for each.
+- **CI roundtrip:** a manual `workflow_dispatch` of `deploy-k8s.yml` results in (a) two new images at `ghcr.io/tesserix/tesserix-{docs,storybook}:sha-<short12>`, (b) a `chore: bump design-system images to sha-<short12>` commit on `tesserix-k8s/main` updating both chart `values.yaml` files, (c) ArgoCD apps reach `Synced + Healthy` within 5 minutes of the bump commit.
+- **Vercel decommissioned:** by Day 7+, both Vercel projects are deleted; `vercel projects ls` shows neither.
+- **No Vercel residue in `design-system`:** `git grep -i vercel` returns no matches except in historical CHANGELOGs.
+- **Homepage links:** browsing `https://tesserix.app`, the footer surfaces "Documentation" → `https://docs.tesserix.app` and "Design System" → `https://ui.tesserix.app` under a Resources/Developers column. Both links open the new k8s-served sites.
 
 ## 10. Out of scope
 
