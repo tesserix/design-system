@@ -95,6 +95,8 @@ Compared to `charts/apps/company/`, both new charts skip:
 
 Charts include only: `_helpers.tpl`, `deployment.yaml`, `service.yaml`, `serviceaccount.yaml`, `virtualservice.yaml`, `network-policy.yaml`, `pdb.yaml` (prod, conditional).
 
+`network-policy.yaml` intent: default-deny on the namespace already covers everything; the chart's NP only **allows ingress from `istio-system` to the pod's container port** (3000 for docs, 8080 for storybook). No egress allows beyond DNS — these pods make no outbound calls.
+
 ## 4. Build artifacts (Dockerfiles)
 
 ### Prerequisite source change
@@ -228,7 +230,7 @@ http {
 }
 ```
 
-The Dockerfile's `COPY` line becomes `COPY apps/storybook/nginx.conf /etc/nginx/nginx.conf` (replacing the master config — Section 4 Dockerfile snippet is updated accordingly during implementation).
+The Dockerfile in this section already reflects the final state: it copies our config to `/etc/nginx/nginx.conf` and removes the stub at `/etc/nginx/conf.d/default.conf`.
 
 ### Build-time auth
 
@@ -314,7 +316,33 @@ pdb:
   minAvailable: 1
 ```
 
-`tesserix-storybook/values.yaml` mirrors the above with: `targetPort: 8080`, `host: ui.tesserix.app`, lower memory limit (`256Mi`), and emptyDirs at `/tmp` (for nginx pid + temp paths) and `/var/cache/nginx`. No `cache` Next.js mount.
+`tesserix-storybook/values.yaml` mirrors the above. Storybook-specific deltas:
+
+```yaml
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  gateway: istio-ingress/tesseract-gateway
+  hosts:
+    - host: ui.tesserix.app
+      paths: [{ path: /, pathType: Prefix }]
+
+resources:
+  requests: { cpu: 50m,  memory: 64Mi }
+  limits:   { cpu: 200m, memory: 256Mi }
+
+# nginx writes pid + temp paths to /tmp and caches to /var/cache/nginx.
+# Both must be writable when readOnlyRootFilesystem is true.
+volumes:
+  tmp:        { enabled: true, mountPath: /tmp }
+  nginxCache: { enabled: true, mountPath: /var/cache/nginx }
+```
+
+(No `cache` mount for Next.js — storybook is fully static.)
 
 **Important divergences from `company/values.yaml` to avoid copy-paste errors:** do **not** carry over `ingress.className: kong` (we route via Istio VirtualService, not Kong) or `ingress.tls` (the gateway holds the wildcard cert). The `common` library chart at `charts/apps/common/` provides only `_helpers.tpl` and `_gcp-secrets.tpl` — it does **not** ship a generic deployment template, so each chart authors `deployment.yaml`, `service.yaml`, `serviceaccount.yaml`, `virtualservice.yaml`, `network-policy.yaml`, `pdb.yaml` from scratch (using helpers).
 
