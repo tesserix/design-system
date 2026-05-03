@@ -1,0 +1,133 @@
+name: Deploy to k8s
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/docs/**'
+      - 'apps/storybook/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+      - '.github/workflows/deploy-k8s.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-k8s-main
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  images:
+    name: Build & push images
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: tesserix-docs
+            dockerfile: apps/docs/Dockerfile
+          - app: tesserix-storybook
+            dockerfile: apps/storybook/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute tag
+        id: meta
+        run: echo "tag=sha-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:${{ steps.meta.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:latest
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,scope=${{ matrix.app }},mode=max
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app }}:${{ steps.meta.outputs.tag }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+
+  bump-k8s:
+    name: Bump tesserix-k8s image tags
+    needs: [images]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute short SHA
+        id: sha
+        run: echo "tag=sha-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Checkout tesserix-k8s
+        uses: actions/checkout@v4
+        with:
+          repository: tesserix/tesserix-k8s
+          token: ${{ secrets.TESSERIX_K8S_BOT }}
+          path: tesserix-k8s
+          ref: main
+          fetch-depth: 0
+
+      - name: Bump image tags
+        working-directory: tesserix-k8s
+        run: |
+          set -euo pipefail
+          for svc in tesserix-docs tesserix-storybook; do
+            f="charts/apps/$svc/values.yaml"
+            if [ ! -f "$f" ]; then
+              echo "WARN: $f does not exist — skipping"; continue
+            fi
+            yq -i ".image.tag = \"${{ steps.sha.outputs.tag }}\"" "$f"
+          done
+
+      - name: Commit & push (with rebase retry)
+        working-directory: tesserix-k8s
+        run: |
+          set -euo pipefail
+          git config user.name "tesserix-bot"
+          git config user.email "tesserix-bot@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No tag changes — nothing to commit"; exit 0
+          fi
+          git add charts/apps/tesserix-docs/values.yaml \
+                  charts/apps/tesserix-storybook/values.yaml
+          git commit -m "chore: bump design-system images to ${{ steps.sha.outputs.tag }}"
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              echo "Pushed on attempt $attempt"; exit 0
+            fi
+            echo "Push failed (attempt $attempt) — rebasing"
+            git pull --rebase origin main
+          done
+          echo "Push failed after 3 rebase attempts"; exit 1
