@@ -9,21 +9,11 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      deploy:
-        description: 'Deploy to Vercel'
-        required: false
-        type: boolean
-        default: false
       publish:
         description: 'Publish packages (npm + GitHub Packages)'
         required: false
         type: boolean
         default: false
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID_UI: ${{ secrets.VERCEL_PROJECT_ID_UI }}
-  VERCEL_PROJECT_ID_DOCS: ${{ secrets.VERCEL_PROJECT_ID_DOCS }}
 
 jobs:
   build:
@@ -106,82 +96,6 @@ jobs:
           onlyChanged: true
           autoAcceptChanges: main
           exitZeroOnChanges: true
-
-  deploy-ui:
-    name: Deploy Storybook (UI)
-    runs-on: ubuntu-latest
-    needs: chromatic
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && inputs.deploy == true)
-    environment:
-      name: production-ui
-      url: https://ui.tesserix.app
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install Vercel CLI
-        run: pnpm add -g vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_UI }}
-
-      - name: Deploy to Vercel
-        run: vercel deploy --prod --yes --local-config vercel-ui.json --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_UI }}
-
-  deploy-docs:
-    name: Deploy Documentation
-    runs-on: ubuntu-latest
-    needs: chromatic
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && inputs.deploy == true)
-    environment:
-      name: production-docs
-      url: https://docs.tesserix.app
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install Vercel CLI
-        run: pnpm add -g vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DOCS }}
-
-      - name: Deploy to Vercel
-        run: vercel deploy --prod --yes --local-config vercel-docs.json --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DOCS }}
 
   changeset:
     name: Version and Publish Packages
