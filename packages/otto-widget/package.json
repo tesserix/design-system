@@ -1,6 +1,6 @@
 {
   "name": "@tesserix/otto-widget",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Otto — reusable real-time support-chat widget (client + staff UIs).",
   "license": "UNLICENSED",
   "repository": {
@@ -12,7 +12,9 @@
     "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
-  "sideEffects": ["./src/styles/*.css"],
+  "sideEffects": [
+    "./src/styles/*.css"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./styles/*.css": "./src/styles/*.css"
