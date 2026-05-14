@@ -18,6 +18,13 @@ export interface UseOttoChannelOptions {
   ticketUrl: string | null | undefined;
   /** Called for every envelope the server sends. */
   onEvent?: (env: WsEnvelope) => void;
+  /** Called every time the socket transitions to OPEN — initial connect
+   *  and every reconnect. The Otto WS handler has no replay-on-subscribe
+   *  semantics, so any event the server broadcast between conversation
+   *  creation and the socket actually opening is dropped on the floor.
+   *  Hosts use this hook to backfill conversation + message state from
+   *  REST so the UI converges to ground truth on every (re)connect. */
+  onOpen?: () => void;
   /** Exponential backoff cap in milliseconds (default 10s). */
   maxBackoffMs?: number;
 }
@@ -31,6 +38,7 @@ export function useOttoChannel({
   url,
   ticketUrl,
   onEvent,
+  onOpen,
   maxBackoffMs = 10_000,
 }: UseOttoChannelOptions) {
   const [state, setState] = useState<ChannelState>("idle");
@@ -38,6 +46,8 @@ export function useOttoChannel({
   const shouldRunRef = useRef(true);
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
+  const onOpenRef = useRef(onOpen);
+  onOpenRef.current = onOpen;
 
   useEffect(() => {
     if (!url || !ticketUrl) {
@@ -82,6 +92,14 @@ export function useOttoChannel({
       ws.onopen = () => {
         attempt = 0;
         setState("open");
+        // Fire AFTER state flips so consumer's onOpen sees an "open"
+        // channel if it inspects state. Wrapped in try/catch so a
+        // throwing host callback can't tear down the socket.
+        try {
+          onOpenRef.current?.();
+        } catch {
+          /* host bug — never let it kill the WS lifecycle */
+        }
       };
       ws.onmessage = (ev) => {
         try {

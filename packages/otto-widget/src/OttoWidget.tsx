@@ -233,11 +233,7 @@ export function OttoWidget({
   const handleEvent = useCallback((env: WsEnvelope) => {
     if (env.type === "otto.message.created") {
       const payload = env.payload as { message: Message };
-      setMessages((prev) =>
-        prev.some((m) => m.id === payload.message.id)
-          ? prev
-          : [...prev, payload.message],
-      );
+      setMessages((prev) => mergeMessages(prev, [payload.message]));
     } else if (
       env.type === "otto.conversation.updated" ||
       env.type === "otto.conversation.closed"
@@ -247,11 +243,40 @@ export function OttoWidget({
     }
   }, []);
 
+  // backfill — re-reads conversation + messages from REST and reconciles
+  // local state. Called on every WebSocket (re)connect and whenever the
+  // queue-poll observes a status transition. This is the single safety
+  // net that closes the well-known race between conversation creation
+  // and the WS actually opening: the Otto server has no replay-on-
+  // subscribe, so any envelope broadcast in that window (typically the
+  // first AI/MCP reply + the pending→active status flip) is lost.
+  // Without this the customer sees "Connecting to support…" until they
+  // refresh, even though the server has already responded.
+  const backfill = useCallback(
+    async (id: string) => {
+      try {
+        const [fresh, list] = await Promise.all([
+          api.getConversation(id),
+          api.listMessages(id),
+        ]);
+        setConversation(fresh.conversation);
+        setMessages((prev) => mergeMessages(prev, list.messages));
+      } catch {
+        /* transient — next reconnect or queue tick will retry */
+      }
+    },
+    [api],
+  );
+
   const wsTicketUrl = conversation ? ticketUrl(conversation.id) : null;
+  const activeConversationId = conversation?.id;
   useOttoChannel({
     url: wsUrl,
     ticketUrl: wsTicketUrl,
     onEvent: handleEvent,
+    onOpen: () => {
+      if (activeConversationId) void backfill(activeConversationId);
+    },
   });
 
   // Resume on mount — if the otto_session cookie points at an open
@@ -300,16 +325,13 @@ export function OttoWidget({
         if (cancelled) return;
         setQueue(snap);
         // Status flipped server-side (AI replied → active, staff
-        // accepted → active, or sweeper closed it). Re-fetch the
-        // conversation so local state matches and the queue overlay
-        // disappears even if the WebSocket update event was missed.
+        // accepted → active, or sweeper closed it). Backfill both
+        // conversation AND messages — the AI reply that triggered the
+        // transition is itself a message envelope that the WS may have
+        // missed, so refetching conversation alone leaves the customer
+        // staring at an empty thread until they refresh.
         if (snap.status && snap.status !== "pending") {
-          try {
-            const fresh = await api.getConversation(id);
-            if (!cancelled) setConversation(fresh.conversation);
-          } catch {
-            /* ignore — next tick will retry */
-          }
+          if (!cancelled) await backfill(id);
         }
       } catch {
         /* transient error — keep previous snapshot */
@@ -321,7 +343,7 @@ export function OttoWidget({
       cancelled = true;
       window.clearInterval(handle);
     };
-  }, [api, conversation]);
+  }, [api, conversation, backfill]);
 
   // If the conversation transitions to closed while we're in the chat
   // phase, surface the feedback survey (unless the customer has
@@ -514,11 +536,7 @@ export function OttoWidget({
           await startConversationNow({ otpCode: undefined, message: text });
         } else {
           const res = await api.sendMessage(conversation.id, text);
-          setMessages((prev) =>
-            prev.some((m) => m.id === res.message.id)
-              ? prev
-              : [...prev, res.message],
-          );
+          setMessages((prev) => mergeMessages(prev, [res.message]));
           setChatDraft("");
         }
       } catch (err) {
@@ -1204,6 +1222,26 @@ function FeedbackStars({
       </div>
     </div>
   );
+}
+
+// mergeMessages reconciles a (possibly stale) local list with a fresh
+// server list. The server list is canonical, but we preserve any local
+// messages whose ids haven't reached the server snapshot yet (e.g. a
+// just-sent customer message whose REST response races the listMessages
+// refetch). Result is sorted by created_at so backfill, WS events, and
+// optimistic sends all interleave in chronological order regardless of
+// which path landed them.
+function mergeMessages(prev: Message[], incoming: Message[]): Message[] {
+  if (incoming.length === 0) return prev;
+  const byId = new Map<string, Message>();
+  for (const m of prev) byId.set(m.id, m);
+  for (const m of incoming) byId.set(m.id, m);
+  const merged = Array.from(byId.values());
+  merged.sort((a, b) => {
+    if (a.created_at === b.created_at) return a.id.localeCompare(b.id);
+    return a.created_at < b.created_at ? -1 : 1;
+  });
+  return merged;
 }
 
 // formatWait turns "180" into "3 min" and "45" into "<1 min". Keeps
