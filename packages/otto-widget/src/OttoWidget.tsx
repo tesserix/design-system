@@ -197,7 +197,37 @@ export function OttoWidget({
     customerName?.trim() && customerEmail?.trim(),
   );
 
-  const [open, setOpen] = useState(false);
+  // The launcher's open/closed state is persisted to sessionStorage so an
+  // accidental refresh mid-conversation doesn't collapse the widget back
+  // to the launcher pill — the customer keeps the chat they were in. We
+  // deliberately use sessionStorage (not localStorage) so the widget
+  // doesn't auto-open in a fresh browser session the next day; the
+  // intent is "survive a refresh," not "remember a preference forever."
+  // Keyed by tenantId so two products mounted on the same host (rare,
+  // but the widget is host-agnostic) don't clobber each other's state.
+  const openStorageKey = `otto-widget:open:${tenantId ?? "default"}`;
+  const [open, setOpen] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.sessionStorage.getItem(openStorageKey) === "1";
+    } catch {
+      // private mode / quota / disabled storage — fail silently
+      return false;
+    }
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (open) {
+        window.sessionStorage.setItem(openStorageKey, "1");
+      } else {
+        window.sessionStorage.removeItem(openStorageKey);
+      }
+    } catch {
+      /* same — silent on private mode / quota errors */
+    }
+  }, [open, openStorageKey]);
+
   const [phase, setPhase] = useState<Phase>("collect");
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
