@@ -338,10 +338,20 @@ export function OttoWidget({
     };
   }, [api]);
 
-  // Poll the queue endpoint while the case is pending. This is cheap
-  // and gives the customer a live position/wait estimate even if the
-  // WebSocket connection is flaky — once status flips to active the
-  // server broadcasts a `conversation.updated` event, we stop polling.
+  // Poll while the case is pending. The interval is tight (1 s) on
+  // purpose: Otto's AI reply usually lands in 1-3 s, and the WS
+  // handshake takes ~500 ms, so the customer can otherwise sit looking
+  // at "Connecting to support…" for noticeably longer than the
+  // server-side delay. Each tick:
+  //   - fetches queueStatus for the position/wait overlay
+  //   - runs a full backfill (conversation + messages) — NOT gated on a
+  //     status transition. This is what makes the reply feel real-time
+  //     even when the WS hasn't opened yet: the merge is id-keyed so
+  //     the WS event that lands moments later is deduped against the
+  //     polled copy.
+  // Polling stops the moment status flips out of pending, so the cost
+  // is bounded — a few extra round trips during the first few seconds
+  // of every conversation.
   useEffect(() => {
     if (!conversation || conversation.status !== "pending") {
       setQueue(null);
@@ -351,24 +361,18 @@ export function OttoWidget({
     const id = conversation.id;
     const tick = async () => {
       try {
-        const snap = await api.queueStatus(id);
+        const [snap] = await Promise.all([
+          api.queueStatus(id),
+          backfill(id),
+        ]);
         if (cancelled) return;
         setQueue(snap);
-        // Status flipped server-side (AI replied → active, staff
-        // accepted → active, or sweeper closed it). Backfill both
-        // conversation AND messages — the AI reply that triggered the
-        // transition is itself a message envelope that the WS may have
-        // missed, so refetching conversation alone leaves the customer
-        // staring at an empty thread until they refresh.
-        if (snap.status && snap.status !== "pending") {
-          if (!cancelled) await backfill(id);
-        }
       } catch {
         /* transient error — keep previous snapshot */
       }
     };
     void tick();
-    const handle = window.setInterval(tick, 5_000);
+    const handle = window.setInterval(tick, 1_000);
     return () => {
       cancelled = true;
       window.clearInterval(handle);
