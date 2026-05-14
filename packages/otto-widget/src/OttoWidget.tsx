@@ -315,6 +315,21 @@ export function OttoWidget({
     onOpen: () => {
       if (activeConversationId) void backfill(activeConversationId);
     },
+    // Triggered when the server makes it clear the customer's
+    // session no longer owns the conversation — typically the
+    // inactivity sweeper closed it server-side while the browser
+    // tab was still cached. Without this the widget would retry
+    // the WS upgrade forever; with this we drop the conversation
+    // and fall back to the start-fresh UI so the customer can
+    // open a new chat instead of seeing a stuck "Connecting…"
+    // overlay.
+    onUnauthorized: () => {
+      setConversation(null);
+      setMessages([]);
+      setPhase("collect");
+      setError(null);
+      setReactions({});
+    },
   });
 
   // Resume on mount — if the otto_session cookie points at an open
