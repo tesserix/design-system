@@ -520,3 +520,126 @@
   color: var(--otto-text-muted, #6c6c6c);
   font-size: 11px;
 }
+
+/* -----------------------------------------------------------------------
+ * Typing indicator — shown under the latest customer message while
+ * the SLM (or staff) composes a reply. Three animated dots in a chat-
+ * bubble shape so it's visually consistent with regular messages.
+ * --------------------------------------------------------------------- */
+.otto-widget__typing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.otto-widget__typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--otto-msg-staff-bg, #f0f0f3);
+  border-radius: 16px 16px 16px 4px;
+}
+
+.otto-widget__typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--otto-text-muted, #888);
+  animation: otto-typing-bounce 1.2s ease-in-out infinite;
+}
+
+.otto-widget__typing-dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.otto-widget__typing-dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+.otto-widget__typing-label {
+  color: var(--otto-text-muted, #666);
+  font-size: 12px;
+  font-style: italic;
+}
+
+@keyframes otto-typing-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* -----------------------------------------------------------------------
+ * Per-message reaction strip — thumbs-up/down + optional "Connect to
+ * a human" CTA. Sits inside each AI/staff message bubble, beneath the
+ * meta line.
+ * --------------------------------------------------------------------- */
+.otto-widget__reactions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--otto-border-soft, rgba(0, 0, 0, 0.06));
+  font-size: 12px;
+}
+
+.otto-widget__reactions-prompt {
+  color: var(--otto-text-muted, #6c6c6c);
+  margin-right: 2px;
+}
+
+.otto-widget__reactions-thanks {
+  color: var(--otto-text-muted, #6c6c6c);
+  font-style: italic;
+}
+
+.otto-widget__reaction {
+  background: transparent;
+  border: 1px solid var(--otto-border-soft, rgba(0, 0, 0, 0.08));
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 120ms, transform 120ms;
+}
+
+.otto-widget__reaction:hover:not(:disabled) {
+  background: var(--otto-msg-staff-bg, #f0f0f3);
+}
+
+.otto-widget__reaction:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.otto-widget__reaction--active {
+  background: var(--otto-accent, #d6efff);
+  border-color: var(--otto-accent, #c0e3ff);
+  opacity: 1;
+}
+
+.otto-widget__escalate {
+  margin-left: auto;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--otto-border-soft, rgba(0, 0, 0, 0.15));
+  border-radius: 999px;
+  color: var(--otto-primary, #4a4a4a);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.otto-widget__escalate:hover {
+  background: var(--otto-msg-staff-bg, #f0f0f3);
+}

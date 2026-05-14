@@ -54,6 +54,15 @@ export interface OttoApi {
       comments?: string;
     },
   ): Promise<{ conversation: Conversation }>;
+  /** Per-message reaction (thumbs up / down). Best-effort — the
+   *  widget keeps the local optimistic state even when this
+   *  returns 404 (backend not yet wired) or otherwise errors,
+   *  so a missing endpoint can't break the chat UX. */
+  reactToMessage(
+    conversationId: string,
+    messageId: string,
+    reaction: "up" | "down",
+  ): Promise<{ ok: boolean }>;
 }
 
 /**
@@ -129,6 +138,11 @@ export function buildOttoApi(
     queueStatus: (id) => get(`/conversations/${encodeURIComponent(id)}/queue`),
     submitFeedback: (id, input) =>
       post(`/conversations/${encodeURIComponent(id)}/feedback`, input),
+    reactToMessage: (id, messageId, reaction) =>
+      post(
+        `/conversations/${encodeURIComponent(id)}/messages/${encodeURIComponent(messageId)}/reaction`,
+        { reaction },
+      ),
   };
 }
 

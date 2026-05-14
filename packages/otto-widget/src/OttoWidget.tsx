@@ -255,6 +255,14 @@ export function OttoWidget({
   const [fbStaff, setFbStaff] = useState(0);
   const [fbComments, setFbComments] = useState("");
   const [fbSubmitted, setFbSubmitted] = useState(false);
+  // Per-message reactions. Keys are message ids; values are the
+  // customer's thumbs-up/down. Local-only for now — we POST to a
+  // best-effort `reactToMessage` endpoint but the UI doesn't depend
+  // on the response, so a not-yet-implemented backend won't break
+  // the chat experience. The full survey at case-close (the
+  // existing feedback phase) stays the authoritative source for
+  // staff metrics.
+  const [reactions, setReactions] = useState<Record<string, "up" | "down">>({});
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const otpInputsRef = useRef<HTMLInputElement[]>([]);
 
@@ -581,6 +589,57 @@ export function OttoWidget({
     },
     [api, busy, chatDraft, conversation, startConversationNow],
   );
+
+  // Per-message reaction handler. Optimistically updates local
+  // state so the UI feels instant, then POSTs to the backend in the
+  // background. The backend endpoint is best-effort — if it returns
+  // 404 (not yet implemented) or errors out we keep the local
+  // reaction; the customer isn't penalised for backend gaps.
+  const reactToMessage = useCallback(
+    async (messageId: string, reaction: "up" | "down") => {
+      if (!conversation) return;
+      setReactions((prev) => ({ ...prev, [messageId]: reaction }));
+      try {
+        await api.reactToMessage(conversation.id, messageId, reaction);
+      } catch {
+        /* swallow — local state is the customer-facing signal */
+      }
+    },
+    [api, conversation],
+  );
+
+  // "Connect me to a human" handler. Sends a flagged message the
+  // slm-router's escalation policy will catch and route to a real
+  // staff member. The message body is plain English on purpose: if
+  // the routing flag is ever lost (e.g. a stale slm-router not yet
+  // updated) the human staff who eventually picks it up still gets
+  // a clear request.
+  const escalateToHuman = useCallback(async () => {
+    if (!conversation || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await api.sendMessage(
+        conversation.id,
+        "I'd like to speak with a human team member, please.",
+      );
+      setMessages((prev) => mergeMessages(prev, [res.message]));
+    } catch (err) {
+      setError((err as Error).message || "Could not request a human agent.");
+    } finally {
+      setBusy(false);
+    }
+  }, [api, busy, conversation]);
+
+  // Customer has earned the "talk to a human" button after sending
+  // at least 3 messages in this thread. The intent is to give the
+  // SLM a real chance to answer simple questions before surfacing
+  // an escalation — premature handoffs erode the value of the SLM.
+  const customerMessageCount = useMemo(
+    () => messages.filter((m) => m.sender_type === "customer").length,
+    [messages],
+  );
+  const showEscalate = customerMessageCount >= 3;
 
   // ── Phase 4: feedback ───────────────────────────────────────────────
   const submitFeedbackNow = useCallback(
@@ -965,9 +1024,38 @@ export function OttoWidget({
                       : "Your messages will appear here."}
                   </p>
                 )}
-                {messages.map((m) => (
-                  <MessageBubble key={m.id} message={m} />
-                ))}
+                {messages.map((m, idx) => {
+                  // Only show the escalate button on the LATEST
+                  // AI/staff reply. The thumbs strip stays on
+                  // every reply (customer can rate any past
+                  // response retroactively), but the human-handoff
+                  // CTA only makes sense for the most recent
+                  // unanswered thread, otherwise we'd plaster the
+                  // history with redundant buttons.
+                  const isLast = idx === messages.length - 1;
+                  return (
+                    <MessageBubble
+                      key={m.id}
+                      message={m}
+                      reaction={reactions[m.id] ?? null}
+                      onReact={(r) => void reactToMessage(m.id, r)}
+                      showEscalate={isLast && showEscalate}
+                      onEscalate={escalateToHuman}
+                    />
+                  );
+                })}
+                {/* Typing indicator — shows whenever the most recent
+                    message is from the customer and the conversation
+                    is still open, i.e. we're waiting on the SLM (or a
+                    human staffer) to compose a reply. Polled state +
+                    WS events both drive `messages`, so as soon as a
+                    non-customer message lands this indicator
+                    disappears in the same render. */}
+                {awaitingReply(conversation, messages) && (
+                  <TypingIndicator
+                    label={waitingMessage(conversation, messages)}
+                  />
+                )}
               </div>
               <form className="otto-widget__form" onSubmit={submitChat}>
                 <textarea
@@ -1287,13 +1375,46 @@ function formatWait(seconds: number): string {
   return `${mins} min`;
 }
 
-function MessageBubble({ message }: { message: Message }) {
+interface MessageBubbleProps {
+  message: Message;
+  /** Current reaction the customer has left on this message — `null`
+   *  means they haven't reacted yet. Only meaningful for AI/staff
+   *  messages; customer's own messages don't show the strip. */
+  reaction?: "up" | "down" | null;
+  /** Called when the customer taps a reaction button. The widget
+   *  POSTs this to the backend; failures are logged and otherwise
+   *  swallowed so a transient backend issue can't break the chat
+   *  UX. */
+  onReact?: (reaction: "up" | "down") => void;
+  /** When true, show a "Connect to a human" call-to-action under
+   *  the reaction strip. The widget passes true only after the
+   *  customer has sent enough messages for it to be a useful
+   *  fallback (≥3) — otherwise the SLM should be given a chance
+   *  to actually answer. */
+  showEscalate?: boolean;
+  /** Called when the customer taps "Connect to a human". */
+  onEscalate?: () => void;
+}
+
+function MessageBubble({
+  message,
+  reaction,
+  onReact,
+  showEscalate,
+  onEscalate,
+}: MessageBubbleProps) {
   const className =
     message.sender_type === "customer"
       ? "otto-widget__msg otto-widget__msg--customer"
       : message.sender_type === "staff"
         ? "otto-widget__msg otto-widget__msg--staff"
         : "otto-widget__msg otto-widget__msg--system";
+  // We only show the reaction strip on AI/staff messages — never on
+  // the customer's own message (rating your own prompt makes no
+  // sense) and never on system messages (the "case auto-closed"
+  // toast, etc., isn't something to thumbs-up).
+  const reactable =
+    message.sender_type !== "customer" && message.sender_type !== "system";
   return (
     <div className={className}>
       {message.body}
@@ -1303,8 +1424,110 @@ function MessageBubble({ message }: { message: Message }) {
           {formatTime(message.created_at)}
         </span>
       )}
+      {reactable && onReact && (
+        <div className="otto-widget__reactions" role="group" aria-label="Was this reply helpful?">
+          {reaction == null && (
+            <span className="otto-widget__reactions-prompt">
+              Helpful?
+            </span>
+          )}
+          <button
+            type="button"
+            className={`otto-widget__reaction${reaction === "up" ? " otto-widget__reaction--active" : ""}`}
+            onClick={() => onReact("up")}
+            disabled={reaction != null}
+            aria-label="Yes, this was helpful"
+            aria-pressed={reaction === "up"}
+          >
+            👍
+          </button>
+          <button
+            type="button"
+            className={`otto-widget__reaction${reaction === "down" ? " otto-widget__reaction--active" : ""}`}
+            onClick={() => onReact("down")}
+            disabled={reaction != null}
+            aria-label="No, this wasn't helpful"
+            aria-pressed={reaction === "down"}
+          >
+            👎
+          </button>
+          {reaction != null && (
+            <span className="otto-widget__reactions-thanks">
+              Thanks — noted.
+            </span>
+          )}
+          {showEscalate && onEscalate && (
+            <button
+              type="button"
+              className="otto-widget__escalate"
+              onClick={onEscalate}
+            >
+              Connect me to a human
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
+}
+
+// TypingIndicator — animated three-dot bubble that sits at the
+// bottom of the messages list while the SLM (or a human staffer) is
+// composing a reply. Replaces the dead-air gap between the customer
+// sending and the AI response arriving (~1s with the queue-poll
+// tightened in 0.4.4). The label below the dots is meant to be
+// reassuring rather than diagnostic — we don't know exactly what
+// the SLM is doing on any given prompt, so a soft "thinking" line
+// covers all paths (tool call, RAG, generation).
+function TypingIndicator({ label }: { label: string }) {
+  return (
+    <div
+      className="otto-widget__typing"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="otto-widget__typing-bubble" aria-hidden="true">
+        <span className="otto-widget__typing-dot" />
+        <span className="otto-widget__typing-dot" />
+        <span className="otto-widget__typing-dot" />
+      </div>
+      <span className="otto-widget__typing-label">{label}</span>
+    </div>
+  );
+}
+
+// awaitingReply returns true when the customer is waiting on a
+// response from someone other than themselves. The triggering
+// signal is that the last entry in `messages` is from the customer
+// — i.e. the SLM hasn't replied yet. Also gated on conversation
+// existence + open status; we don't render the indicator on a
+// closed thread.
+function awaitingReply(c: Conversation | null, messages: Message[]): boolean {
+  if (!c || c.status === "closed") return false;
+  const last = messages[messages.length - 1];
+  if (!last) return false;
+  return last.sender_type === "customer";
+}
+
+// waitingMessage picks copy that matches what the customer is
+// likely waiting on. "Connecting to support…" already covers the
+// pre-active path via the queue overlay, so this only fires once a
+// case is active and the SLM is composing.
+function waitingMessage(c: Conversation | null, messages: Message[]): string {
+  if (c && c.status === "pending") {
+    return "Otto is checking your details…";
+  }
+  // Active — a staff member is assigned OR the AI is replying. Tone
+  // it so either path reads naturally.
+  if (c?.assignee?.name) {
+    return `${c.assignee.name} is typing…`;
+  }
+  // Fall through — keep typeof messages reference so the linter
+  // doesn't flag it as unused; the conditional above doesn't read
+  // it but future copy variants might (e.g. "thinking about your
+  // 4th question").
+  void messages;
+  return "Otto is thinking…";
 }
 
 function statusLabel(c: Conversation): string {
