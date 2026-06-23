@@ -271,6 +271,9 @@ export function OttoWidget({
   const handleEvent = useCallback((env: WsEnvelope) => {
     if (env.type === "otto.message.created") {
       const payload = env.payload as { message: Message };
+      // Audible notification when Otto or an agent replies (most useful when
+      // the widget is minimized) — never on the customer's own echoed message.
+      if (payload.message.sender_type !== "customer") playChime();
       setMessages((prev) => mergeMessages(prev, [payload.message]));
     } else if (
       env.type === "otto.conversation.updated" ||
@@ -1539,6 +1542,34 @@ function TypingIndicator({ label }: { label: string }) {
       <span className="otto-widget__typing-label">{label}</span>
     </div>
   );
+}
+
+// A short two-tone chime via the Web Audio API — no asset to bundle, and a
+// no-op if the browser blocks autoplay or lacks AudioContext.
+let audioCtx: AudioContext | null = null;
+function playChime() {
+  try {
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    audioCtx = audioCtx ?? new Ctx();
+    const ctx = audioCtx;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.type = "sine";
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.setValueAtTime(1175, ctx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+    o.start();
+    o.stop(ctx.currentTime + 0.4);
+  } catch {
+    /* autoplay blocked / unsupported — silent */
+  }
 }
 
 // friendlyError maps raw backend error codes (snake_case like "not_found")
