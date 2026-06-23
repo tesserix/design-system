@@ -863,6 +863,13 @@ export function OttoWidget({
                   value={pendingMessage}
                   onChange={(e) => setPendingMessage(e.target.value)}
                   disabled={busy}
+                  onKeyDown={(e) => {
+                    // Enter starts the chat; Shift+Enter inserts a newline.
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      void submitCollect(e as unknown as FormEvent);
+                    }
+                  }}
                   aria-label="Message"
                 />
                 {error && <div className="otto-widget__error">{error}</div>}
