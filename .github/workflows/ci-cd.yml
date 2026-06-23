@@ -157,6 +157,10 @@ jobs:
 
       - name: Publish to npm (public registry)
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+        # Public-npm publish is best-effort — @tesserix is consumed from
+        # GitHub Packages, so a public-registry auth failure must NOT abort
+        # the job before the GitHub Packages publish step below runs.
+        continue-on-error: true
         run: |
           rm -f packages/web/.npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$NPM_CONFIG_USERCONFIG"
