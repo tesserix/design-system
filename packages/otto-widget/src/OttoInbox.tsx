@@ -204,17 +204,24 @@ export function OttoInbox({
           conversation_id?: string;
         };
         if (payload.conversation) {
-          setConversations((prev) =>
-            prev.map((c) =>
-              c.id === payload.conversation!.id ? payload.conversation! : c,
-            ),
-          );
+          const updated = payload.conversation;
+          // A status change (accept→active, close→closed, reopen) must
+          // MOVE the thread between tabs, not just relabel it in place —
+          // otherwise a closed case lingers in the Active list. Drop it
+          // from the current tab when its status no longer matches; keep
+          // it fresh (or add it) when it does.
+          setConversations((prev) => {
+            if (updated.status !== statusFilterRef.current) {
+              return prev.filter((c) => c.id !== updated.id);
+            }
+            return prev.some((c) => c.id === updated.id)
+              ? prev.map((c) => (c.id === updated.id ? updated : c))
+              : [updated, ...prev];
+          });
           // Keep the pinned thread-pane copy fresh too — feedback
           // submissions and status flips should reflect immediately.
           setSelectedConv((prev) =>
-            prev && prev.id === payload.conversation!.id
-              ? payload.conversation!
-              : prev,
+            prev && prev.id === updated.id ? updated : prev,
           );
         } else if (payload.conversation_id) {
           void loadList(statusFilterRef.current);
@@ -494,6 +501,18 @@ export function OttoInbox({
       // Server releases the staff's current_case_id — mirror that
       // locally so Accept Next lights up again immediately.
       setCurrentCaseID("");
+      // Move it out of the current tab right away — don't wait for the WS
+      // echo. Closing from Active drops it from Active instantly and flips
+      // the thread pane to the closed (reopen-able) state.
+      const closedId = selected.id;
+      setConversations((prev) =>
+        statusFilterRef.current === "closed"
+          ? prev.map((c) => (c.id === closedId ? { ...c, status: "closed" } : c))
+          : prev.filter((c) => c.id !== closedId),
+      );
+      setSelectedConv((prev) =>
+        prev && prev.id === closedId ? { ...prev, status: "closed" } : prev,
+      );
       showToast(
         "success",
         "Case closed",
@@ -790,6 +809,15 @@ export function OttoInbox({
                         : "Only the assigned agent can reply."
                 }
                 disabled={!canReply || busy}
+                onKeyDown={(e) => {
+                  // Enter sends; Shift+Enter inserts a newline.
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (canReply && !busy && reply.trim()) {
+                      void send(e as unknown as FormEvent);
+                    }
+                  }
+                }}
               />
               {error && <div className="otto-inbox__error">{error}</div>}
               <button
