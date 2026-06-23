@@ -597,7 +597,17 @@ export function OttoWidget({
           setChatDraft("");
         }
       } catch (err) {
-        setError((err as Error).message || "Message did not send.");
+        const e = err as Error & { status?: number };
+        if (e.status === 404) {
+          // The conversation is no longer reachable (ended/expired). Reset so
+          // the customer can start fresh instead of being stuck on a dead
+          // thread — and a refresh won't keep looping the same error.
+          setConversation(null);
+          setMessages([]);
+          setError("This chat session has ended. Send a message to start a new one.");
+        } else {
+          setError(friendlyError(e));
+        }
       } finally {
         setBusy(false);
       }
@@ -640,7 +650,14 @@ export function OttoWidget({
       );
       setMessages((prev) => mergeMessages(prev, [res.message]));
     } catch (err) {
-      setError((err as Error).message || "Could not request a human agent.");
+      const e = err as Error & { status?: number };
+      if (e.status === 404) {
+        setConversation(null);
+        setMessages([]);
+        setError("This chat session has ended. Send a message to start a new one.");
+      } else {
+        setError(friendlyError(e));
+      }
     } finally {
       setBusy(false);
     }
@@ -1093,6 +1110,9 @@ export function OttoWidget({
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
+                      // Sequential turns — wait for Otto's reply before
+                      // sending the next message (you can keep typing).
+                      if (awaitingReply(conversation, messages)) return;
                       void submitChat(e as unknown as FormEvent);
                     }
                   }}
@@ -1105,7 +1125,8 @@ export function OttoWidget({
                   disabled={
                     busy ||
                     !chatDraft.trim() ||
-                    conversation?.status === "closed"
+                    conversation?.status === "closed" ||
+                    awaitingReply(conversation, messages)
                   }
                 >
                   {busy ? "Sending..." : conversation ? "Send" : "Start chat"}
@@ -1428,9 +1449,11 @@ function MessageBubble({
   const className =
     message.sender_type === "customer"
       ? "otto-widget__msg otto-widget__msg--customer"
-      : message.sender_type === "staff"
-        ? "otto-widget__msg otto-widget__msg--staff"
-        : "otto-widget__msg otto-widget__msg--system";
+      : message.sender_type === "system"
+        ? "otto-widget__msg otto-widget__msg--system"
+        : // assistant (Otto AI), staff + agent all render as a readable
+          // left bubble — only true system notices use the muted style.
+          "otto-widget__msg otto-widget__msg--staff";
   // We only show the reaction strip on AI/staff messages — never on
   // the customer's own message (rating your own prompt makes no
   // sense) and never on system messages (the "case auto-closed"
@@ -1516,6 +1539,17 @@ function TypingIndicator({ label }: { label: string }) {
       <span className="otto-widget__typing-label">{label}</span>
     </div>
   );
+}
+
+// friendlyError maps raw backend error codes (snake_case like "not_found")
+// to a readable message; already-human messages pass through unchanged so we
+// never surface a bare code to the customer.
+function friendlyError(err: Error & { status?: number }): string {
+  const m = (err.message || "").trim();
+  if (!m || /^[a-z][a-z0-9_]*$/.test(m)) {
+    return "Something went wrong — please try again in a moment.";
+  }
+  return m;
 }
 
 // awaitingReply returns true when the customer is waiting on a
