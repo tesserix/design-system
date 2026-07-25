@@ -192,15 +192,23 @@ export function OttoInbox({
     return Array.from(seen).sort();
   }, [platformMode, conversations]);
 
+  // The tenant filter can go stale across a list refresh/tab switch: the
+  // chip set is re-derived from the new list, but the selected tenant id
+  // isn't cleared with it. If the selected tenant has no rows in the new
+  // list, self-clear back to "All" rather than silently showing an empty
+  // pane with no active chip to explain why.
+  const effectiveTenantFilter =
+    tenantFilter && tenantIds.includes(tenantFilter) ? tenantFilter : null;
+
   // Rows actually rendered. In single-tenant mode this is the list itself
   // (same reference), so default rendering is unchanged. In platform mode
   // with a tenant selected it filters client-side.
   const visibleConversations = useMemo(
     () =>
-      platformMode && tenantFilter
-        ? conversations.filter((c) => c.tenant_id === tenantFilter)
+      platformMode && effectiveTenantFilter
+        ? conversations.filter((c) => c.tenant_id === effectiveTenantFilter)
         : conversations,
-    [platformMode, tenantFilter, conversations],
+    [platformMode, effectiveTenantFilter, conversations],
   );
 
   const loadList = useCallback(
@@ -686,7 +694,7 @@ export function OttoInbox({
           >
             <button
               type="button"
-              className={`otto-inbox__tenant-chip ${tenantFilter === null ? "is-active" : ""}`}
+              className={`otto-inbox__tenant-chip ${effectiveTenantFilter === null ? "is-active" : ""}`}
               onClick={() => setTenantFilter(null)}
             >
               All
@@ -695,7 +703,7 @@ export function OttoInbox({
               <button
                 key={t}
                 type="button"
-                className={`otto-inbox__tenant-chip ${tenantFilter === t ? "is-active" : ""}`}
+                className={`otto-inbox__tenant-chip ${effectiveTenantFilter === t ? "is-active" : ""}`}
                 onClick={() => setTenantFilter(t)}
                 title={t}
               >
@@ -706,7 +714,11 @@ export function OttoInbox({
         )}
         {visibleConversations.length === 0 ? (
           <div className="otto-inbox__empty">
-            {error ? `Could not load: ${error}` : "No conversations here yet."}
+            {error
+              ? `Could not load: ${error}`
+              : effectiveTenantFilter
+                ? "No conversations for this product."
+                : "No conversations here yet."}
           </div>
         ) : (
           visibleConversations.map((c) => (
