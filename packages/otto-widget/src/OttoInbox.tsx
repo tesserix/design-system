@@ -104,6 +104,11 @@ export function OttoInbox({
     [tenantLabels],
   );
   const [statusFilter, setStatusFilter] = useState<InboxStatus>("pending");
+  // Platform-mode tenant filter (null = "All"). Independent of the status
+  // tabs so the two compose. Applied client-side against the already-fetched
+  // list — no new endpoint, and it can't collapse the set of tenant chips we
+  // derive from that same list.
+  const [tenantFilter, setTenantFilter] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // selectedConv mirrors selectedId but is stored independently of
@@ -174,6 +179,29 @@ export function OttoInbox({
   // selectedConv so the thread pane survives a loadList refresh.
   const selected =
     conversations.find((c) => c.id === selectedId) ?? selectedConv ?? null;
+
+  // Platform mode: the tenant filter chips are derived from the tenant ids
+  // present in the currently-fetched list — no extra endpoint. The set
+  // updates naturally as the list changes (tab switch, WS inserts).
+  const tenantIds = useMemo(() => {
+    if (!platformMode) return [] as string[];
+    const seen = new Set<string>();
+    for (const c of conversations) {
+      if (c.tenant_id) seen.add(c.tenant_id);
+    }
+    return Array.from(seen).sort();
+  }, [platformMode, conversations]);
+
+  // Rows actually rendered. In single-tenant mode this is the list itself
+  // (same reference), so default rendering is unchanged. In platform mode
+  // with a tenant selected it filters client-side.
+  const visibleConversations = useMemo(
+    () =>
+      platformMode && tenantFilter
+        ? conversations.filter((c) => c.tenant_id === tenantFilter)
+        : conversations,
+    [platformMode, tenantFilter, conversations],
+  );
 
   const loadList = useCallback(
     async (next: InboxStatus) => {
@@ -650,12 +678,38 @@ export function OttoInbox({
             </button>
           ))}
         </div>
-        {conversations.length === 0 ? (
+        {platformMode && tenantIds.length > 0 && (
+          <div
+            className="otto-inbox__tenant-filter"
+            role="group"
+            aria-label="Filter by product"
+          >
+            <button
+              type="button"
+              className={`otto-inbox__tenant-chip ${tenantFilter === null ? "is-active" : ""}`}
+              onClick={() => setTenantFilter(null)}
+            >
+              All
+            </button>
+            {tenantIds.map((t) => (
+              <button
+                key={t}
+                type="button"
+                className={`otto-inbox__tenant-chip ${tenantFilter === t ? "is-active" : ""}`}
+                onClick={() => setTenantFilter(t)}
+                title={t}
+              >
+                {productLabel(t)}
+              </button>
+            ))}
+          </div>
+        )}
+        {visibleConversations.length === 0 ? (
           <div className="otto-inbox__empty">
             {error ? `Could not load: ${error}` : "No conversations here yet."}
           </div>
         ) : (
-          conversations.map((c) => (
+          visibleConversations.map((c) => (
             <button
               key={c.id}
               type="button"
