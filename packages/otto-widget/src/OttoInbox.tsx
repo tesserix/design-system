@@ -51,6 +51,22 @@ export interface OttoInboxProps {
     title: string,
     description?: string,
   ) => void;
+  /**
+   * Cross-tenant "platform mode" for the Tesserix platform inbox
+   * (tesserix-home admin). Map of tenant id → friendly product name.
+   *
+   * PRESENCE of this prop is the mode switch — there is no separate
+   * boolean that could disagree with the data:
+   *   - omitted  → single-tenant mode (default; byte-for-byte unchanged
+   *                for existing consumers such as mark8ly admin)
+   *   - provided → platform mode: a product badge on every row and in
+   *                the thread header, plus a tenant filter derived from
+   *                the tenant ids present in the fetched list.
+   *
+   * An empty object ({}) still enables platform mode; each badge then
+   * falls back to the raw tenant id until labels are supplied.
+   */
+  tenantLabels?: Record<string, string>;
 }
 
 const DEFAULT_INBOX_WS = () => {
@@ -74,8 +90,19 @@ export function OttoInbox({
   style,
   className,
   onToast,
+  tenantLabels,
 }: OttoInboxProps) {
   const base = useMemo(() => apiBaseUrl.replace(/\/+$/, ""), [apiBaseUrl]);
+  // Platform mode is opt-in via the presence of tenantLabels. Kept as a
+  // single derived boolean so every platform-only branch reads the same
+  // switch and single-tenant consumers hit none of them.
+  const platformMode = tenantLabels !== undefined;
+  // Resolve a tenant id to its friendly product name, falling back to the
+  // raw id when no label is mapped (or labels weren't supplied).
+  const productLabel = useCallback(
+    (tenantId: string) => tenantLabels?.[tenantId] ?? tenantId,
+    [tenantLabels],
+  );
   const [statusFilter, setStatusFilter] = useState<InboxStatus>("pending");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -652,6 +679,11 @@ export function OttoInbox({
                 {c.subject || "(no subject)"}
               </div>
               <div className="otto-inbox__row-meta">
+                {platformMode && (
+                  <span className="otto-inbox__product" title={c.tenant_id}>
+                    {productLabel(c.tenant_id)}
+                  </span>
+                )}
                 <span className={`otto-inbox__pill otto-inbox__pill--${c.status}`}>
                   {c.status}
                 </span>
@@ -683,6 +715,16 @@ export function OttoInbox({
                     selected.customer.email ||
                     "Anonymous visitor"}
                 </strong>
+                {platformMode && (
+                  <div className="otto-inbox__thread-product">
+                    <span
+                      className="otto-inbox__product"
+                      title={selected.tenant_id}
+                    >
+                      {productLabel(selected.tenant_id)}
+                    </span>
+                  </div>
+                )}
                 <div className="otto-inbox__thread-subtitle">
                   {selected.case_id ? (
                     <>
