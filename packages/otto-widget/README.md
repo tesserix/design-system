@@ -73,6 +73,48 @@ const FANZONE_REASONS: readonly ReasonOption[] = [
 />
 ```
 
+## Platform mode (v0.6.0)
+
+`OttoInbox` has an opt-in **platform mode** for a cross-tenant inbox (the
+Tesserix platform console in tesserix-home admin, which sees conversations
+across every product). Pass `tenantLabels` — a map of tenant id → friendly
+product name — and the presence of that prop switches the mode on:
+
+```tsx
+<OttoInbox
+  apiBaseUrl="/api/admin/otto"        // point at the PLATFORM proxy
+  buildInboxWsUrl={() => `${wsProto()}://${location.host}/api/v1/admin/otto/ws`}
+  buildConversationWsUrl={(id) =>
+    `${wsProto()}://${location.host}/api/v1/admin/otto/conversations/${id}/ws`
+  }
+  currentUserId={staffUserId}
+  tenantLabels={{
+    homechef: "HomeChef",
+    fanzone: "FanZone",
+    stockpilot: "StockPilot",
+  }}
+/>
+```
+
+In platform mode:
+
+- **Product badge** on every conversation row and in the thread header
+  (friendly label, falling back to the raw tenant id for any tenant not in
+  `tenantLabels`).
+- **Tenant filter** chips derived from the tenant ids present in the fetched
+  list (no extra endpoint). Selecting one filters the rows client-side; it
+  composes with the Pending / Active / Closed tabs.
+
+Omit `tenantLabels` and the inbox behaves exactly as before — single tenant,
+no badges, no filter. An empty object (`tenantLabels={{}}`) still enables the
+mode; every badge then shows the raw tenant id.
+
+The widget never hardcodes either surface: the same component renders the
+per-tenant admin inbox and the platform inbox. The only difference is the
+`apiBaseUrl` (which proxy the host points at) and whether `tenantLabels` is
+passed. Conversations already carry `tenant_id` on the wire, so no backend
+change is required.
+
 ## Theming
 
 Both components expose a handful of CSS custom properties (prefixed

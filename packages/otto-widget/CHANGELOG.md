@@ -1,5 +1,30 @@
 # @tesserix/otto-widget
 
+## 0.6.0
+
+### Minor Changes
+
+- OttoInbox platform mode: opt-in cross-tenant view for the Tesserix
+  platform inbox (tesserix-home admin).
+
+  Pass `tenantLabels` (a map of tenant id → friendly product name) to switch
+  `OttoInbox` into platform mode. The presence of the prop is the only
+  switch — omit it and behaviour is byte-for-byte unchanged for existing
+  single-tenant consumers (mark8ly admin).
+
+  In platform mode:
+
+  - every conversation row shows a product badge (friendly label, falling
+    back to the raw tenant id);
+  - a tenant filter (chips) appears, derived from the tenant ids present in
+    the fetched list — no new endpoint — and composes with the existing
+    Pending / Active / Closed tabs, filtered client-side;
+  - the thread header shows the product name of the open conversation.
+
+  No wire/API changes: conversations already carry `tenant_id`, and the
+  REST/WS shapes are identical between the tenant-admin and platform
+  surfaces. The consumer just points `apiBaseUrl` at the platform proxy.
+
 ## 0.5.4
 
 ### Patch Changes
