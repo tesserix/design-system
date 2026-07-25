@@ -15,6 +15,8 @@
   --otto-pill-pending: #fde68a;
   --otto-pill-active: #bbf7d0;
   --otto-pill-closed: #e5e7eb;
+  --otto-product-bg: #eef2ff;
+  --otto-product-fg: #3730a3;
 
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -480,4 +482,63 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ── Platform mode — product badges + tenant filter ───────────────── */
+/* Rendered only when OttoInbox runs in platform mode (the host passed
+   tenantLabels). Uses the same token scheme + chip styling as the rest of
+   the inbox so it drops in without a visual seam. */
+.otto-inbox__tenant-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--otto-border);
+  background: var(--otto-surface);
+}
+
+.otto-inbox__tenant-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--otto-border);
+  border-radius: 999px;
+  background: var(--otto-surface-muted);
+  color: var(--otto-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.otto-inbox__tenant-chip:hover {
+  background: var(--otto-surface);
+  color: var(--otto-text);
+}
+
+.otto-inbox__tenant-chip.is-active {
+  background: var(--otto-product-bg);
+  color: var(--otto-product-fg);
+  border-color: var(--otto-product-fg);
+}
+
+.otto-inbox__product {
+  display: inline-block;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--otto-product-bg);
+  color: var(--otto-product-fg);
+}
+
+.otto-inbox__thread-product {
+  margin-top: 4px;
 }
