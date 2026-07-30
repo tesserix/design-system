@@ -25,7 +25,7 @@
     "apps/*"
   ],
   "engines": {
-    "node": ">=20.19.0",
+    "node": ">=22.13.0",
     "pnpm": ">=11.0.0"
   },
   "packageManager": "pnpm@11.18.0",
