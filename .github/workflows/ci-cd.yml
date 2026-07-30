@@ -149,18 +149,9 @@ jobs:
           git commit -m "chore: version packages" || echo "No version changes"
           git push
 
-      - name: Publish to npm (public registry)
-        if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
-        # Public-npm publish is best-effort — @tesserix is consumed from
-        # GitHub Packages, so a public-registry auth failure must NOT abort
-        # the job before the GitHub Packages publish step below runs.
-        continue-on-error: true
-        run: |
-          rm -f packages/web/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$NPM_CONFIG_USERCONFIG"
-          cp "$NPM_CONFIG_USERCONFIG" .npmrc
-          pnpm release
-
+      # GitHub Packages first, so a public-registry failure can no longer abort
+      # the job before this runs. That ordering — not `continue-on-error` — is
+      # what protects this step.
       - name: Publish to GitHub Packages
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
@@ -168,4 +159,16 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.ADMIN_TOKEN }}" >> "$NPM_CONFIG_USERCONFIG"
           cp "$NPM_CONFIG_USERCONFIG" .npmrc
           pnpm changeset publish
+
+      # Must NOT be continue-on-error. mark8ly's package-lock.json resolves
+      # @tesserix/web from registry.npmjs.org, so a silent failure here strands
+      # every consumer on the previous version — which is exactly what happened
+      # to @tesserix/otto-widget@0.6.0 and @tesserix/web@1.8.0.
+      - name: Publish to npm (public registry)
+        if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+        run: |
+          rm -f packages/web/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$NPM_CONFIG_USERCONFIG"
+          cp "$NPM_CONFIG_USERCONFIG" .npmrc
+          pnpm release
 
