@@ -1,5 +1,24 @@
 # @tesserix/web
 
+## 1.8.1
+
+### Patch Changes
+
+- Republish with resolved sibling versions.
+
+  The 1.8.0 artifact on the public npm registry shipped `@tesserix/hooks`,
+  `@tesserix/tokens` and `@tesserix/utils` as `workspace:*`, a pnpm-only
+  specifier that npm's resolver cannot handle — `npm install @tesserix/web@1.8.0`
+  fails, and it fails silently, with no error on stdout, stderr or the debug log.
+
+  Cause: 1.8.0 was published to npm with `npm publish`, which ships package.json
+  verbatim. `pnpm publish` / `changeset publish` rewrite the workspace protocol
+  to concrete versions at pack time, which is why the GitHub Packages copy of
+  1.8.0 and every earlier release are unaffected.
+
+  No source or component changes — `workspace:*` remains correct in the monorepo.
+  Publish this and every future release through pnpm, never bare `npm publish`.
+
 ## 1.8.0
 
 ### Minor Changes
