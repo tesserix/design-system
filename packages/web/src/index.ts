@@ -1,6 +1,7 @@
 // Export UI components
 export * from './components/accordion'
 export * from './components/alert'
+export * from './components/app-store-badges'
 export * from './components/auth-layout'
 export * from './components/app-shell'
 export * from './components/aspect-ratio'
