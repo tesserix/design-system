@@ -2,13 +2,10 @@
 
 Package: `@tesserix/web`
 
-Searchable select input with full keyboard support, controlled/uncontrolled modes, icons, descriptions, custom search terms, and custom option rendering.
-
 ## Import
 
 ```tsx
 import { Combobox } from '@tesserix/web'
-import type { ComboboxOption, ComboboxProps } from '@tesserix/web'
 ```
 
 ## Source
@@ -23,164 +20,12 @@ import type { ComboboxOption, ComboboxProps } from '@tesserix/web'
 - Story file: Present
 - Test file: Present
 
-## Usage
-
-### Basic
+## Example
 
 ```tsx
-const options = [
-  { value: 'react', label: 'React' },
-  { value: 'vue', label: 'Vue' },
-  { value: 'svelte', label: 'Svelte' },
-]
+import { Combobox } from '@tesserix/web'
 
-<Combobox
-  options={options}
-  placeholder="Choose framework"
-  searchPlaceholder="Search framework..."
-/>
+export function DemoCombobox() {
+  return <Combobox />
+}
 ```
-
-### Controlled
-
-```tsx
-const [value, setValue] = useState('react')
-
-<Combobox
-  options={options}
-  value={value}
-  onValueChange={setValue}
-  placeholder="Choose framework"
-/>
-```
-
-### With Default Value (Uncontrolled)
-
-```tsx
-<Combobox options={options} defaultValue="vue" />
-```
-
-### With Description and Search Terms
-
-Options can include `description` for secondary text and `searchTerms` for additional search keywords.
-
-```tsx
-const currencies = [
-  { value: 'USD', label: '$ USD', description: 'United States Dollar', searchTerms: ['dollar', 'america'] },
-  { value: 'EUR', label: '€ EUR', description: 'Euro', searchTerms: ['europe'] },
-  { value: 'GBP', label: '£ GBP', description: 'British Pound Sterling', searchTerms: ['uk', 'pound'] },
-]
-
-<Combobox
-  options={currencies}
-  placeholder="Select currency"
-  searchPlaceholder="Search by name or code..."
-/>
-```
-
-### With Icons
-
-```tsx
-const countries = [
-  { value: 'US', label: '+1', icon: <span>🇺🇸</span> },
-  { value: 'GB', label: '+44', icon: <span>🇬🇧</span> },
-  { value: 'IN', label: '+91', icon: <span>🇮🇳</span> },
-]
-
-<Combobox options={countries} placeholder="Code" />
-```
-
-### Custom Option Rendering
-
-Use `renderOption` for full control over how each option is displayed.
-
-```tsx
-<Combobox
-  options={options}
-  renderOption={(option, { selected, highlighted }) => (
-    <div className="flex items-center gap-2">
-      <span>{option.label}</span>
-      {selected && <CheckIcon />}
-    </div>
-  )}
-/>
-```
-
-### Disabled Options
-
-```tsx
-const options = [
-  { value: 'react', label: 'React' },
-  { value: 'legacy', label: 'Legacy Framework', disabled: true },
-  { value: 'vue', label: 'Vue' },
-]
-
-<Combobox options={options} />
-```
-
-### Error State
-
-```tsx
-<Combobox options={options} error placeholder="Please select a framework" />
-```
-
-### Loading State
-
-```tsx
-<Combobox options={[]} loading placeholder="Loading..." />
-```
-
-### Disabled
-
-```tsx
-<Combobox options={options} disabled placeholder="Unavailable" />
-```
-
-## Keyboard Navigation
-
-| Key | Action |
-|-----|--------|
-| `ArrowDown` | Open dropdown / move to next option |
-| `ArrowUp` | Open dropdown / move to previous option (wraps) |
-| `Enter` | Select highlighted option |
-| `Escape` | Close dropdown and reset query |
-| Type | Filter options by label, value, description, or search terms |
-
-## API
-
-### ComboboxOption
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `value` | `string` | Unique option value |
-| `label` | `string` | Display text |
-| `description` | `string` | Secondary description text |
-| `icon` | `ReactNode` | Icon rendered before the label |
-| `searchTerms` | `string[]` | Additional terms for search filtering |
-| `disabled` | `boolean` | Prevents selection of this option |
-
-### ComboboxProps
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `options` | `ComboboxOption[]` | — | Array of options |
-| `value` | `string` | — | Controlled selected value |
-| `defaultValue` | `string` | — | Initial value (uncontrolled) |
-| `onValueChange` | `(value: string) => void` | — | Called when selection changes |
-| `placeholder` | `string` | `"Select an option..."` | Input placeholder when closed |
-| `searchPlaceholder` | `string` | `"Search..."` | Input placeholder when open |
-| `emptyText` | `string` | `"No results found."` | Text shown when no options match |
-| `disabled` | `boolean` | `false` | Disables the combobox |
-| `error` | `boolean` | `false` | Shows error styling and sets `aria-invalid` |
-| `loading` | `boolean` | `false` | Shows loading spinner in dropdown |
-| `renderOption` | `(option, state) => ReactNode` | — | Custom option renderer |
-| `aria-label` | `string` | `"Combobox input"` | Accessible label |
-
-## Accessibility
-
-- `role="combobox"` on input with `aria-expanded`, `aria-controls`, `aria-activedescendant`
-- `role="listbox"` on the dropdown with `role="option"` on each item
-- `aria-selected` marks the currently selected option
-- `aria-invalid` set when `error` is true
-- Disabled options have `disabled` attribute and reduced opacity
-- Full keyboard navigation with arrow keys, Enter, and Escape

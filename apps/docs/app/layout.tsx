@@ -6,6 +6,7 @@ import { getPageMap } from 'nextra/page-map'
 import 'nextra-theme-docs/style.css'
 import './globals.css'
 import themeConfig from '../theme.config'
+import { Analytics } from './analytics'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://docs.tesserix.app'),
@@ -135,6 +136,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         >
           {children}
         </Layout>
+        <Analytics />
       </body>
     </html>
   )
