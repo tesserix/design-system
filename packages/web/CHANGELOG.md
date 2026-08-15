@@ -1,5 +1,15 @@
 # @tesserix/web
 
+## 1.9.1
+
+### Patch Changes
+
+- 4f2e769: Make `AuroraAuthPanel`'s `title` optional.
+
+  Hosts that already render their own heading — the Zitadel login, where every
+  step supplies its own translated `<h1>` — were forced to either nest headings
+  or leave an empty one in the card.
+
 ## 1.9.0
 
 ### Minor Changes
