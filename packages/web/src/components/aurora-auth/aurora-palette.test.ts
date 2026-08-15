@@ -27,6 +27,11 @@ describe("deriveAuroraPalette", () => {
     expect(hue(swatches.tertiary)).toBeCloseTo((hue("#0E9F6E") - 42 + 360) % 360, 0)
   })
 
+  it("tints the input border with the brand so fields read on either surface", () => {
+    expect(deriveAuroraPalette(TESSERIX).inputBorder).toBe("rgba(91,95,214,0.22)")
+    expect(deriveAuroraPalette(TESSERIX, { mode: "dark" }).inputBorder).toBe("rgba(91,95,214,0.34)")
+  })
+
   it("emits three radial washes at full intensity", () => {
     const { washes } = deriveAuroraPalette(TESSERIX)
     expect(washes).toHaveLength(3)

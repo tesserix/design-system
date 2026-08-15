@@ -22,6 +22,7 @@ export interface AuroraPalette {
   labelForeground: string
   subtleForeground: string
   inputBackground: string
+  inputBorder: string
   gridline: string
   buttonBackground: string
   buttonForeground: string
@@ -45,6 +46,7 @@ const SURFACE = {
     labelForeground: "#3D4657",
     subtleForeground: "#98A1AE",
     inputBackground: "rgba(255,255,255,.85)",
+    inputBorderAlpha: 0.22,
     gridline: "rgba(15,23,41,.05)",
     borderAlpha: 0.2,
     buttonLift: 6,
@@ -62,6 +64,7 @@ const SURFACE = {
     labelForeground: "#C6C8E4",
     subtleForeground: "#7A7FA5",
     inputBackground: "rgba(15,14,42,.6)",
+    inputBorderAlpha: 0.34,
     gridline: "rgba(255,255,255,.045)",
     borderAlpha: 0.24,
     buttonLift: 10,
@@ -100,6 +103,7 @@ export function deriveAuroraPalette(
     labelForeground: surface.labelForeground,
     subtleForeground: surface.subtleForeground,
     inputBackground: surface.inputBackground,
+    inputBorder: rgba(brand, surface.inputBorderAlpha),
     gridline: surface.gridline,
     buttonBackground: `linear-gradient(180deg,${toHex(shift(brand, 0, surface.buttonLift))} 0%,${brand} 100%)`,
     buttonForeground: surface.buttonForeground,

@@ -38,6 +38,7 @@ function auroraVariables(palette: AuroraPalette): Record<string, string> {
     "--aurora-card-shadow": palette.cardShadow,
     "--aurora-border": palette.cardBorder,
     "--aurora-input": palette.inputBackground,
+    "--aurora-input-border": palette.inputBorder,
     "--aurora-foreground": palette.foreground,
     "--aurora-muted": palette.mutedForeground,
     "--aurora-label": palette.labelForeground,
