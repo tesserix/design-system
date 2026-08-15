@@ -75,7 +75,8 @@ export interface AuroraAuthPanelProps extends Omit<React.HTMLAttributes<HTMLDivE
   /** Resolve `auto` to a concrete mode before rendering; server and client must agree. */
   mode?: AuroraMode
   intensity?: AuroraIntensity
-  title: React.ReactNode
+  /** Omit when the host app supplies its own heading inside `children`. */
+  title?: React.ReactNode
   tagline?: React.ReactNode
   /** Tenant wordmark. Use `useAuroraPalette()` inside it to colour an inline SVG. */
   logo?: React.ReactNode
@@ -150,7 +151,7 @@ const AuroraAuthPanel = React.forwardRef<HTMLDivElement, AuroraAuthPanelProps>(
                 {logo}
               </div>
             ) : null}
-            <h1 className="mb-1.5 text-2xl font-semibold tracking-tight">{title}</h1>
+            {title ? <h1 className="mb-1.5 text-2xl font-semibold tracking-tight">{title}</h1> : null}
             {tagline ? (
               <p className="mb-7 text-[0.9375rem]" style={{ color: palette.mutedForeground }}>
                 {tagline}

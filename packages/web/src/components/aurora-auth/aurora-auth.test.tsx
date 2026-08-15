@@ -20,6 +20,17 @@ describe("AuroraAuthPanel", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument()
   })
 
+  it("omits the heading when the host app renders its own title", () => {
+    render(
+      <AuroraAuthPanel brandColor="#5B5FD6">
+        <h1>Welcome back</h1>
+      </AuroraAuthPanel>
+    )
+
+    expect(screen.getAllByRole("heading")).toHaveLength(1)
+    expect(screen.getByRole("heading", { name: "Welcome back" })).toBeInTheDocument()
+  })
+
   it("renders the tenant logo and footer slots", () => {
     render(
       <AuroraAuthPanel
