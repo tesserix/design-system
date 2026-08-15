@@ -68,6 +68,41 @@ describe("AuroraAuthPanel", () => {
     expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("#0F0E2A")
   })
 
+  it("publishes both surfaces at auto so the panel follows the host's dark class", () => {
+    const { container } = render(
+      <AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" mode="auto" data-testid="panel" />
+    )
+
+    const css = container.querySelector("style")?.textContent ?? ""
+    expect(css).toContain("--aurora-canvas:#FAFBF8")
+    expect(css).toContain("--aurora-canvas:#0F0E2A")
+    expect(css).toMatch(/\.dark \[data-aurora-scope=/)
+  })
+
+  it("scopes the auto stylesheet to its own panel", () => {
+    const { container } = render(
+      <AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" mode="auto" data-testid="panel" />
+    )
+
+    const scope = screen.getByTestId("panel").getAttribute("data-aurora-scope")
+    expect(scope).toBeTruthy()
+    expect(container.querySelector("style")?.textContent).toContain(`[data-aurora-scope="${scope}"]`)
+  })
+
+  it("paints the auto washes from custom properties rather than baked colours", () => {
+    render(<AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" mode="auto" data-testid="panel" />)
+
+    const washes = screen.getByTestId("panel").querySelectorAll("[data-aurora-wash]")
+    expect(washes).toHaveLength(3)
+    expect(washes[0].getAttribute("style")).toContain("var(--aurora-wash-0)")
+  })
+
+  it("keeps a fixed mode inline so it never inherits the host's dark class", () => {
+    render(<AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" mode="light" data-testid="panel" />)
+
+    expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("#FAFBF8")
+  })
+
   it("hides the watermark by default and shows it when the tenant may not remove it", () => {
     const { rerender } = render(<AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" />)
     expect(screen.queryByText("Secured by Tesserix")).not.toBeInTheDocument()

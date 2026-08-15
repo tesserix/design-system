@@ -16,7 +16,7 @@ const meta = {
     },
   },
   argTypes: {
-    mode: { control: "inline-radio", options: ["light", "dark"] },
+    mode: { control: "inline-radio", options: ["light", "dark", "auto"] },
     intensity: { control: "inline-radio", options: ["subtle", "full", "flat"] },
   },
 } satisfies Meta<typeof AuroraAuthPanel>
@@ -117,6 +117,16 @@ export const Default: Story = {
     title: "Sign in to Tesserix",
     tagline: "Welcome back. Please enter your details.",
     footer: "Don't have an account? Sign up",
+    children: <SignInForm email="samyak@tesserix.app" idp="Google" />,
+  },
+}
+
+export const FollowsHostTheme: Story = {
+  args: {
+    brandColor: "#5B5FD6",
+    mode: "auto",
+    title: "Sign in to Tesserix",
+    tagline: "Toggle the Storybook theme — the panel follows without a repaint.",
     children: <SignInForm email="samyak@tesserix.app" idp="Google" />,
   },
 }
