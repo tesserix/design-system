@@ -1,5 +1,11 @@
 # @tesserix/web
 
+## 1.10.1
+
+### Patch Changes
+
+- 7e4d213: Expose `inputBorder` on the aurora palette and `--aurora-input-border` on the panel, so host form controls can pick up a brand-tinted field border instead of a neutral one.
+
 ## 1.10.0
 
 ### Minor Changes
