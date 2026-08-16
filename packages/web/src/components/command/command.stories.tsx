@@ -189,13 +189,13 @@ export const DialogInteraction: Story = {
     const openButton = canvas.getByRole("button", { name: /open command palette/i })
     fireEvent.click(openButton)
 
-    const dialogInput = await waitFor(() => within(document.body).getByRole("textbox", { name: /type a command/i }))
+    const dialogInput = await waitFor(() => within(document.body).getByRole("combobox", { name: /type a command/i }))
     fireEvent.change(dialogInput, { target: { value: "billing" } })
     const billingOption = within(document.body).getByRole("option", { name: /go to billing/i })
     fireEvent.click(billingOption)
 
     await waitFor(() => {
-      expect(within(document.body).queryByRole("textbox", { name: /type a command/i })).not.toBeInTheDocument()
+      expect(within(document.body).queryByRole("combobox", { name: /type a command/i })).not.toBeInTheDocument()
     })
   },
 }
@@ -229,7 +229,7 @@ export const KeyboardListSelection: Story = {
 export const DisabledItemBehavior: Story = {
   render: () => <CommandWithDisabledDemo />,
   play: async ({ canvas }) => {
-    const input = canvas.getByRole("textbox", { name: /disabled command input/i })
+    const input = canvas.getByRole("combobox", { name: /disabled command input/i })
 
     fireEvent.change(input, { target: { value: "disabled" } })
     const disabledOption = await waitFor(() => canvas.getByRole("option", { name: /disabled item/i }))

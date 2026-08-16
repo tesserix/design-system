@@ -1,5 +1,6 @@
+import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect } from "storybook/test"
+import { expect, fireEvent } from "storybook/test"
 
 import { CommandPalette } from "./command-palette"
 
@@ -32,9 +33,68 @@ export const Default: Story = {
   render: (args) => <CommandPalette {...args} />,
 }
 
+export const Loading: Story = {
+  args: {
+    open: true,
+    onOpenChange: () => {},
+    items: [],
+    loading: true,
+  },
+  render: (args) => <CommandPalette {...args} />,
+}
+
+/**
+ * Results come from a server: the caller owns the query, matches it remotely,
+ * and turns the internal filter off so a match the label does not literally
+ * contain is still shown.
+ */
+export const ServerDrivenSearch: Story = {
+  render: function ServerDrivenSearchStory(args) {
+    const [query, setQuery] = React.useState("")
+    const [loading, setLoading] = React.useState(false)
+    const [results, setResults] = React.useState<typeof items>([])
+
+    React.useEffect(() => {
+      if (!query) {
+        setResults([])
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      const timer = setTimeout(() => {
+        setResults([
+          { id: "ticket-3184", label: `Ticket #3184 matching “${query}”`, group: "Tickets" },
+          { id: "tenant-acme", label: `Tenant acme matching “${query}”`, group: "Tenants" },
+        ])
+        setLoading(false)
+      }, 400)
+
+      return () => clearTimeout(timer)
+    }, [query])
+
+    return (
+      <CommandPalette
+        {...args}
+        items={results}
+        query={query}
+        onQueryChange={setQuery}
+        loading={loading}
+        shouldFilter={false}
+        placeholder="Search tickets and tenants…"
+        emptyText="Type to search."
+      />
+    )
+  },
+}
+
 export const SmokeTest: Story = {
   render: Default.render,
-  play: async ({ canvasElement }) => {
+  play: async ({ canvas, canvasElement }) => {
     await expect(canvasElement).toBeTruthy()
+
+    const input = canvas.getByPlaceholderText(/search commands/i)
+    fireEvent.keyDown(input, { key: "ArrowDown" })
+    await expect(canvas.getByRole("option", { name: /create project/i })).toHaveAttribute("data-active", "true")
   },
 }

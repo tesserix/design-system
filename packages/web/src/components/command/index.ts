@@ -5,6 +5,7 @@ export {
   CommandEmpty,
   CommandGroup,
   CommandItem,
+  CommandLoading,
   CommandShortcut,
   CommandSeparator,
   CommandDialog,
