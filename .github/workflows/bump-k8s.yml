@@ -49,8 +49,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: tesserix/tesserix-k8s
-          # ADMIN_TOKEN is the fallback for when the bot PAT expires.
-          token: ${{ secrets.TESSERIX_K8S_BOT || secrets.ADMIN_TOKEN }}
+          # TESSERIX_K8S_BOT is the fallback; its PAT expired in 2026-08.
+          token: ${{ secrets.ADMIN_TOKEN || secrets.TESSERIX_K8S_BOT }}
           path: tesserix-k8s
           ref: main
           fetch-depth: 0

@@ -10,7 +10,6 @@ on:
       - 'pnpm-lock.yaml'
       - 'package.json'
       - '.github/workflows/deploy-k8s.yml'
-      - '.github/workflows/bump-k8s.yml'
   workflow_dispatch:
 
 concurrency:
