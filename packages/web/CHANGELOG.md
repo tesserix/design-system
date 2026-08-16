@@ -1,5 +1,11 @@
 # @tesserix/web
 
+## 1.12.0
+
+### Minor Changes
+
+- 0bc1a10: Export `AuroraProviderMark` so a host with its own button chrome — a Zitadel login form whose submit button carries the server action and pending state — can still render the resolved brand logo.
+
 ## 1.11.0
 
 ### Minor Changes
