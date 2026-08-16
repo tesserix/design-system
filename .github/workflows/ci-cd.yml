@@ -170,5 +170,11 @@ jobs:
           rm -f packages/web/.npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$NPM_CONFIG_USERCONFIG"
           cp "$NPM_CONFIG_USERCONFIG" .npmrc
+          # npm answers an unauthorised publish with E404, so name the account first.
+          if ! who=$(npm whoami --registry https://registry.npmjs.org 2>&1); then
+            echo "::error::NPM_TOKEN does not authenticate ($who) — mint a new Automation token for the @tesserix scope"
+            exit 1
+          fi
+          echo "Publishing to registry.npmjs.org as $who"
           pnpm release
 
