@@ -23,6 +23,8 @@ export interface AuroraPalette {
   subtleForeground: string
   inputBackground: string
   inputBorder: string
+  /** Hover fill for secondary and provider buttons sitting on the card. */
+  surfaceHover: string
   gridline: string
   buttonBackground: string
   buttonForeground: string
@@ -37,21 +39,22 @@ const AA_CONTRAST = 4.5
 
 const SURFACE = {
   light: {
-    canvas: "#FAFBF8",
+    canvas: "#F6F6FC",
     cardBase: "#FFFFFF",
-    cardBackground: "rgba(255,255,255,.72)",
-    cardShadow: "0 24px 60px rgba(31,38,80,.13),inset 0 1px 0 rgba(255,255,255,.9)",
+    cardBackground: "rgba(255,255,255,.92)",
+    cardShadow: "0 1px 2px rgba(16,24,40,.06),0 24px 48px -12px rgba(16,24,40,.18)",
     foreground: "#0F1729",
     mutedForeground: "#55606F",
     labelForeground: "#3D4657",
     subtleForeground: "#98A1AE",
-    inputBackground: "rgba(255,255,255,.85)",
-    inputBorderAlpha: 0.22,
-    gridline: "rgba(15,23,41,.05)",
-    borderAlpha: 0.2,
+    inputBackground: "#FFFFFF",
+    inputBorderAlpha: 0.3,
+    surfaceHover: "rgba(15,23,41,.05)",
+    gridline: "rgba(15,23,41,.03)",
+    borderAlpha: 0.22,
     buttonLift: 6,
     buttonForeground: "#FFFFFF",
-    washAlpha: [0.2, 0.17, 0.28],
+    washAlpha: [0.28, 0.22, 0.3],
     washLift: [0, 6, 10],
   },
   dark: {
@@ -65,6 +68,7 @@ const SURFACE = {
     subtleForeground: "#7A7FA5",
     inputBackground: "rgba(15,14,42,.6)",
     inputBorderAlpha: 0.34,
+    surfaceHover: "rgba(255,255,255,.07)",
     gridline: "rgba(255,255,255,.045)",
     borderAlpha: 0.24,
     buttonLift: 10,
@@ -104,6 +108,7 @@ export function deriveAuroraPalette(
     subtleForeground: surface.subtleForeground,
     inputBackground: surface.inputBackground,
     inputBorder: rgba(brand, surface.inputBorderAlpha),
+    surfaceHover: surface.surfaceHover,
     gridline: surface.gridline,
     buttonBackground: `linear-gradient(180deg,${toHex(shift(brand, 0, surface.buttonLift))} 0%,${brand} 100%)`,
     buttonForeground: surface.buttonForeground,

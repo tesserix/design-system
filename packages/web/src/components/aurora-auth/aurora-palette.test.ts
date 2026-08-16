@@ -27,8 +27,31 @@ describe("deriveAuroraPalette", () => {
     expect(hue(swatches.tertiary)).toBeCloseTo((hue("#0E9F6E") - 42 + 360) % 360, 0)
   })
 
+  it("uses a cool near-white canvas so the brand washes read as tint, not grime", () => {
+    expect(deriveAuroraPalette(TESSERIX).canvas).toBe("#F6F6FC")
+  })
+
+  it("keeps the light card nearly opaque so it separates from the canvas", () => {
+    const light = deriveAuroraPalette(TESSERIX)
+    expect(light.cardBackground).toBe("rgba(255,255,255,.92)")
+    expect(light.cardShadow).toContain("rgba(16,24,40,.18)")
+  })
+
+  it("fills light-mode fields solid so they do not vanish into the card", () => {
+    expect(deriveAuroraPalette(TESSERIX).inputBackground).toBe("#FFFFFF")
+  })
+
+  it("exposes a hover wash for secondary buttons on both surfaces", () => {
+    expect(deriveAuroraPalette(TESSERIX).surfaceHover).toBe("rgba(15,23,41,.05)")
+    expect(deriveAuroraPalette(TESSERIX, { mode: "dark" }).surfaceHover).toBe("rgba(255,255,255,.07)")
+  })
+
+  it("keeps the light gridline faint enough to stay behind the card", () => {
+    expect(deriveAuroraPalette(TESSERIX).gridline).toBe("rgba(15,23,41,.03)")
+  })
+
   it("tints the input border with the brand so fields read on either surface", () => {
-    expect(deriveAuroraPalette(TESSERIX).inputBorder).toBe("rgba(91,95,214,0.22)")
+    expect(deriveAuroraPalette(TESSERIX).inputBorder).toBe("rgba(91,95,214,0.3)")
     expect(deriveAuroraPalette(TESSERIX, { mode: "dark" }).inputBorder).toBe("rgba(91,95,214,0.34)")
   })
 

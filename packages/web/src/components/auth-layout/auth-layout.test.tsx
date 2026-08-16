@@ -52,6 +52,71 @@ describe("AuthLayout", () => {
     expect(screen.getByRole("button", { name: /continue with github/i })).toBeDisabled()
   })
 
+  it("paints a brand mark for a known provider without the host supplying one", () => {
+    render(<AuthSocialButton provider="Google" />)
+
+    const mark = screen.getByRole("button").querySelector("[data-provider-mark]")
+    expect(mark).toHaveAttribute("data-provider-mark", "google")
+  })
+
+  it("marks an unknown provider generically rather than leaving a bare label", () => {
+    render(<AuthSocialButton provider="Northwind Staff Directory" />)
+
+    expect(
+      screen.getByRole("button").querySelector("[data-provider-mark]")
+    ).toHaveAttribute("data-provider-mark", "sso")
+  })
+
+  it("lets the host's own icon win over the brand mark", () => {
+    render(<AuthSocialButton provider="Google" icon={<span data-testid="own-icon">G</span>} />)
+
+    expect(screen.getByTestId("own-icon")).toBeInTheDocument()
+    expect(screen.getByRole("button").querySelector("[data-provider-mark]")).toBeNull()
+  })
+
+  it("drops the mark when the host asks for a text-only button", () => {
+    render(<AuthSocialButton provider="Google" display="text-only" />)
+
+    expect(screen.getByRole("button").querySelector("[data-provider-mark]")).toBeNull()
+  })
+
+  it("stacks provider buttons so their labels are never truncated", () => {
+    render(<AuthSocialProviders data-testid="providers" />)
+
+    expect(screen.getByTestId("providers")).not.toHaveClass("sm:grid-cols-2")
+  })
+
+  it("centres the card header so the title sits over the form", () => {
+    render(
+      <AuthCardHeader data-testid="header">
+        <AuthCardTitle>Sign in</AuthCardTitle>
+      </AuthCardHeader>
+    )
+
+    expect(screen.getByTestId("header")).toHaveClass("text-center")
+  })
+
+  it("hides the brand pane below lg without leaving its grid column behind", () => {
+    render(
+      <AuthLayout data-testid="layout">
+        <AuthLayoutBrand data-testid="brand" />
+        <AuthLayoutContent />
+      </AuthLayout>
+    )
+
+    expect(screen.getByTestId("brand")).toHaveClass("max-lg:hidden")
+    expect(screen.getByTestId("brand")).not.toHaveClass("hidden")
+  })
+
+  it("centres the card in the viewport on any screen", () => {
+    render(<AuthLayoutContent data-testid="content" />)
+
+    const content = screen.getByTestId("content")
+    expect(content).toHaveClass("items-center")
+    expect(content).toHaveClass("justify-center")
+    expect(content).toHaveClass("min-h-[100svh]")
+  })
+
   it("supports icon-only, text-only and icon+text social button modes", () => {
     const onClick = vi.fn()
 

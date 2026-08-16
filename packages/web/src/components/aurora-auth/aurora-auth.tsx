@@ -25,9 +25,9 @@ export function useAuroraPalette(): AuroraPalette {
 export type AuroraSurfaceMode = AuroraMode | "auto"
 
 const WASH_POSITION = [
-  "h-[780px] w-[780px] -top-[260px] -left-[180px]",
-  "h-[700px] w-[700px] -bottom-[280px] -right-[140px]",
-  "h-[560px] w-[560px] top-[42%] left-[52%]",
+  "h-[85vmax] w-[85vmax] -top-[28vmax] -left-[20vmax]",
+  "h-[76vmax] w-[76vmax] -bottom-[30vmax] -right-[16vmax]",
+  "h-[60vmax] w-[60vmax] top-[42%] left-[52%]",
 ]
 
 function auroraVariables(palette: AuroraPalette): Record<string, string> {
@@ -39,6 +39,7 @@ function auroraVariables(palette: AuroraPalette): Record<string, string> {
     "--aurora-border": palette.cardBorder,
     "--aurora-input": palette.inputBackground,
     "--aurora-input-border": palette.inputBorder,
+    "--aurora-hover": palette.surfaceHover,
     "--aurora-foreground": palette.foreground,
     "--aurora-muted": palette.mutedForeground,
     "--aurora-label": palette.labelForeground,
@@ -186,7 +187,7 @@ const AuroraAuthPanel = React.forwardRef<HTMLDivElement, AuroraAuthPanelProps>(
           ref={ref}
           data-aurora-scope={surface.scope}
           className={cn(
-            "relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-12",
+            "relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-4 py-8 sm:py-12",
             className
           )}
           style={
@@ -207,7 +208,7 @@ const AuroraAuthPanel = React.forwardRef<HTMLDivElement, AuroraAuthPanelProps>(
             <AuroraSurface washCount={surface.palette.washes.length} />
           </div>
           <div
-            className="relative w-full max-w-[404px] rounded-[1.25rem] p-8 text-center backdrop-blur-[28px] sm:p-10"
+            className="relative w-full max-w-[404px] rounded-[1.25rem] p-6 text-center backdrop-blur-[28px] sm:p-9"
             style={{
               background: "var(--aurora-card)",
               border: "var(--aurora-border)",
@@ -219,7 +220,9 @@ const AuroraAuthPanel = React.forwardRef<HTMLDivElement, AuroraAuthPanelProps>(
                 {logo}
               </div>
             ) : null}
-            {title ? <h1 className="mb-1.5 text-2xl font-semibold tracking-tight">{title}</h1> : null}
+            {title ? (
+              <h1 className="mb-1.5 text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
+            ) : null}
             {tagline ? (
               <p className="mb-7 text-[0.9375rem]" style={{ color: "var(--aurora-muted)" }}>
                 {tagline}

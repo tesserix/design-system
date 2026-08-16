@@ -52,7 +52,7 @@ describe("AuroraAuthPanel", () => {
 
     const panel = screen.getByTestId("panel")
     expect(panel.style.getPropertyValue("--aurora-accent")).toBe("#5B5FD6")
-    expect(panel.style.getPropertyValue("--aurora-canvas")).toBe("#FAFBF8")
+    expect(panel.style.getPropertyValue("--aurora-canvas")).toBe("#F6F6FC")
     expect(panel.style.getPropertyValue("--aurora-button")).toContain("linear-gradient")
   })
 
@@ -74,7 +74,7 @@ describe("AuroraAuthPanel", () => {
     )
 
     const css = container.querySelector("style")?.textContent ?? ""
-    expect(css).toContain("--aurora-canvas:#FAFBF8")
+    expect(css).toContain("--aurora-canvas:#F6F6FC")
     expect(css).toContain("--aurora-canvas:#0F0E2A")
     expect(css).toMatch(/\.dark \[data-aurora-scope=/)
   })
@@ -100,7 +100,20 @@ describe("AuroraAuthPanel", () => {
   it("keeps a fixed mode inline so it never inherits the host's dark class", () => {
     render(<AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" mode="light" data-testid="panel" />)
 
-    expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("#FAFBF8")
+    expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("#F6F6FC")
+  })
+
+  it("sizes itself to the small viewport so mobile browser chrome cannot clip the card", () => {
+    render(<AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" data-testid="panel" />)
+
+    expect(screen.getByTestId("panel")).toHaveClass("min-h-[100svh]")
+  })
+
+  it("scales its washes to the viewport instead of a desktop pixel size", () => {
+    render(<AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" data-testid="panel" />)
+
+    const wash = screen.getByTestId("panel").querySelector("[data-aurora-wash]")
+    expect(wash?.className).toMatch(/vmax/)
   })
 
   it("hides the watermark by default and shows it when the tenant may not remove it", () => {

@@ -1,6 +1,14 @@
 import * as React from "react"
 
 import { cn } from "../../lib/utils"
+import { resolveAuroraProvider } from "../aurora-auth/aurora-provider-button"
+import { PROVIDER_MARKS } from "../aurora-auth/provider-marks"
+
+/** Same marks the aurora auth surface uses, so both auth layouts show one Google logo. */
+function BrandMark({ provider }: { provider: string }) {
+  const Mark = PROVIDER_MARKS[resolveAuroraProvider(provider)]
+  return <Mark size={18} />
+}
 
 const AuthLayout = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -21,7 +29,7 @@ const AuthLayoutBrand = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLE
     <aside
       ref={ref}
       className={cn(
-        "relative hidden overflow-hidden border-r bg-gradient-to-br from-primary/10 via-card to-background p-10 lg:flex lg:flex-col lg:justify-between",
+        "relative flex flex-col justify-between overflow-hidden border-r bg-gradient-to-br from-primary/10 via-card to-background p-10 max-lg:hidden",
         className
       )}
       {...props}
@@ -34,7 +42,7 @@ const AuthLayoutContent = React.forwardRef<HTMLElement, React.HTMLAttributes<HTM
   ({ className, ...props }, ref) => (
     <main
       ref={ref}
-      className={cn("flex items-center justify-center px-4 py-10 sm:px-6", className)}
+      className={cn("flex min-h-[100svh] items-center justify-center px-4 py-10 sm:px-6", className)}
       {...props}
     />
   )
@@ -53,7 +61,7 @@ const AuthCard = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
 AuthCard.displayName = "AuthCard"
 
 const AuthCardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => <div ref={ref} className={cn("mb-6 space-y-1", className)} {...props} />
+  ({ className, ...props }, ref) => <div ref={ref} className={cn("mb-6 space-y-1 text-center", className)} {...props} />
 )
 AuthCardHeader.displayName = "AuthCardHeader"
 
@@ -91,7 +99,7 @@ const AuthSocialProviders = React.forwardRef<HTMLDivElement, React.HTMLAttribute
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("grid gap-2 sm:grid-cols-2", className)}
+      className={cn("grid gap-2", className)}
       {...props}
     />
   )
@@ -120,8 +128,8 @@ const AuthSocialButton = React.forwardRef<HTMLButtonElement, AuthSocialButtonPro
     },
     ref
   ) => {
-    const resolvedDisplay =
-      display ?? (icon && children ? "icon-text" : icon ? "icon-only" : "text-only")
+    const brandMark = icon ?? <BrandMark provider={provider} />
+    const resolvedDisplay = display ?? (children ? "icon-text" : "icon-only")
     const defaultLabel = `Continue with ${provider}`
     const labelContent = children ?? defaultLabel
     const computedAriaLabel =
@@ -141,17 +149,17 @@ const AuthSocialButton = React.forwardRef<HTMLButtonElement, AuthSocialButtonPro
         aria-label={computedAriaLabel}
         {...props}
       >
-        {resolvedDisplay !== "text-only" && iconPosition === "left" && icon ? (
+        {resolvedDisplay !== "text-only" && iconPosition === "left" ? (
           <span aria-hidden="true" className="flex shrink-0 items-center justify-center">
-            {icon}
+            {brandMark}
           </span>
         ) : null}
         {resolvedDisplay !== "icon-only" ? (
           <span className="block min-w-0 truncate whitespace-nowrap">{labelContent}</span>
         ) : null}
-        {resolvedDisplay !== "text-only" && iconPosition === "right" && icon ? (
+        {resolvedDisplay !== "text-only" && iconPosition === "right" ? (
           <span aria-hidden="true" className="flex shrink-0 items-center justify-center">
-            {icon}
+            {brandMark}
           </span>
         ) : null}
       </button>

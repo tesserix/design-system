@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
 import { AuroraAuthPanel, useAuroraPalette } from "./aurora-auth"
+import { AuroraProviderButton } from "./aurora-provider-button"
+import { AuroraProviderList } from "./aurora-provider-list"
 
 const meta = {
   title: "Patterns/AuroraAuthPanel",
@@ -39,7 +41,8 @@ function Wordmark({ name, glyph }: { name: string; glyph: React.ReactNode }) {
   )
 }
 
-function SignInForm({ email, idp }: { email: string; idp: string }) {
+/** `providers` mirrors what the tenant enabled in Zitadel — an empty list renders no section at all. */
+function SignInForm({ email, providers = [] }: { email: string; providers?: string[] }) {
   const palette = useAuroraPalette()
   const field = {
     background: "var(--aurora-input)",
@@ -85,26 +88,11 @@ function SignInForm({ email, idp }: { email: string; idp: string }) {
       >
         Continue
       </button>
-      <div
-        className="flex items-center gap-3 py-1 text-xs uppercase tracking-wider"
-        style={{ color: palette.mutedForeground }}
-      >
-        <span className="h-px flex-1" style={{ background: palette.accent, opacity: 0.2 }} />
-        or
-        <span className="h-px flex-1" style={{ background: palette.accent, opacity: 0.2 }} />
-      </div>
-      <div className="space-y-2.5">
-        {["Continue with passkey", `Continue with ${idp}`].map((label) => (
-          <button
-            key={label}
-            type="button"
-            className="w-full rounded-[0.625rem] py-3 text-[0.9375rem] font-medium"
-            style={{ border: "var(--aurora-border)", color: "var(--aurora-foreground)" }}
-          >
-            {label}
-          </button>
+      <AuroraProviderList label="or continue with">
+        {providers.map((provider) => (
+          <AuroraProviderButton key={provider} provider={provider} />
         ))}
-      </div>
+      </AuroraProviderList>
     </form>
   )
 }
@@ -117,7 +105,7 @@ export const Default: Story = {
     title: "Sign in to Tesserix",
     tagline: "Welcome back. Please enter your details.",
     footer: "Don't have an account? Sign up",
-    children: <SignInForm email="samyak@tesserix.app" idp="Google" />,
+    children: <SignInForm email="samyak@tesserix.app" providers={["passkey", "google"]} />,
   },
 }
 
@@ -127,7 +115,7 @@ export const FollowsHostTheme: Story = {
     mode: "auto",
     title: "Sign in to Tesserix",
     tagline: "Toggle the Storybook theme — the panel follows without a repaint.",
-    children: <SignInForm email="samyak@tesserix.app" idp="Google" />,
+    children: <SignInForm email="samyak@tesserix.app" providers={["passkey", "google"]} />,
   },
 }
 
@@ -149,7 +137,7 @@ export const NorthwindHealth: Story = {
         }
       />
     ),
-    children: <SignInForm email="j.okafor@northwind.health" idp="Microsoft" />,
+    children: <SignInForm email="j.okafor@northwind.health" providers={["microsoft"]} />,
   },
 }
 
@@ -172,7 +160,7 @@ export const KestrelFreightDark: Story = {
         }
       />
     ),
-    children: <SignInForm email="dispatch@kestrelfreight.com" idp="Okta" />,
+    children: <SignInForm email="dispatch@kestrelfreight.com" providers={["okta", "google", "github", "apple"]} />,
   },
 }
 
@@ -184,7 +172,7 @@ export const AureliaBankSubtle: Story = {
     title: "Aurelia Online Banking",
     tagline: "Your accounts, wherever you are.",
     footer: "Never share your one-time code with anyone.",
-    children: <SignInForm email="m.laurent@aurelia.bank" idp="SAML SSO" />,
+    children: <SignInForm email="m.laurent@aurelia.bank" providers={["Aurelia Staff SSO"]} />,
   },
 }
 
@@ -193,6 +181,25 @@ export const Flat: Story = {
     ...Default.args,
     intensity: "flat",
     tagline: "Aurora off — for tenants who want a plain surface.",
+  },
+}
+
+export const NoProvidersEnabled: Story = {
+  args: {
+    ...Default.args,
+    tagline: "The tenant has no IdP configured — no divider, no dead social button.",
+    children: <SignInForm email="samyak@tesserix.app" />,
+  },
+}
+
+export const OnPhone: Story = {
+  parameters: { viewport: { defaultViewport: "mobile1" } },
+  args: {
+    ...Default.args,
+    tagline: "Four providers collapse into one tappable row.",
+    children: (
+      <SignInForm email="samyak@tesserix.app" providers={["google", "microsoft", "apple", "github"]} />
+    ),
   },
 }
 
