@@ -10,6 +10,7 @@ on:
       - 'pnpm-lock.yaml'
       - 'package.json'
       - '.github/workflows/deploy-k8s.yml'
+      - '.github/workflows/bump-k8s.yml'
   workflow_dispatch:
 
 concurrency:
@@ -77,58 +78,6 @@ jobs:
           exit-code: "0"
 
   bump-k8s:
-    name: Bump tesserix-k8s image tags
     needs: [images]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Compute short SHA
-        id: sha
-        run: echo "tag=sha-$(echo ${GITHUB_SHA} | cut -c1-12)" >> $GITHUB_OUTPUT
-
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          yq --version
-
-      - name: Checkout tesserix-k8s
-        uses: actions/checkout@v4
-        with:
-          repository: tesserix/tesserix-k8s
-          token: ${{ secrets.TESSERIX_K8S_BOT }}
-          path: tesserix-k8s
-          ref: main
-          fetch-depth: 0
-
-      - name: Bump image tags
-        working-directory: tesserix-k8s
-        run: |
-          set -euo pipefail
-          for svc in tesserix-docs tesserix-storybook; do
-            f="charts/apps/$svc/values.yaml"
-            if [ ! -f "$f" ]; then
-              echo "WARN: $f does not exist — skipping"; continue
-            fi
-            yq -i ".image.tag = \"${{ steps.sha.outputs.tag }}\"" "$f"
-          done
-
-      - name: Commit & push (with rebase retry)
-        working-directory: tesserix-k8s
-        run: |
-          set -euo pipefail
-          git config user.name "tesserix-bot"
-          git config user.email "tesserix-bot@users.noreply.github.com"
-          if git diff --quiet; then
-            echo "No tag changes — nothing to commit"; exit 0
-          fi
-          git add charts/apps/tesserix-docs/values.yaml \
-                  charts/apps/tesserix-storybook/values.yaml
-          git commit -m "chore: bump design-system images to ${{ steps.sha.outputs.tag }}"
-          for attempt in 1 2 3; do
-            if git push origin main; then
-              echo "Pushed on attempt $attempt"; exit 0
-            fi
-            echo "Push failed (attempt $attempt) — rebasing"
-            git pull --rebase origin main
-          done
-          echo "Push failed after 3 rebase attempts"; exit 1
+    uses: ./.github/workflows/bump-k8s.yml
+    secrets: inherit

@@ -1,0 +1,93 @@
+name: Bump k8s image tags
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Image tag to roll out; defaults to the caller commit'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag to roll out, e.g. sha-d5e9c6041353'
+        required: false
+        type: string
+
+concurrency:
+  group: bump-k8s
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    name: Bump tesserix-k8s image tags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: meta
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="${INPUT_TAG:-}"
+          [ -n "$tag" ] || tag="sha-$(echo "$GITHUB_SHA" | cut -c1-12)"
+          case "$tag" in
+            *[!A-Za-z0-9._-]*) echo "Refusing unsafe tag: $tag" >&2; exit 1 ;;
+          esac
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Checkout tesserix-k8s
+        uses: actions/checkout@v4
+        with:
+          repository: tesserix/tesserix-k8s
+          # ADMIN_TOKEN is the fallback for when the bot PAT expires.
+          token: ${{ secrets.TESSERIX_K8S_BOT || secrets.ADMIN_TOKEN }}
+          path: tesserix-k8s
+          ref: main
+          fetch-depth: 0
+
+      - name: Bump image tags
+        working-directory: tesserix-k8s
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          for svc in tesserix-docs tesserix-storybook; do
+            f="charts/apps/$svc/values.yaml"
+            if [ ! -f "$f" ]; then
+              echo "WARN: $f does not exist — skipping"; continue
+            fi
+            yq -i ".image.tag = \"$TAG\"" "$f"
+          done
+
+      - name: Commit & push (with rebase retry)
+        working-directory: tesserix-k8s
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "tesserix-bot"
+          git config user.email "tesserix-bot@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No tag changes — nothing to commit"; exit 0
+          fi
+          git add charts/apps/tesserix-docs/values.yaml \
+                  charts/apps/tesserix-storybook/values.yaml
+          git commit -m "chore: bump design-system images to $TAG"
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              echo "Pushed on attempt $attempt"; exit 0
+            fi
+            echo "Push failed (attempt $attempt) — rebasing"
+            git pull --rebase origin main
+          done
+          echo "Push failed after 3 rebase attempts"; exit 1
