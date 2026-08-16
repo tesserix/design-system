@@ -1,14 +1,7 @@
 import * as React from "react"
 
 import { cn } from "../../lib/utils"
-import { resolveAuroraProvider } from "../aurora-auth/aurora-provider-button"
-import { PROVIDER_MARKS } from "../aurora-auth/provider-marks"
-
-/** Same marks the aurora auth surface uses, so both auth layouts show one Google logo. */
-function BrandMark({ provider }: { provider: string }) {
-  const Mark = PROVIDER_MARKS[resolveAuroraProvider(provider)]
-  return <Mark size={18} />
-}
+import { AuroraProviderMark } from "../aurora-auth/aurora-provider-button"
 
 const AuthLayout = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -128,7 +121,7 @@ const AuthSocialButton = React.forwardRef<HTMLButtonElement, AuthSocialButtonPro
     },
     ref
   ) => {
-    const brandMark = icon ?? <BrandMark provider={provider} />
+    const brandMark = icon ?? <AuroraProviderMark provider={provider} size={18} />
     const resolvedDisplay = display ?? (children ? "icon-text" : "icon-only")
     const defaultLabel = `Continue with ${provider}`
     const labelContent = children ?? defaultLabel

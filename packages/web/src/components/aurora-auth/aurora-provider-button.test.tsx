@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
-import { AuroraProviderButton, resolveAuroraProvider } from "./aurora-provider-button"
+import { AuroraProviderButton, AuroraProviderMark, resolveAuroraProvider } from "./aurora-provider-button"
 
 describe("resolveAuroraProvider", () => {
   it("maps a tenant's display name onto a known brand", () => {
@@ -103,5 +103,21 @@ describe("AuroraProviderButton", () => {
     const style = screen.getByRole("button").getAttribute("style") ?? ""
     expect(style).toContain("var(--aurora-input")
     expect(style).toContain("var(--aurora-foreground")
+  })
+})
+
+describe("AuroraProviderMark", () => {
+  it("paints the brand mark for a provider name so hosts can reuse it in their own button", () => {
+    render(<AuroraProviderMark provider="Google Workspace" size={24} />)
+
+    const mark = document.querySelector("[data-provider-mark]")
+    expect(mark).toHaveAttribute("data-provider-mark", "google")
+    expect(mark).toHaveAttribute("width", "24")
+  })
+
+  it("falls back to the generic sso mark for an unrecognised provider", () => {
+    render(<AuroraProviderMark provider="Northwind Staff Directory" />)
+
+    expect(document.querySelector("[data-provider-mark]")).toHaveAttribute("data-provider-mark", "sso")
   })
 })

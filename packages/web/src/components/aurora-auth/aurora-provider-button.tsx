@@ -40,6 +40,18 @@ export function resolveAuroraProvider(provider: string): AuroraProviderId {
   return PROVIDER_ALIAS.find(([pattern]) => pattern.test(name))?.[1] ?? "sso"
 }
 
+export interface AuroraProviderMarkProps {
+  /** A known provider id, or the tenant's IdP display name to resolve one from. */
+  provider: AuroraProviderId | (string & {})
+  size?: number
+}
+
+/** Exported on its own so a host with its own button chrome still gets the brand logo. */
+function AuroraProviderMark({ provider, size }: AuroraProviderMarkProps) {
+  const Mark = PROVIDER_MARKS[resolveAuroraProvider(provider)]
+  return <Mark size={size} />
+}
+
 const BUTTON_CSS = `
 [data-aurora-provider-button]{transition:background .15s ease,border-color .15s ease,box-shadow .15s ease}
 [data-aurora-provider-button]:hover:not(:disabled){background:var(--aurora-hover,rgba(15,23,41,.045))}
@@ -103,4 +115,4 @@ const AuroraProviderButton = React.forwardRef<HTMLButtonElement, AuroraProviderB
 )
 AuroraProviderButton.displayName = "AuroraProviderButton"
 
-export { AuroraProviderButton }
+export { AuroraProviderButton, AuroraProviderMark }
