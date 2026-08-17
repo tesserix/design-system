@@ -88,7 +88,9 @@ export const ZitadelDriven: Story = {
     })
 
     return (
-      <AuthPanel brandColor={BRAND} branding={policies.branding} title="Sign in" tagline="Welcome back.">
+      // No `brandColor`: the colour comes from the policy alone, which is the
+      // path a real Zitadel-backed host takes.
+      <AuthPanel branding={policies.branding} title="Sign in" tagline="Welcome back.">
         <AuthCredentialForm
           methodPolicy={policies.methods}
           values={values}
