@@ -37,6 +37,21 @@ function Surface({ children, title }: { children: React.ReactNode; title?: strin
   )
 }
 
+/**
+ * No brand colour: the surface takes its accent, background, text and radius
+ * from the host's design tokens and paints no washes.
+ */
+export const DesignTokensOnly: Story = {
+  render: function DesignTokensOnlyStory() {
+    const [values, setValues] = React.useState<AuthCredentialValues>({ loginName: "", password: "" })
+    return (
+      <AuthPanel title="Sign in" tagline="Welcome back.">
+        <AuthCredentialForm values={values} onValuesChange={setValues} onSubmit={() => {}} />
+      </AuthPanel>
+    )
+  },
+}
+
 /** No policy at all — the zero-config default. */
 export const PlainSignIn: Story = {
   render: function PlainSignInStory() {

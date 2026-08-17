@@ -321,3 +321,51 @@ describe("AuthPanel theming", () => {
     expect(css).toMatch(/\.dark \[data-auth-scope/)
   })
 })
+
+describe("AuthPanel without a brand colour", () => {
+  const styleOf = (container: HTMLElement) =>
+    (container.querySelector("[data-auth-scope]") as HTMLElement).getAttribute("style") ?? ""
+
+  it("defers the accent to the design system's primary token", () => {
+    const { container } = render(<AuthPanel>x</AuthPanel>)
+
+    expect(styleOf(container)).toContain("var(--primary,")
+  })
+
+  it("defers the input border to the input token", () => {
+    const { container } = render(<AuthPanel>x</AuthPanel>)
+
+    expect(styleOf(container)).toContain("var(--input,")
+  })
+
+  it("paints no washes, so a token-themed surface has no gradient", () => {
+    const { container } = render(<AuthPanel>x</AuthPanel>)
+    const style = styleOf(container)
+
+    expect(style).toContain("--auth-wash-0: none")
+    expect(style).toContain("--auth-wash-1: none")
+    expect(style).toContain("--auth-wash-2: none")
+  })
+
+  it("does not warn, because omitting the colour is a supported choice", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    render(<AuthPanel>x</AuthPanel>)
+
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it("still honours an explicit intensity when no brand colour is given", () => {
+    const { container } = render(<AuthPanel intensity="full">x</AuthPanel>)
+
+    expect(styleOf(container)).not.toContain("--auth-wash-0: none")
+  })
+
+  it("keeps a supplied brand colour literal, exactly as before", () => {
+    const { container } = render(<AuthPanel brandColor="#5469D4">x</AuthPanel>)
+    const style = styleOf(container)
+
+    expect(style).toContain("#5469D4")
+    expect(style).not.toContain("var(--primary,")
+  })
+})
