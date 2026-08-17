@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 
 import { AuroraAuthPanel, AuroraBackground, useAuroraPalette } from "./aurora-auth"
@@ -178,5 +178,43 @@ describe("useAuroraPalette", () => {
     }
 
     expect(() => render(<Orphan />)).toThrow(/AuroraAuthPanel/)
+  })
+})
+
+describe("AuroraAuthPanel brand colour resilience", () => {
+  const invalidBrandColors = ["", "   ", "rgb(84,105,212)", "rebeccapurple", "#12", "not-a-colour"]
+
+  it.each(invalidBrandColors)("renders instead of crashing the login page for %j", (brandColor) => {
+    expect(() =>
+      render(
+        <AuroraAuthPanel brandColor={brandColor} title="Sign in">
+          <button type="button">Continue</button>
+        </AuroraAuthPanel>
+      )
+    ).not.toThrow()
+  })
+
+  it("still renders the panel's content when the brand colour is unusable", () => {
+    render(
+      <AuroraAuthPanel brandColor="" title="Sign in">
+        <button type="button">Continue</button>
+      </AuroraAuthPanel>
+    )
+
+    expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument()
+  })
+
+  it("warns in development so a misconfigured tenant colour is not silent", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    render(<AuroraAuthPanel brandColor="rebeccapurple">x</AuroraAuthPanel>)
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("rebeccapurple"))
+    warn.mockRestore()
+  })
+
+  it("keeps painting a valid brand colour exactly as before", () => {
+    expect(() => render(<AuroraBackground brandColor="#5469D4" />)).not.toThrow()
+    expect(() => render(<AuroraBackground brandColor="" />)).not.toThrow()
   })
 })

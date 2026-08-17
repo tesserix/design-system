@@ -36,7 +36,9 @@ const PROVIDER_ALIAS: Array<[RegExp, AuroraProviderId]> = [
 
 export function resolveAuroraProvider(provider: string): AuroraProviderId {
   const name = provider.trim().toLowerCase()
-  if (name in PROVIDER_MARKS) return name as AuroraProviderId
+  // Own keys only: `in` would resolve an IdP named "constructor" to a prototype
+  // member and render a non-component.
+  if (Object.prototype.hasOwnProperty.call(PROVIDER_MARKS, name)) return name as AuroraProviderId
   return PROVIDER_ALIAS.find(([pattern]) => pattern.test(name))?.[1] ?? "sso"
 }
 
