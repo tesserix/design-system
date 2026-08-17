@@ -4,16 +4,27 @@ import { cn } from "../../lib/utils"
 import { Dialog, DialogContent } from "../dialog"
 import type { DialogProps } from "../dialog/dialog"
 
+interface RegisteredItem {
+  disabled: boolean
+  element: HTMLElement | null
+}
+
 interface CommandContextValue {
   query: string
   setQuery: (query: string) => void
+  shouldFilter: boolean
   activeValue?: string
   setActiveValue: (value?: string) => void
   value?: string
   onValueChange?: (value: string) => void
-  registerVisibleItem: (value: string) => void
-  unregisterVisibleItem: (value: string) => void
-  getVisibleItems: () => string[]
+  registerItem: (value: string, item: RegisteredItem) => void
+  unregisterItem: (value: string) => void
+  getSelectableValues: () => string[]
+  renderedCount: number
+  listId: string
+  listMounted: boolean
+  setListMounted: (mounted: boolean) => void
+  getItemId: (value: string) => string
 }
 
 const CommandContext = React.createContext<CommandContextValue | undefined>(undefined)
@@ -26,51 +37,212 @@ const useCommand = () => {
   return context
 }
 
+/**
+ * `useLayoutEffect` warns when React renders on the server, and this component
+ * ships to server-rendered apps. Registration only matters where there is a DOM,
+ * so fall back to the passive effect during SSR.
+ */
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
+
+/** Orders two registered items by their position in the document. */
+const compareDocumentOrder = (a: HTMLElement | null, b: HTMLElement | null) => {
+  if (!a || !b || a === b) return 0
+  const position = a.compareDocumentPosition(b)
+  if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1
+  if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1
+  return 0
+}
+
 export interface CommandProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** The selected item's value. */
   value?: string
   defaultValue?: string
   onValueChange?: (value: string) => void
+  /** The search text. Distinct from `value`, which is the selected item. */
+  query?: string
+  defaultQuery?: string
+  onQueryChange?: (query: string) => void
+  /** Set false when a caller filters results itself (e.g. server-side search). */
+  shouldFilter?: boolean
 }
 
 const Command = React.forwardRef<HTMLDivElement, CommandProps>(
-  ({ className, value: controlledValue, defaultValue, onValueChange, children, ...props }, ref) => {
-    const [query, setQuery] = React.useState("")
+  (
+    {
+      className,
+      value: controlledValue,
+      defaultValue,
+      onValueChange,
+      query: controlledQuery,
+      defaultQuery = "",
+      onQueryChange,
+      shouldFilter = true,
+      onKeyDown,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const baseId = React.useId()
+    const [uncontrolledQuery, setUncontrolledQuery] = React.useState(defaultQuery)
     const [activeValue, setActiveValue] = React.useState<string | undefined>(undefined)
     const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue)
-    const visibleItemsRef = React.useRef<string[]>([])
+    const [listMounted, setListMounted] = React.useState(false)
+
+    // The registry is state, because CommandEmpty and the highlight both render
+    // from it and a ref alone would leave them showing stale data (#8, #11).
+    // It is mirrored into a ref because event handlers must read the live
+    // registry, not the snapshot their render closed over: a keypress landing
+    // in the same tick as the registration effects would otherwise see an
+    // empty list and do nothing.
+    const [items, setItems] = React.useState<ReadonlyMap<string, RegisteredItem>>(() => new Map())
+    const itemsRef = React.useRef<ReadonlyMap<string, RegisteredItem>>(items)
+    const itemIdsRef = React.useRef<Map<string, string>>(new Map())
 
     const value = controlledValue !== undefined ? controlledValue : uncontrolledValue
+    const query = controlledQuery !== undefined ? controlledQuery : uncontrolledQuery
 
-    const registerVisibleItem = React.useCallback((itemValue: string) => {
-      if (!visibleItemsRef.current.includes(itemValue)) {
-        visibleItemsRef.current = [...visibleItemsRef.current, itemValue]
+    const setQuery = React.useCallback(
+      (nextQuery: string) => {
+        if (controlledQuery === undefined) {
+          setUncontrolledQuery(nextQuery)
+        }
+        onQueryChange?.(nextQuery)
+      },
+      [controlledQuery, onQueryChange]
+    )
+
+    const registerItem = React.useCallback((itemValue: string, item: RegisteredItem) => {
+      setItems((previous) => {
+        const existing = previous.get(itemValue)
+        if (existing && existing.disabled === item.disabled && existing.element === item.element) {
+          return previous
+        }
+        const next = new Map(previous)
+        next.set(itemValue, item)
+        itemsRef.current = next
+        return next
+      })
+    }, [])
+
+    const unregisterItem = React.useCallback((itemValue: string) => {
+      setItems((previous) => {
+        if (!previous.has(itemValue)) return previous
+        const next = new Map(previous)
+        next.delete(itemValue)
+        itemsRef.current = next
+        return next
+      })
+    }, [])
+
+    // Reads the ref so a handler always sees every item registered so far,
+    // including ones that registered after this render was captured.
+    const getSelectableValues = React.useCallback(
+      () =>
+        [...itemsRef.current.entries()]
+          .filter(([, item]) => !item.disabled)
+          .sort(([, a], [, b]) => compareDocumentOrder(a.element, b.element))
+          .map(([itemValue]) => itemValue),
+      []
+    )
+
+    const getItemId = React.useCallback(
+      (itemValue: string) => {
+        const existing = itemIdsRef.current.get(itemValue)
+        if (existing) return existing
+        const nextId = `${baseId}-item-${itemIdsRef.current.size}`
+        itemIdsRef.current.set(itemValue, nextId)
+        return nextId
+      },
+      [baseId]
+    )
+
+    const selectValue = React.useCallback(
+      (nextValue: string) => {
+        if (controlledValue === undefined) {
+          setUncontrolledValue(nextValue)
+        }
+        onValueChange?.(nextValue)
+      },
+      [controlledValue, onValueChange]
+    )
+
+    // Keep the highlight inside the current match set. Items register in an
+    // effect, so this must run after them — child effects flush first, which is
+    // why a stale `activeValue` can never survive a keystroke (#11).
+    React.useEffect(() => {
+      if (activeValue === undefined) return
+      const selectable = getSelectableValues()
+      if (!selectable.includes(activeValue)) {
+        setActiveValue(selectable[0])
       }
-    }, [])
+    // `items` is the trigger: the registry changing is what can invalidate the
+    // current highlight. `getSelectableValues` is stable and reads the ref.
+    }, [activeValue, items, getSelectableValues])
 
-    const unregisterVisibleItem = React.useCallback((itemValue: string) => {
-      visibleItemsRef.current = visibleItemsRef.current.filter((valueItem) => valueItem !== itemValue)
-    }, [])
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const selectable = getSelectableValues()
 
-    const getVisibleItems = React.useCallback(() => visibleItemsRef.current, [])
+      if (event.key === "ArrowDown") {
+        event.preventDefault()
+        if (selectable.length === 0) return
+        const currentIndex = selectable.indexOf(activeValue ?? "")
+        setActiveValue(selectable[(currentIndex + 1) % selectable.length])
+        return
+      }
 
-    const contextValue = React.useMemo(
+      if (event.key === "ArrowUp") {
+        event.preventDefault()
+        if (selectable.length === 0) return
+        const currentIndex = Math.max(selectable.indexOf(activeValue ?? ""), 0)
+        setActiveValue(selectable[(currentIndex - 1 + selectable.length) % selectable.length])
+        return
+      }
+
+      if (event.key === "Enter") {
+        event.preventDefault()
+        // Confirm the highlight is still on screen before acting on it (#11).
+        if (activeValue && selectable.includes(activeValue)) {
+          selectValue(activeValue)
+        }
+      }
+
+      onKeyDown?.(event)
+    }
+
+    const contextValue = React.useMemo<CommandContextValue>(
       () => ({
         query,
         setQuery,
+        shouldFilter,
         activeValue,
         setActiveValue,
         value,
-        onValueChange: (nextValue: string) => {
-          if (controlledValue === undefined) {
-            setUncontrolledValue(nextValue)
-          }
-          onValueChange?.(nextValue)
-        },
-        registerVisibleItem,
-        unregisterVisibleItem,
-        getVisibleItems,
+        onValueChange: selectValue,
+        registerItem,
+        unregisterItem,
+        getSelectableValues,
+        renderedCount: items.size,
+        listId: `${baseId}-list`,
+        listMounted,
+        setListMounted,
+        getItemId,
       }),
-      [query, activeValue, value, controlledValue, onValueChange, registerVisibleItem, unregisterVisibleItem, getVisibleItems]
+      [
+        query,
+        setQuery,
+        shouldFilter,
+        activeValue,
+        value,
+        selectValue,
+        registerItem,
+        unregisterItem,
+        getSelectableValues,
+        items,
+        baseId,
+        listMounted,
+        getItemId,
+      ]
     )
 
     return (
@@ -81,6 +253,9 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
             "flex h-full w-full flex-col overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-md",
             className
           )}
+          // Handled here rather than on CommandList so keystrokes from the
+          // input — a sibling of the list — still reach it (#7).
+          onKeyDown={handleKeyDown}
           {...props}
         >
           {children}
@@ -93,7 +268,7 @@ Command.displayName = "Command"
 
 const CommandInput = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, placeholder = "Type a command or search...", ...props }, ref) => {
-    const { query, setQuery, setActiveValue, getVisibleItems } = useCommand()
+    const { query, setQuery, activeValue, listId, listMounted, getItemId } = useCommand()
 
     return (
       <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
@@ -119,12 +294,13 @@ const CommandInput = React.forwardRef<HTMLInputElement, React.ComponentProps<"in
             className
           )}
           value={query}
-          onChange={(event) => {
-            setQuery(event.target.value)
-            const firstVisibleItem = getVisibleItems()[0]
-            setActiveValue(firstVisibleItem)
-          }}
+          onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
+          role="combobox"
+          aria-expanded={listMounted}
+          aria-autocomplete="list"
+          aria-controls={listMounted ? listId : undefined}
+          aria-activedescendant={activeValue ? getItemId(activeValue) : undefined}
           {...props}
         />
       </div>
@@ -134,45 +310,21 @@ const CommandInput = React.forwardRef<HTMLInputElement, React.ComponentProps<"in
 CommandInput.displayName = "CommandInput"
 
 const CommandList = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
-  ({ className, onKeyDown, ...props }, ref) => {
-    const { activeValue, setActiveValue, getVisibleItems, onValueChange } = useCommand()
+  ({ className, ...props }, ref) => {
+    const { listId, setListMounted } = useCommand()
+
+    React.useEffect(() => {
+      setListMounted(true)
+      return () => setListMounted(false)
+    }, [setListMounted])
 
     return (
       <div
         ref={ref}
+        id={listId}
         role="listbox"
         tabIndex={0}
         className={cn("max-h-[320px] overflow-y-auto overflow-x-hidden p-2", className)}
-        onKeyDown={(event) => {
-          const visibleItems = getVisibleItems()
-
-          if (event.key === "ArrowDown") {
-            event.preventDefault()
-            if (visibleItems.length === 0) return
-            const currentIndex = Math.max(visibleItems.indexOf(activeValue ?? ""), -1)
-            const nextValue = visibleItems[(currentIndex + 1) % visibleItems.length]
-            setActiveValue(nextValue)
-            return
-          }
-
-          if (event.key === "ArrowUp") {
-            event.preventDefault()
-            if (visibleItems.length === 0) return
-            const currentIndex = Math.max(visibleItems.indexOf(activeValue ?? ""), 0)
-            const previousValue = visibleItems[(currentIndex - 1 + visibleItems.length) % visibleItems.length]
-            setActiveValue(previousValue)
-            return
-          }
-
-          if (event.key === "Enter") {
-            event.preventDefault()
-            if (activeValue) {
-              onValueChange?.(activeValue)
-            }
-          }
-
-          onKeyDown?.(event)
-        }}
         {...props}
       />
     )
@@ -182,12 +334,12 @@ CommandList.displayName = "CommandList"
 
 const CommandEmpty = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => {
-    const { getVisibleItems } = useCommand()
-    if (getVisibleItems().length > 0) return null
+    // Empty means "nothing rendered", not "nothing selectable" — a list of
+    // disabled matches is not empty (#8).
+    const { renderedCount } = useCommand()
+    if (renderedCount > 0) return null
 
-    return (
-      <div ref={ref} className={cn("py-6 text-center text-sm text-muted-foreground", className)} {...props} />
-    )
+    return <div ref={ref} className={cn("py-6 text-center text-sm text-muted-foreground", className)} {...props} />
   }
 )
 CommandEmpty.displayName = "CommandEmpty"
@@ -218,15 +370,46 @@ export interface CommandItemProps extends React.ComponentProps<"button"> {
 
 const CommandItem = React.forwardRef<HTMLButtonElement, CommandItemProps>(
   ({ className, value, keywords = [], onClick, children, disabled, ...props }, ref) => {
-    const { query, activeValue, setActiveValue, onValueChange, value: selectedValue, registerVisibleItem, unregisterVisibleItem } = useCommand()
+    const {
+      query,
+      shouldFilter,
+      activeValue,
+      setActiveValue,
+      onValueChange,
+      value: selectedValue,
+      registerItem,
+      unregisterItem,
+      getItemId,
+    } = useCommand()
 
-    const matchesQuery = [value, ...keywords].join(" ").toLowerCase().includes(query.toLowerCase().trim())
+    const innerRef = React.useRef<HTMLButtonElement | null>(null)
+    const setRefs = React.useCallback(
+      (node: HTMLButtonElement | null) => {
+        innerRef.current = node
+        if (typeof ref === "function") {
+          ref(node)
+        } else if (ref) {
+          ref.current = node
+        }
+      },
+      [ref]
+    )
 
-    React.useEffect(() => {
-      if (!matchesQuery || disabled) return
-      registerVisibleItem(value)
-      return () => unregisterVisibleItem(value)
-    }, [matchesQuery, disabled, value, registerVisibleItem, unregisterVisibleItem])
+    const matchesQuery =
+      !shouldFilter || [value, ...keywords].join(" ").toLowerCase().includes(query.toLowerCase().trim())
+
+    // Disabled items register too — they are on screen, so they count against
+    // emptiness even though they cannot be selected (#8).
+    //
+    // Layout, not passive: registration records the item's DOM node and the
+    // navigation order is derived from document position, so it has to complete
+    // before the browser paints. With a passive effect a key pressed in the
+    // first frame finds an empty registry and does nothing.
+    useIsomorphicLayoutEffect(() => {
+      if (!matchesQuery) return
+      registerItem(value, { disabled: Boolean(disabled), element: innerRef.current })
+      return () => unregisterItem(value)
+    }, [matchesQuery, disabled, value, registerItem, unregisterItem])
 
     if (!matchesQuery) return null
 
@@ -235,7 +418,8 @@ const CommandItem = React.forwardRef<HTMLButtonElement, CommandItemProps>(
 
     return (
       <button
-        ref={ref}
+        ref={setRefs}
+        id={getItemId(value)}
         type="button"
         role="option"
         aria-selected={isSelected}
@@ -266,6 +450,21 @@ const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanE
 )
 CommandShortcut.displayName = "CommandShortcut"
 
+const CommandLoading = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, children = "Searching…", ...props }, ref) => (
+    <div
+      ref={ref}
+      role="status"
+      aria-live="polite"
+      className={cn("py-6 text-center text-sm text-muted-foreground", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+)
+CommandLoading.displayName = "CommandLoading"
+
 interface CommandDialogProps extends DialogProps {
   children: React.ReactNode
   contentClassName?: string
@@ -287,6 +486,7 @@ export {
   CommandEmpty,
   CommandGroup,
   CommandItem,
+  CommandLoading,
   CommandShortcut,
   CommandSeparator,
   CommandDialog,
