@@ -83,7 +83,10 @@ function authVariables(
     "--auth-canvas": tokenBacked("--background", palette.canvas, supplied.background),
     "--auth-card": tokenBacked("--card", palette.cardBackground, supplied.background),
     "--auth-card-shadow": palette.cardShadow,
-    "--auth-border": palette.cardBorder,
+    // The brand tint on the card edge is only meaningful when there is a brand.
+    "--auth-border": supplied.brand
+      ? palette.cardBorder
+      : `1px solid var(--border, ${palette.cardBorder.replace(/^1px solid\s*/, "")})`,
     "--auth-input": tokenBacked("--background", palette.inputBackground, supplied.background),
     "--auth-input-border": tokenBacked("--input", palette.inputBorder, supplied.brand),
     "--auth-hover": palette.surfaceHover,
@@ -92,9 +95,13 @@ function authVariables(
     "--auth-label": tokenBacked("--foreground", palette.labelForeground, supplied.font),
     "--auth-subtle": tokenBacked("--muted-foreground", palette.subtleForeground, supplied.font),
     "--auth-gridline": palette.gridline,
-    "--auth-button": palette.buttonBackground,
-    "--auth-button-foreground": palette.buttonForeground,
-    "--auth-button-shadow": palette.buttonShadow,
+    // The primary button is the loudest element on the surface. Without a brand
+    // colour it has to read as the product's primary, not as a gradient derived
+    // from the fallback brand — which is what made a token-themed sign-in page
+    // still look blue.
+    "--auth-button": supplied.brand ? palette.buttonBackground : `var(--primary, ${palette.buttonBackground})`,
+    "--auth-button-foreground": tokenBacked("--primary-foreground", palette.buttonForeground, supplied.brand),
+    "--auth-button-shadow": supplied.brand ? palette.buttonShadow : "none",
     "--auth-wash-0": palette.washes[0] ?? "none",
     "--auth-wash-1": palette.washes[1] ?? "none",
     "--auth-wash-2": palette.washes[2] ?? "none",

@@ -369,3 +369,35 @@ describe("AuthPanel without a brand colour", () => {
     expect(style).not.toContain("var(--primary,")
   })
 })
+
+describe("AuthPanel button and border without a brand colour", () => {
+  const styleOf = (container: HTMLElement) =>
+    (container.querySelector("[data-auth-scope]") as HTMLElement).getAttribute("style") ?? ""
+
+  it("paints the primary button from the primary token, not a brand gradient", () => {
+    const style = styleOf(render(<AuthPanel>x</AuthPanel>).container)
+
+    expect(style).toContain("--auth-button: var(--primary,")
+    expect(style).not.toMatch(/--auth-button: linear-gradient/)
+  })
+
+  it("takes the button's text colour from the primary-foreground token", () => {
+    expect(styleOf(render(<AuthPanel>x</AuthPanel>).container)).toContain("var(--primary-foreground,")
+  })
+
+  it("drops the brand-tinted glow under the button", () => {
+    expect(styleOf(render(<AuthPanel>x</AuthPanel>).container)).toContain("--auth-button-shadow: none")
+  })
+
+  it("borders the card with the border token", () => {
+    expect(styleOf(render(<AuthPanel>x</AuthPanel>).container)).toContain("var(--border,")
+  })
+
+  it("keeps the brand gradient, glow and tinted border when a brand colour is given", () => {
+    const style = styleOf(render(<AuthPanel brandColor="#5469D4">x</AuthPanel>).container)
+
+    expect(style).toMatch(/--auth-button: linear-gradient/)
+    expect(style).toContain("--auth-button-shadow: 0 8px 22px")
+    expect(style).not.toContain("var(--primary-foreground,")
+  })
+})
