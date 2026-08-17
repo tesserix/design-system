@@ -1,6 +1,6 @@
 {
   "name": "@tesserix/storybook",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "private": true,
   "description": "Unified Storybook for Tesserix Design System - showcases web and native components",
   "scripts": {
