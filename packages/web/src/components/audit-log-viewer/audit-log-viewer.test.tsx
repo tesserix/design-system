@@ -1,7 +1,17 @@
 import { describe, expect, it, vi } from "vitest"
 import { fireEvent, render, screen } from "@testing-library/react"
 
-import { AuditLogViewer } from "./audit-log-viewer"
+import {
+  AuditLogViewer,
+  AuditLogRoot,
+  AuditLogHeader,
+  AuditLogTitle,
+  AuditLogCount,
+  AuditLogList,
+  AuditLogRow,
+  AuditLogSummary,
+  AuditLogTime,
+} from "./audit-log-viewer"
 
 describe("AuditLogViewer", () => {
   const entries = [
@@ -79,5 +89,44 @@ describe("AuditLogViewer", () => {
     render(<AuditLogViewer entries={[{ ...entries[0], metadata: "Changed payout schedule" }]} />)
 
     expect(screen.getByText("Changed payout schedule")).toBeInTheDocument()
+  })
+})
+
+describe("AuditLogViewer parts", () => {
+  it("composes an equivalent list from the exported parts", () => {
+    render(
+      <AuditLogRoot>
+        <AuditLogHeader>
+          <AuditLogTitle>Audit Log</AuditLogTitle>
+          <AuditLogCount>1 entry</AuditLogCount>
+        </AuditLogHeader>
+        <AuditLogList>
+          <AuditLogRow entryId="1">
+            <AuditLogSummary>
+              Mahesh updated settings
+              <AuditLogTime>2026-02-24</AuditLogTime>
+            </AuditLogSummary>
+          </AuditLogRow>
+        </AuditLogList>
+      </AuditLogRoot>
+    )
+
+    expect(screen.getByRole("list")).toBeInTheDocument()
+    expect(screen.getByRole("listitem")).toHaveTextContent("Mahesh updated settings")
+    expect(screen.getByText("1 entry")).toBeInTheDocument()
+  })
+
+  it("exposes the parts as dot-notation aliases on AuditLogViewer", () => {
+    expect(AuditLogViewer.Root).toBe(AuditLogRoot)
+    expect(AuditLogViewer.Row).toBe(AuditLogRow)
+    expect(AuditLogViewer.Summary).toBe(AuditLogSummary)
+  })
+
+  it("throws a clear error when a row is used outside a root", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {})
+    expect(() => render(<AuditLogSummary>orphan</AuditLogSummary>)).toThrow(
+      /must be used within/i
+    )
+    spy.mockRestore()
   })
 })

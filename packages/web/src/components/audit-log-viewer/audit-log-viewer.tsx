@@ -1,6 +1,18 @@
 import * as React from "react"
 
-import { cn } from "../../lib/utils"
+import {
+  AuditLogCount,
+  AuditLogEmpty,
+  AuditLogHeader,
+  AuditLogList,
+  AuditLogMetadata,
+  AuditLogRoot,
+  AuditLogRow,
+  AuditLogSource,
+  AuditLogSummary,
+  AuditLogTime,
+  AuditLogTitle,
+} from "./audit-log-parts"
 
 export interface AuditLogEntry {
   id: string
@@ -23,26 +35,24 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   renderMetadata?: (metadata: string) => React.ReactNode
 }
 
-const ROW_CLASSNAME = "w-full rounded-md border p-3 text-left"
-
-const AuditLogViewer = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
+const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
   (
     { className, entries, emptyMessage = "No audit entries", onEntrySelect, renderSource, renderMetadata, ...props },
     ref
   ) => (
-    <div ref={ref} className={cn("space-y-3 rounded-xl border bg-card p-4", className)} {...props}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Audit Log</h3>
-        <span className="text-xs text-muted-foreground">{entries.length} entries</span>
-      </div>
+    <AuditLogRoot ref={ref} className={className} onEntrySelect={onEntrySelect} {...props}>
+      <AuditLogHeader>
+        <AuditLogTitle>Audit Log</AuditLogTitle>
+        <AuditLogCount>{entries.length} entries</AuditLogCount>
+      </AuditLogHeader>
 
       {entries.length === 0 ? (
-        <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">{emptyMessage}</p>
+        <AuditLogEmpty>{emptyMessage}</AuditLogEmpty>
       ) : (
-        <ol className="space-y-2">
-          {entries.map((entry) => {
-            const content = (
-              <>
+        <AuditLogList>
+          {entries.map((entry) => (
+            <AuditLogRow key={entry.id} entryId={entry.id}>
+              <AuditLogSummary>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium">
                     {entry.actor} {entry.action}
@@ -50,42 +60,47 @@ const AuditLogViewer = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
                   </p>
                   <div className="flex items-center gap-2">
                     {entry.source ? (
-                      <span className="text-xs text-muted-foreground">
+                      <AuditLogSource>
                         {renderSource ? renderSource(entry.source) : entry.source}
-                      </span>
+                      </AuditLogSource>
                     ) : null}
-                    <time className="text-xs text-muted-foreground">{entry.timestamp}</time>
+                    <AuditLogTime>{entry.timestamp}</AuditLogTime>
                   </div>
                 </div>
                 {entry.metadata ? (
-                  <div className="mt-1 text-xs text-muted-foreground">
+                  <AuditLogMetadata>
                     {renderMetadata ? renderMetadata(entry.metadata) : entry.metadata}
-                  </div>
+                  </AuditLogMetadata>
                 ) : null}
-              </>
-            )
-
-            return (
-              <li key={entry.id}>
-                {onEntrySelect ? (
-                  <button
-                    type="button"
-                    className={cn(ROW_CLASSNAME, "hover:bg-accent")}
-                    onClick={() => onEntrySelect(entry.id)}
-                  >
-                    {content}
-                  </button>
-                ) : (
-                  <div className={ROW_CLASSNAME}>{content}</div>
-                )}
-              </li>
-            )
-          })}
-        </ol>
+              </AuditLogSummary>
+            </AuditLogRow>
+          ))}
+        </AuditLogList>
       )}
-    </div>
+    </AuditLogRoot>
   )
 )
-AuditLogViewer.displayName = "AuditLogViewer"
+AuditLogViewerRoot.displayName = "AuditLogViewer"
+
+/**
+ * Data-driven audit log. Pass `entries` for the common case; import the
+ * parts (also attached here as `AuditLogViewer.Row` etc.) to compose a
+ * custom layout.
+ */
+const AuditLogViewer = Object.assign(AuditLogViewerRoot, {
+  Root: AuditLogRoot,
+  Header: AuditLogHeader,
+  Title: AuditLogTitle,
+  Count: AuditLogCount,
+  List: AuditLogList,
+  Row: AuditLogRow,
+  Summary: AuditLogSummary,
+  Time: AuditLogTime,
+  Source: AuditLogSource,
+  Metadata: AuditLogMetadata,
+  Empty: AuditLogEmpty,
+})
 
 export { AuditLogViewer }
+export * from "./audit-log-parts"
+export * from "./audit-log-context"
