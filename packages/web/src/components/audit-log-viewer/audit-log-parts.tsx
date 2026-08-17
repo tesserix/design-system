@@ -136,9 +136,7 @@ const AuditLogRow = React.forwardRef<HTMLLIElement, AuditLogRowProps>(
   ({ className, entryId, entryLabel, severity, children, ...props }, ref) => {
     const reactId = React.useId()
     const { expandedIds, toggleEntry, labels } = useAuditLogViewer()
-    const [hasDetail, setHasDetail] = React.useState(false)
 
-    const registerDetail = React.useCallback((next: boolean) => setHasDetail(next), [])
     const toggle = React.useCallback(() => toggleEntry(entryId), [toggleEntry, entryId])
 
     const value = React.useMemo(
@@ -148,11 +146,9 @@ const AuditLogRow = React.forwardRef<HTMLLIElement, AuditLogRowProps>(
         detailId: `${reactId}-detail`,
         expanded: expandedIds.has(entryId),
         toggle,
-        hasDetail,
-        registerDetail,
         entryLabel,
       }),
-      [entryId, reactId, expandedIds, toggle, hasDetail, registerDetail, entryLabel]
+      [entryId, reactId, expandedIds, toggle, entryLabel]
     )
 
     return (
@@ -171,6 +167,12 @@ AuditLogRow.displayName = "AuditLogRow"
  * The entry's main line. Renders a `<button>` only when the viewer has an
  * `onEntrySelect`; otherwise a plain `<div>`, so a viewer with no detail view
  * exposes no focusable control that does nothing.
+ *
+ * `id` and `onClick` are owned by this component and are not spreadable
+ * overrides: `id` is load-bearing for the detail region's `aria-labelledby`
+ * and the disclosure's `aria-controls`, so passing your own breaks that
+ * wiring, and `onClick` drives the `onEntrySelect` callback on the button
+ * variant.
  */
 const AuditLogSummary = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
   ({ className, children, ...props }, ref) => {
@@ -183,7 +185,8 @@ const AuditLogSummary = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLE
         <div
           ref={ref as React.Ref<HTMLDivElement>}
           id={summaryId}
-          className={cn(AUDIT_LOG_ROW_CLASSNAME, className)}
+          aria-current={selected ? "true" : undefined}
+          className={cn(AUDIT_LOG_ROW_CLASSNAME, selected && "border-primary bg-accent", className)}
           {...props}
         >
           {children}
@@ -294,12 +297,7 @@ AuditLogDisclosure.displayName = "AuditLogDisclosure"
  */
 const AuditLogDetail = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
-    const { detailId, summaryId, expanded, registerDetail } = useAuditLogRow()
-
-    React.useEffect(() => {
-      registerDetail(true)
-      return () => registerDetail(false)
-    }, [registerDetail])
+    const { detailId, summaryId, expanded } = useAuditLogRow()
 
     if (!expanded) {
       return null
@@ -328,20 +326,25 @@ export interface AuditLogSkeletonProps extends React.HTMLAttributes<HTMLDivEleme
 
 /** Placeholder rows for a viewer whose entries have not arrived yet. */
 const AuditLogSkeleton = React.forwardRef<HTMLDivElement, AuditLogSkeletonProps>(
-  ({ className, rows = 3, ...props }, ref) => (
-    <div ref={ref} role="status" aria-busy="true" className={cn("space-y-2", className)} {...props}>
-      {Array.from({ length: rows }).map((_, index) => (
-        <div
-          key={index}
-          data-slot="audit-log-skeleton-row"
-          className={cn(AUDIT_LOG_ROW_CLASSNAME, "space-y-2")}
-        >
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-3 w-1/3" />
-        </div>
-      ))}
-    </div>
-  )
+  ({ className, rows = 3, ...props }, ref) => {
+    const { labels } = useAuditLogViewer()
+
+    return (
+      <div ref={ref} role="status" aria-busy="true" className={cn("space-y-2", className)} {...props}>
+        <span className="sr-only">{labels.loading}</span>
+        {Array.from({ length: rows }).map((_, index) => (
+          <div
+            key={index}
+            data-slot="audit-log-skeleton-row"
+            className={cn(AUDIT_LOG_ROW_CLASSNAME, "space-y-2")}
+          >
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+        ))}
+      </div>
+    )
+  }
 )
 AuditLogSkeleton.displayName = "AuditLogSkeleton"
 

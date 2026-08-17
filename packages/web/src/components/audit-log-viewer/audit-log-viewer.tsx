@@ -40,6 +40,11 @@ export interface AuditLogEntry {
 
 export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement> {
   entries: AuditLogEntry[]
+  /**
+   * Legacy empty-state override, retained for backward compatibility. Takes
+   * precedence over `labels.empty` when both are supplied. Prefer
+   * `labels.empty` for new code.
+   */
   emptyMessage?: string
   onEntrySelect?: (entryId: string) => void
   /** Id of the selected entry. Marks that row `aria-current` and tints it. */
@@ -55,7 +60,10 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   renderSummary?: (entry: AuditLogEntry) => React.ReactNode
   /** Overrides for user-visible strings. Unspecified keys keep their English default. */
   labels?: Partial<AuditLogLabels>
-  /** Heading level for the viewer title. Default 3. */
+  /**
+   * Heading level for the viewer title. Default 3. Maps to `AuditLogTitle`'s
+   * `level` prop when composing the parts directly.
+   */
   headingLevel?: 2 | 3 | 4 | 5 | 6
   /** Builds collapsible detail for entries that carry none of their own. */
   renderDetail?: (entry: AuditLogEntry) => React.ReactNode
@@ -66,7 +74,10 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   onExpandedChange?: (expandedIds: string[]) => void
   /** Renders placeholder rows instead of entries or the empty state. */
   loading?: boolean
-  /** Placeholder rows while `loading`. Default 3. */
+  /**
+   * Placeholder rows while `loading`. Default 3. Maps to `AuditLogSkeleton`'s
+   * `rows` prop when composing the parts directly.
+   */
   loadingRowCount?: number
 }
 
@@ -109,7 +120,7 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
       >
         <AuditLogHeader>
           <AuditLogTitle level={headingLevel} />
-          <AuditLogCount>{mergedCountLabel(entries.length)}</AuditLogCount>
+          {loading ? null : <AuditLogCount>{mergedCountLabel(entries.length)}</AuditLogCount>}
         </AuditLogHeader>
 
         {loading ? (

@@ -426,4 +426,32 @@ describe("AuditLogViewer loading", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument()
     expect(screen.getByText(/mahesh updated settings/i)).toBeInTheDocument()
   })
+
+  it("announces the loading state via an sr-only label", () => {
+    render(<AuditLogViewer entries={[]} loading />)
+    expect(screen.getByText("Loading audit entries")).toHaveClass("sr-only")
+  })
+
+  it("suppresses the entry count while loading", () => {
+    render(<AuditLogViewer entries={[]} loading />)
+    expect(screen.queryByText("0 entries")).not.toBeInTheDocument()
+  })
+})
+
+describe("AuditLogViewer selection without onEntrySelect", () => {
+  const entries = [
+    {
+      id: "1",
+      actor: "Mahesh",
+      action: "updated",
+      target: "settings",
+      timestamp: "2026-02-24",
+    },
+  ]
+
+  it("marks the selected row aria-current even without onEntrySelect", () => {
+    const { container } = render(<AuditLogViewer entries={entries} selectedEntryId="1" />)
+    expect(container.querySelector('[aria-current="true"]')).toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+  })
 })

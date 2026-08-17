@@ -2,6 +2,7 @@
   "name": "@tesserix/icons",
   "version": "1.0.0",
   "description": "Icon library for Tesserix Design System - Lucide icons wrapper + custom brand icons",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

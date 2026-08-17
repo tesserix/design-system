@@ -10,6 +10,8 @@ export interface AuditLogLabels {
   collapse: string
   empty: string
   severityLabel: (severity: AuditLogSeverity) => string
+  /** Announced by the loading skeleton's live region. */
+  loading: string
 }
 
 export const defaultAuditLogLabels: AuditLogLabels = {
@@ -18,6 +20,7 @@ export const defaultAuditLogLabels: AuditLogLabels = {
   expand: "Show details",
   collapse: "Hide details",
   empty: "No audit entries",
+  loading: "Loading audit entries",
   severityLabel: (severity) =>
     ({ info: "Info", warning: "Warning", critical: "Critical" })[severity],
 }
@@ -51,9 +54,6 @@ export interface AuditLogRowContextValue {
   detailId: string
   expanded: boolean
   toggle: () => void
-  /** True once an `AuditLogDetail` has registered for this row. */
-  hasDetail: boolean
-  registerDetail: (hasDetail: boolean) => void
   /** Plain-text name of the row, for the disclosure's accessible name. */
   entryLabel?: string
 }
