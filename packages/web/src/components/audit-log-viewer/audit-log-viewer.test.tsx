@@ -192,3 +192,47 @@ describe("AuditLogViewer labels and headings", () => {
     expect(screen.queryByText("ignored")).not.toBeInTheDocument()
   })
 })
+
+describe("AuditLogViewer time and summary", () => {
+  const entries = [
+    {
+      id: "1",
+      actor: "Mahesh",
+      action: "updated",
+      target: "settings",
+      timestamp: "2026-02-24",
+    },
+  ]
+
+  it("sets dateTime on the time element when supplied", () => {
+    render(
+      <AuditLogViewer
+        entries={[{ ...entries[0], timestamp: "24 Feb 2026", dateTime: "2026-02-24T09:12:00Z" }]}
+      />
+    )
+    const time = screen.getByText("24 Feb 2026")
+    expect(time.tagName).toBe("TIME")
+    expect(time).toHaveAttribute("datetime", "2026-02-24T09:12:00Z")
+  })
+
+  it("omits the dateTime attribute entirely when not supplied", () => {
+    render(<AuditLogViewer entries={entries} />)
+    expect(screen.getByText("2026-02-24")).not.toHaveAttribute("datetime")
+  })
+
+  it("renders a custom summary via renderSummary", () => {
+    render(
+      <AuditLogViewer
+        entries={entries}
+        renderSummary={(entry) => <span data-testid="summary">{entry.action.toUpperCase()}</span>}
+      />
+    )
+    expect(screen.getByTestId("summary")).toHaveTextContent("UPDATED")
+    expect(screen.queryByText(/mahesh updated settings/i)).not.toBeInTheDocument()
+  })
+
+  it("wraps long metadata instead of overflowing", () => {
+    render(<AuditLogViewer entries={[{ ...entries[0], metadata: "x".repeat(400) }]} />)
+    expect(screen.getByText("x".repeat(400))).toHaveClass("break-words")
+  })
+})

@@ -164,7 +164,7 @@ AuditLogSource.displayName = "AuditLogSource"
 
 const AuditLogMetadata = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("mt-1 text-xs text-muted-foreground", className)} {...props} />
+    <div ref={ref} className={cn("mt-1 break-words text-xs text-muted-foreground", className)} {...props} />
   )
 )
 AuditLogMetadata.displayName = "AuditLogMetadata"

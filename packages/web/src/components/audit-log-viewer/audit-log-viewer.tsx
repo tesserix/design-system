@@ -24,6 +24,11 @@ export interface AuditLogEntry {
   metadata?: string
   /** Opaque, consumer-defined id of the system this entry came from. */
   source?: string
+  /**
+   * ISO 8601 form of `timestamp`, for `<time dateTime>`. Omit it and no
+   * attribute is emitted — an invalid `dateTime` is worse than none.
+   */
+  dateTime?: string
 }
 
 export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -34,6 +39,11 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   renderSource?: (source: string) => React.ReactNode
   /** Renders an entry's `metadata`. Defaults to the raw string. */
   renderMetadata?: (metadata: string) => React.ReactNode
+  /**
+   * Renders the entry's headline. Use it to localize word order, which
+   * string substitution cannot do.
+   */
+  renderSummary?: (entry: AuditLogEntry) => React.ReactNode
   /** Overrides for user-visible strings. Unspecified keys keep their English default. */
   labels?: Partial<AuditLogLabels>
   /** Heading level for the viewer title. Default 3. */
@@ -49,6 +59,7 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
       onEntrySelect,
       renderSource,
       renderMetadata,
+      renderSummary,
       labels,
       headingLevel = 3,
       ...props
@@ -73,8 +84,9 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
                 <AuditLogSummary>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-medium">
-                      {entry.actor} {entry.action}
-                      {entry.target ? ` ${entry.target}` : ""}
+                      {renderSummary
+                        ? renderSummary(entry)
+                        : `${entry.actor} ${entry.action}${entry.target ? ` ${entry.target}` : ""}`}
                     </p>
                     <div className="flex items-center gap-2">
                       {entry.source ? (
@@ -82,7 +94,7 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
                           {renderSource ? renderSource(entry.source) : entry.source}
                         </AuditLogSource>
                       ) : null}
-                      <AuditLogTime>{entry.timestamp}</AuditLogTime>
+                      <AuditLogTime dateTime={entry.dateTime}>{entry.timestamp}</AuditLogTime>
                     </div>
                   </div>
                   {entry.metadata ? (
