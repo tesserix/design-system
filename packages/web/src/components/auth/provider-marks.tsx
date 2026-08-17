@@ -111,7 +111,7 @@ function FacebookMark({ size = 20 }: ProviderMarkProps) {
 }
 
 function InstagramMark({ size = 20 }: ProviderMarkProps) {
-  const gradient = `aurora-instagram-${React.useId().replace(/:/g, "")}`
+  const gradient = `auth-instagram-${React.useId().replace(/:/g, "")}`
   return mark(
     "instagram",
     size,
@@ -201,4 +201,4 @@ export const PROVIDER_MARKS = {
   sso: SsoMark,
 } as const
 
-export type AuroraProviderId = keyof typeof PROVIDER_MARKS
+export type AuthProviderId = keyof typeof PROVIDER_MARKS

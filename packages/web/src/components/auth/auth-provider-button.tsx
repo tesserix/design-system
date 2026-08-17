@@ -3,12 +3,12 @@
 import * as React from "react"
 
 import { cn } from "../../lib/utils"
-import { AuroraProviderLayoutContext } from "./aurora-provider-list"
-import { PROVIDER_MARKS, type AuroraProviderId } from "./provider-marks"
+import { AuthProviderLayoutContext } from "./auth-provider-list"
+import { PROVIDER_MARKS, type AuthProviderId } from "./provider-marks"
 
-export type { AuroraProviderId }
+export type { AuthProviderId }
 
-const PROVIDER_LABEL: Record<AuroraProviderId, string> = {
+const PROVIDER_LABEL: Record<AuthProviderId, string> = {
   google: "Google",
   microsoft: "Microsoft",
   apple: "Apple",
@@ -22,7 +22,7 @@ const PROVIDER_LABEL: Record<AuroraProviderId, string> = {
 }
 
 /** Zitadel hands us the tenant's own IdP name; a generic OIDC provider called "Google" is still Google. */
-const PROVIDER_ALIAS: Array<[RegExp, AuroraProviderId]> = [
+const PROVIDER_ALIAS: Array<[RegExp, AuthProviderId]> = [
   [/\bgoogle\b|\bgsuite\b|google workspace/, "google"],
   [/\bmicrosoft\b|\bazure\b|\bentra\b|office\s?365|\bmsal\b/, "microsoft"],
   [/\bapple\b|\bicloud\b/, "apple"],
@@ -34,48 +34,48 @@ const PROVIDER_ALIAS: Array<[RegExp, AuroraProviderId]> = [
   [/\bpasskey\b|\bwebauthn\b|\bfido\b/, "passkey"],
 ]
 
-export function resolveAuroraProvider(provider: string): AuroraProviderId {
+export function resolveAuthProvider(provider: string): AuthProviderId {
   const name = provider.trim().toLowerCase()
   // Own keys only: `in` would resolve an IdP named "constructor" to a prototype
   // member and render a non-component.
-  if (Object.prototype.hasOwnProperty.call(PROVIDER_MARKS, name)) return name as AuroraProviderId
+  if (Object.prototype.hasOwnProperty.call(PROVIDER_MARKS, name)) return name as AuthProviderId
   return PROVIDER_ALIAS.find(([pattern]) => pattern.test(name))?.[1] ?? "sso"
 }
 
-export interface AuroraProviderMarkProps {
+export interface AuthProviderMarkProps {
   /** A known provider id, or the tenant's IdP display name to resolve one from. */
-  provider: AuroraProviderId | (string & {})
+  provider: AuthProviderId | (string & {})
   size?: number
 }
 
 /** Exported on its own so a host with its own button chrome still gets the brand logo. */
-function AuroraProviderMark({ provider, size }: AuroraProviderMarkProps) {
-  const Mark = PROVIDER_MARKS[resolveAuroraProvider(provider)]
+function AuthProviderMark({ provider, size }: AuthProviderMarkProps) {
+  const Mark = PROVIDER_MARKS[resolveAuthProvider(provider)]
   return <Mark size={size} />
 }
 
 const BUTTON_CSS = `
-[data-aurora-provider-button]{transition:background .15s ease,border-color .15s ease,box-shadow .15s ease}
-[data-aurora-provider-button]:hover:not(:disabled){background:var(--aurora-hover,rgba(15,23,41,.045))}
-[data-aurora-provider-button]:focus-visible{outline:2px solid var(--aurora-accent,#5B5FD6);outline-offset:2px}
-[data-aurora-provider-button]:disabled{opacity:.55;cursor:not-allowed}
+[data-auth-provider-button]{transition:background .15s ease,border-color .15s ease,box-shadow .15s ease}
+[data-auth-provider-button]:hover:not(:disabled){background:var(--auth-hover,rgba(15,23,41,.045))}
+[data-auth-provider-button]:focus-visible{outline:2px solid var(--auth-accent,#5B5FD6);outline-offset:2px}
+[data-auth-provider-button]:disabled{opacity:.55;cursor:not-allowed}
 `
 
-export interface AuroraProviderButtonProps
+export interface AuthProviderButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
   /** A known provider id, or the tenant's IdP display name to resolve one from. */
-  provider: AuroraProviderId | (string & {})
+  provider: AuthProviderId | (string & {})
   /** Defaults to `Continue with <provider>`. */
   label?: React.ReactNode
   /** Icon-only square button. Defaults to whatever the surrounding list decided. */
   compact?: boolean
 }
 
-const AuroraProviderButton = React.forwardRef<HTMLButtonElement, AuroraProviderButtonProps>(
+const AuthProviderButton = React.forwardRef<HTMLButtonElement, AuthProviderButtonProps>(
   ({ provider, label, compact, className, style, type = "button", ...props }, ref) => {
-    const fromList = React.useContext(AuroraProviderLayoutContext)
+    const fromList = React.useContext(AuthProviderLayoutContext)
     const isCompact = compact ?? fromList
-    const id = resolveAuroraProvider(provider)
+    const id = resolveAuthProvider(provider)
     const Mark = PROVIDER_MARKS[id]
     const name = id === "sso" && provider.trim() ? provider.trim() : PROVIDER_LABEL[id]
     const fallbackLabel = `Continue with ${name}`
@@ -83,13 +83,13 @@ const AuroraProviderButton = React.forwardRef<HTMLButtonElement, AuroraProviderB
 
     return (
       <>
-        <style href="tesserix-aurora-provider-button" precedence="medium">
+        <style href="tesserix-auth-provider-button" precedence="medium">
           {BUTTON_CSS}
         </style>
         <button
           ref={ref}
           type={type}
-          data-aurora-provider-button={id}
+          data-auth-provider-button={id}
           aria-label={isCompact ? accessibleName : undefined}
           className={cn(
             "relative flex min-h-11 items-center justify-center rounded-xl text-sm font-medium",
@@ -98,9 +98,9 @@ const AuroraProviderButton = React.forwardRef<HTMLButtonElement, AuroraProviderB
           )}
           style={
             {
-              background: "var(--aurora-input,#FFFFFF)",
-              border: "1px solid var(--aurora-input-border,rgba(15,23,41,.14))",
-              color: "var(--aurora-foreground,#0F1729)",
+              background: "var(--auth-input,#FFFFFF)",
+              border: "1px solid var(--auth-input-border,rgba(15,23,41,.14))",
+              color: "var(--auth-foreground,#0F1729)",
               ...style,
             } as React.CSSProperties
           }
@@ -115,6 +115,6 @@ const AuroraProviderButton = React.forwardRef<HTMLButtonElement, AuroraProviderB
     )
   }
 )
-AuroraProviderButton.displayName = "AuroraProviderButton"
+AuthProviderButton.displayName = "AuthProviderButton"
 
-export { AuroraProviderButton, AuroraProviderMark }
+export { AuthProviderButton, AuthProviderMark }

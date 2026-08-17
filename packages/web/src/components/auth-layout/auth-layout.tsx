@@ -1,8 +1,16 @@
+/**
+ * @deprecated Superseded by the `auth` component set, which paints from the
+ * `--auth-*` custom properties and is driven by a tenant's auth policy rather
+ * than by fixed Tailwind classes. Prefer `AuthPanel` plus `AuthCredentialForm`,
+ * `AuthProviderList` and friends. These exports still work and are not
+ * scheduled for removal in this major.
+ */
 import * as React from "react"
 
 import { cn } from "../../lib/utils"
-import { AuroraProviderMark } from "../aurora-auth/aurora-provider-button"
+import { AuthProviderMark } from "../auth/auth-provider-button"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthLayout = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
@@ -17,6 +25,7 @@ const AuthLayout = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 )
 AuthLayout.displayName = "AuthLayout"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthLayoutBrand = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
   ({ className, ...props }, ref) => (
     <aside
@@ -31,6 +40,7 @@ const AuthLayoutBrand = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLE
 )
 AuthLayoutBrand.displayName = "AuthLayoutBrand"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthLayoutContent = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
   ({ className, ...props }, ref) => (
     <main
@@ -42,6 +52,7 @@ const AuthLayoutContent = React.forwardRef<HTMLElement, React.HTMLAttributes<HTM
 )
 AuthLayoutContent.displayName = "AuthLayoutContent"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthCard = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
@@ -53,11 +64,13 @@ const AuthCard = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
 )
 AuthCard.displayName = "AuthCard"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthCardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => <div ref={ref} className={cn("mb-6 space-y-1 text-center", className)} {...props} />
 )
 AuthCardHeader.displayName = "AuthCardHeader"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthCardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
     <h1 ref={ref} className={cn("text-xl font-semibold tracking-tight", className)} {...props} />
@@ -65,6 +78,7 @@ const AuthCardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<
 )
 AuthCardTitle.displayName = "AuthCardTitle"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthCardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -73,6 +87,7 @@ const AuthCardDescription = React.forwardRef<
 ))
 AuthCardDescription.displayName = "AuthCardDescription"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthCardDivider = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { label?: string }
@@ -88,6 +103,7 @@ const AuthCardDivider = React.forwardRef<
 ))
 AuthCardDivider.displayName = "AuthCardDivider"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthSocialProviders = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
@@ -106,6 +122,7 @@ export interface AuthSocialButtonProps extends React.ButtonHTMLAttributes<HTMLBu
   iconPosition?: "left" | "right"
 }
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthSocialButton = React.forwardRef<HTMLButtonElement, AuthSocialButtonProps>(
   (
     {
@@ -121,7 +138,7 @@ const AuthSocialButton = React.forwardRef<HTMLButtonElement, AuthSocialButtonPro
     },
     ref
   ) => {
-    const brandMark = icon ?? <AuroraProviderMark provider={provider} size={18} />
+    const brandMark = icon ?? <AuthProviderMark provider={provider} size={18} />
     const resolvedDisplay = display ?? (children ? "icon-text" : "icon-only")
     const defaultLabel = `Continue with ${provider}`
     const labelContent = children ?? defaultLabel
@@ -161,6 +178,7 @@ const AuthSocialButton = React.forwardRef<HTMLButtonElement, AuthSocialButtonPro
 )
 AuthSocialButton.displayName = "AuthSocialButton"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthLayoutCentered = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
@@ -175,6 +193,7 @@ const AuthLayoutCentered = React.forwardRef<HTMLDivElement, React.HTMLAttributes
 )
 AuthLayoutCentered.displayName = "AuthLayoutCentered"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthLayoutBackground = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { src?: string }>(
   ({ className, src, children, ...props }, ref) => (
     <div ref={ref} className={cn("fixed inset-0 -z-20", className)} {...props}>
@@ -194,6 +213,7 @@ const AuthLayoutBackground = React.forwardRef<HTMLDivElement, React.HTMLAttribut
 )
 AuthLayoutBackground.displayName = "AuthLayoutBackground"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthCardCentered = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
@@ -212,6 +232,7 @@ const AuthCardCentered = React.forwardRef<HTMLDivElement, React.HTMLAttributes<H
 )
 AuthCardCentered.displayName = "AuthCardCentered"
 
+/** @deprecated Use the `auth` component set instead. */
 const AuthCardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
