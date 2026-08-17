@@ -187,3 +187,4 @@ the MDX.
 | Silent visual regression in the console | Existing tests and stories run unmodified; metadata placement deliberately unchanged |
 | Nested-button invalid HTML | Explicit test asserting no nested interactive elements |
 | API surface growth (14 parts) | Parts are exports of one component folder, documented together; the `entries` path remains the documented default |
+| Dot aliases keep all 14 parts referenced from one object, which can defeat tree-shaking for consumers who only use `entries` | Accepted knowingly for the ergonomics. Flat exports stay canonical, so a consumer who cares can import only what it uses; the aliases are attached last and are the only thing holding the extra references. Revisit if bundle size regresses. |
