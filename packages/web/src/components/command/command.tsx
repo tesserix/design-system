@@ -37,6 +37,13 @@ const useCommand = () => {
   return context
 }
 
+/**
+ * `useLayoutEffect` warns when React renders on the server, and this component
+ * ships to server-rendered apps. Registration only matters where there is a DOM,
+ * so fall back to the passive effect during SSR.
+ */
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
+
 /** Orders two registered items by their position in the document. */
 const compareDocumentOrder = (a: HTMLElement | null, b: HTMLElement | null) => {
   if (!a || !b || a === b) return 0
@@ -393,7 +400,12 @@ const CommandItem = React.forwardRef<HTMLButtonElement, CommandItemProps>(
 
     // Disabled items register too — they are on screen, so they count against
     // emptiness even though they cannot be selected (#8).
-    React.useEffect(() => {
+    //
+    // Layout, not passive: registration records the item's DOM node and the
+    // navigation order is derived from document position, so it has to complete
+    // before the browser paints. With a passive effect a key pressed in the
+    // first frame finds an empty registry and does nothing.
+    useIsomorphicLayoutEffect(() => {
       if (!matchesQuery) return
       registerItem(value, { disabled: Boolean(disabled), element: innerRef.current })
       return () => unregisterItem(value)
