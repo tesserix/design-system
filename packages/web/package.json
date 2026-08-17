@@ -2,6 +2,7 @@
   "name": "@tesserix/web",
   "version": "2.2.1",
   "description": "Tesserix Design System - Web UI components built with shadcn/ui",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -51,12 +52,16 @@
   },
   "peerDependencies": {
     "framer-motion": "^11.0.0 || ^12.0.0",
+    "lucide-react": "^0.469.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.1.0"
   },
   "peerDependenciesMeta": {
     "framer-motion": {
+      "optional": true
+    },
+    "lucide-react": {
       "optional": true
     }
   },
@@ -75,6 +80,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.1.8",
     "@tesserix/hooks": "workspace:*",
+    "@tesserix/icons": "workspace:*",
     "@tesserix/tokens": "workspace:*",
     "@tesserix/utils": "workspace:*",
     "class-variance-authority": "^0.7.0",

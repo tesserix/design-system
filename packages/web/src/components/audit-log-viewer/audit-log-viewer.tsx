@@ -1,6 +1,22 @@
 import * as React from "react"
 
-import { cn } from "../../lib/utils"
+import {
+  AuditLogCount,
+  AuditLogDetail,
+  AuditLogDisclosure,
+  AuditLogEmpty,
+  AuditLogHeader,
+  AuditLogList,
+  AuditLogMetadata,
+  AuditLogRoot,
+  AuditLogRow,
+  AuditLogSkeleton,
+  AuditLogSource,
+  AuditLogSummary,
+  AuditLogTime,
+  AuditLogTitle,
+} from "./audit-log-parts"
+import { defaultAuditLogLabels, type AuditLogLabels, type AuditLogSeverity } from "./audit-log-context"
 
 export interface AuditLogEntry {
   id: string
@@ -11,81 +27,176 @@ export interface AuditLogEntry {
   metadata?: string
   /** Opaque, consumer-defined id of the system this entry came from. */
   source?: string
+  /**
+   * ISO 8601 form of `timestamp`, for `<time dateTime>`. Omit it and no
+   * attribute is emitted — an invalid `dateTime` is worse than none.
+   */
+  dateTime?: string
+  /** Collapsible detail for this entry. Renders a disclosure when present. */
+  detail?: React.ReactNode
+  /** Severity level for this entry. Rendered as a colored left border and sr-only text. */
+  severity?: AuditLogSeverity
 }
 
 export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement> {
   entries: AuditLogEntry[]
+  /**
+   * Legacy empty-state override, retained for backward compatibility. Takes
+   * precedence over `labels.empty` when both are supplied. Prefer
+   * `labels.empty` for new code.
+   */
   emptyMessage?: string
   onEntrySelect?: (entryId: string) => void
+  /** Id of the selected entry. Marks that row `aria-current` and tints it. */
+  selectedEntryId?: string
   /** Renders the label for an entry's `source`. Defaults to the raw id. */
   renderSource?: (source: string) => React.ReactNode
   /** Renders an entry's `metadata`. Defaults to the raw string. */
   renderMetadata?: (metadata: string) => React.ReactNode
+  /**
+   * Renders the entry's headline. Use it to localize word order, which
+   * string substitution cannot do.
+   */
+  renderSummary?: (entry: AuditLogEntry) => React.ReactNode
+  /** Overrides for user-visible strings. Unspecified keys keep their English default. */
+  labels?: Partial<AuditLogLabels>
+  /**
+   * Heading level for the viewer title. Default 3. Maps to `AuditLogTitle`'s
+   * `level` prop when composing the parts directly.
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6
+  /** Builds collapsible detail for entries that carry none of their own. */
+  renderDetail?: (entry: AuditLogEntry) => React.ReactNode
+  /** Expanded entry ids (controlled). */
+  expandedIds?: string[]
+  /** Initially expanded entry ids (uncontrolled). */
+  defaultExpandedIds?: string[]
+  onExpandedChange?: (expandedIds: string[]) => void
+  /** Renders placeholder rows instead of entries or the empty state. */
+  loading?: boolean
+  /**
+   * Placeholder rows while `loading`. Default 3. Maps to `AuditLogSkeleton`'s
+   * `rows` prop when composing the parts directly.
+   */
+  loadingRowCount?: number
 }
 
-const ROW_CLASSNAME = "w-full rounded-md border p-3 text-left"
-
-const AuditLogViewer = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
+const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
   (
-    { className, entries, emptyMessage = "No audit entries", onEntrySelect, renderSource, renderMetadata, ...props },
+    {
+      className,
+      entries,
+      emptyMessage,
+      onEntrySelect,
+      selectedEntryId,
+      renderSource,
+      renderMetadata,
+      renderSummary,
+      labels,
+      headingLevel = 3,
+      renderDetail,
+      expandedIds,
+      defaultExpandedIds,
+      onExpandedChange,
+      loading,
+      loadingRowCount,
+      ...props
+    },
     ref
-  ) => (
-    <div ref={ref} className={cn("space-y-3 rounded-xl border bg-card p-4", className)} {...props}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Audit Log</h3>
-        <span className="text-xs text-muted-foreground">{entries.length} entries</span>
-      </div>
+  ) => {
+    const mergedCountLabel = labels?.countLabel ?? defaultAuditLogLabels.countLabel
 
-      {entries.length === 0 ? (
-        <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">{emptyMessage}</p>
-      ) : (
-        <ol className="space-y-2">
-          {entries.map((entry) => {
-            const content = (
-              <>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium">
-                    {entry.actor} {entry.action}
-                    {entry.target ? ` ${entry.target}` : ""}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    {entry.source ? (
-                      <span className="text-xs text-muted-foreground">
-                        {renderSource ? renderSource(entry.source) : entry.source}
-                      </span>
-                    ) : null}
-                    <time className="text-xs text-muted-foreground">{entry.timestamp}</time>
-                  </div>
-                </div>
-                {entry.metadata ? (
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {renderMetadata ? renderMetadata(entry.metadata) : entry.metadata}
-                  </div>
-                ) : null}
-              </>
-            )
+    return (
+      <AuditLogRoot
+        ref={ref}
+        className={className}
+        onEntrySelect={onEntrySelect}
+        selectedEntryId={selectedEntryId}
+        labels={labels}
+        expandedIds={expandedIds}
+        defaultExpandedIds={defaultExpandedIds}
+        onExpandedChange={onExpandedChange}
+        {...props}
+      >
+        <AuditLogHeader>
+          <AuditLogTitle level={headingLevel} />
+          {loading ? null : <AuditLogCount>{mergedCountLabel(entries.length)}</AuditLogCount>}
+        </AuditLogHeader>
 
-            return (
-              <li key={entry.id}>
-                {onEntrySelect ? (
-                  <button
-                    type="button"
-                    className={cn(ROW_CLASSNAME, "hover:bg-accent")}
-                    onClick={() => onEntrySelect(entry.id)}
-                  >
-                    {content}
-                  </button>
-                ) : (
-                  <div className={ROW_CLASSNAME}>{content}</div>
-                )}
-              </li>
-            )
-          })}
-        </ol>
-      )}
-    </div>
-  )
+        {loading ? (
+          <AuditLogSkeleton rows={loadingRowCount} />
+        ) : entries.length === 0 ? (
+          <AuditLogEmpty>{emptyMessage}</AuditLogEmpty>
+        ) : (
+          <AuditLogList>
+            {entries.map((entry) => {
+              const detail = entry.detail ?? renderDetail?.(entry)
+              const entryLabel = `${entry.actor} ${entry.action}${entry.target ? ` ${entry.target}` : ""}`
+
+              return (
+                <AuditLogRow
+                  key={entry.id}
+                  entryId={entry.id}
+                  entryLabel={entryLabel}
+                  severity={entry.severity}
+                >
+                  <div className="flex items-start gap-2">
+                    <AuditLogSummary className="flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-medium">
+                          {renderSummary ? renderSummary(entry) : entryLabel}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          {entry.source ? (
+                            <AuditLogSource>
+                              {renderSource ? renderSource(entry.source) : entry.source}
+                            </AuditLogSource>
+                          ) : null}
+                          <AuditLogTime dateTime={entry.dateTime}>{entry.timestamp}</AuditLogTime>
+                        </div>
+                      </div>
+                      {entry.metadata ? (
+                        <AuditLogMetadata>
+                          {renderMetadata ? renderMetadata(entry.metadata) : entry.metadata}
+                        </AuditLogMetadata>
+                      ) : null}
+                    </AuditLogSummary>
+                    {detail ? <AuditLogDisclosure /> : null}
+                  </div>
+                  {detail ? <AuditLogDetail>{detail}</AuditLogDetail> : null}
+                </AuditLogRow>
+              )
+            })}
+          </AuditLogList>
+        )}
+      </AuditLogRoot>
+    )
+  }
 )
-AuditLogViewer.displayName = "AuditLogViewer"
+AuditLogViewerRoot.displayName = "AuditLogViewer"
+
+/**
+ * Data-driven audit log. Pass `entries` for the common case; import the
+ * parts (also attached here as `AuditLogViewer.Row` etc.) to compose a
+ * custom layout.
+ */
+const AuditLogViewer = Object.assign(AuditLogViewerRoot, {
+  Root: AuditLogRoot,
+  Header: AuditLogHeader,
+  Title: AuditLogTitle,
+  Count: AuditLogCount,
+  List: AuditLogList,
+  Row: AuditLogRow,
+  Summary: AuditLogSummary,
+  Time: AuditLogTime,
+  Source: AuditLogSource,
+  Metadata: AuditLogMetadata,
+  Empty: AuditLogEmpty,
+  Disclosure: AuditLogDisclosure,
+  Detail: AuditLogDetail,
+  Skeleton: AuditLogSkeleton,
+})
 
 export { AuditLogViewer }
+export * from "./audit-log-parts"
+export * from "./audit-log-context"
