@@ -78,6 +78,27 @@ describe("Command keyboard navigation (#7)", () => {
   })
 })
 
+describe("Command registry timing", () => {
+  it("navigates on a keypress that lands before the registration effects flush", () => {
+    // Mirrors a real palette: the key arrives in the same tick as the mount, so
+    // a handler reading its render-time snapshot of the registry sees nothing.
+    const { container } = render(
+      <Command>
+        <CommandInput placeholder="Search…" />
+        <CommandList>
+          <CommandItem value="alpha">Alpha</CommandItem>
+          <CommandItem value="beta">Beta</CommandItem>
+        </CommandList>
+      </Command>
+    )
+
+    const input = container.querySelector("input") as HTMLInputElement
+    fireEvent.keyDown(input, { key: "ArrowDown" })
+
+    expect(activeValueOf()).toBe("Alpha")
+  })
+})
+
 describe("CommandEmpty (#8)", () => {
   it("does not report empty while disabled matches are on screen", () => {
     render(

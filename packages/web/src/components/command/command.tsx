@@ -82,9 +82,14 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
     const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue)
     const [listMounted, setListMounted] = React.useState(false)
 
-    // The registry is state, not a ref: CommandEmpty and the highlight both
-    // depend on it, and a ref would leave them rendering stale data (#8, #11).
+    // The registry is state, because CommandEmpty and the highlight both render
+    // from it and a ref alone would leave them showing stale data (#8, #11).
+    // It is mirrored into a ref because event handlers must read the live
+    // registry, not the snapshot their render closed over: a keypress landing
+    // in the same tick as the registration effects would otherwise see an
+    // empty list and do nothing.
     const [items, setItems] = React.useState<ReadonlyMap<string, RegisteredItem>>(() => new Map())
+    const itemsRef = React.useRef<ReadonlyMap<string, RegisteredItem>>(items)
     const itemIdsRef = React.useRef<Map<string, string>>(new Map())
 
     const value = controlledValue !== undefined ? controlledValue : uncontrolledValue
@@ -108,6 +113,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
         }
         const next = new Map(previous)
         next.set(itemValue, item)
+        itemsRef.current = next
         return next
       })
     }, [])
@@ -117,17 +123,20 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
         if (!previous.has(itemValue)) return previous
         const next = new Map(previous)
         next.delete(itemValue)
+        itemsRef.current = next
         return next
       })
     }, [])
 
+    // Reads the ref so a handler always sees every item registered so far,
+    // including ones that registered after this render was captured.
     const getSelectableValues = React.useCallback(
       () =>
-        [...items.entries()]
+        [...itemsRef.current.entries()]
           .filter(([, item]) => !item.disabled)
           .sort(([, a], [, b]) => compareDocumentOrder(a.element, b.element))
           .map(([itemValue]) => itemValue),
-      [items]
+      []
     )
 
     const getItemId = React.useCallback(
@@ -160,7 +169,9 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       if (!selectable.includes(activeValue)) {
         setActiveValue(selectable[0])
       }
-    }, [activeValue, getSelectableValues])
+    // `items` is the trigger: the registry changing is what can invalidate the
+    // current highlight. `getSelectableValues` is stable and reads the ref.
+    }, [activeValue, items, getSelectableValues])
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       const selectable = getSelectableValues()

@@ -13,3 +13,5 @@ Fix five defects in `Command` that made it unusable as a real command palette, a
 Arrow navigation also skips `disabled` items, and the new `CommandLoading` part is exported.
 
 Note for consumers: `CommandInput` now has `role="combobox"`, so a test querying it by `getByRole("textbox")` must query `getByRole("combobox")` instead.
+
+The item registry is also mirrored into a ref so keyboard handlers read the live list rather than the snapshot their render closed over — a key pressed in the same tick as mount previously did nothing.
