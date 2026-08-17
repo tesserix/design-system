@@ -2,6 +2,7 @@ import * as React from "react"
 import { ChevronDown } from "@tesserix/icons/web"
 
 import { cn } from "../../lib/utils"
+import { Skeleton } from "../skeleton"
 import {
   AuditLogRowProvider,
   AuditLogViewerProvider,
@@ -320,6 +321,30 @@ const AuditLogDetail = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
 )
 AuditLogDetail.displayName = "AuditLogDetail"
 
+export interface AuditLogSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Placeholder rows to render. Default 3. */
+  rows?: number
+}
+
+/** Placeholder rows for a viewer whose entries have not arrived yet. */
+const AuditLogSkeleton = React.forwardRef<HTMLDivElement, AuditLogSkeletonProps>(
+  ({ className, rows = 3, ...props }, ref) => (
+    <div ref={ref} role="status" aria-busy="true" className={cn("space-y-2", className)} {...props}>
+      {Array.from({ length: rows }).map((_, index) => (
+        <div
+          key={index}
+          data-slot="audit-log-skeleton-row"
+          className={cn(AUDIT_LOG_ROW_CLASSNAME, "space-y-2")}
+        >
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-3 w-1/3" />
+        </div>
+      ))}
+    </div>
+  )
+)
+AuditLogSkeleton.displayName = "AuditLogSkeleton"
+
 export {
   AuditLogRoot,
   AuditLogHeader,
@@ -334,4 +359,5 @@ export {
   AuditLogEmpty,
   AuditLogDisclosure,
   AuditLogDetail,
+  AuditLogSkeleton,
 }

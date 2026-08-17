@@ -10,6 +10,7 @@ import {
   AuditLogMetadata,
   AuditLogRoot,
   AuditLogRow,
+  AuditLogSkeleton,
   AuditLogSource,
   AuditLogSummary,
   AuditLogTime,
@@ -63,6 +64,10 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   /** Initially expanded entry ids (uncontrolled). */
   defaultExpandedIds?: string[]
   onExpandedChange?: (expandedIds: string[]) => void
+  /** Renders placeholder rows instead of entries or the empty state. */
+  loading?: boolean
+  /** Placeholder rows while `loading`. Default 3. */
+  loadingRowCount?: number
 }
 
 const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
@@ -82,6 +87,8 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
       expandedIds,
       defaultExpandedIds,
       onExpandedChange,
+      loading,
+      loadingRowCount,
       ...props
     },
     ref
@@ -105,7 +112,9 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
           <AuditLogCount>{mergedCountLabel(entries.length)}</AuditLogCount>
         </AuditLogHeader>
 
-        {entries.length === 0 ? (
+        {loading ? (
+          <AuditLogSkeleton rows={loadingRowCount} />
+        ) : entries.length === 0 ? (
           <AuditLogEmpty>{emptyMessage}</AuditLogEmpty>
         ) : (
           <AuditLogList>
@@ -174,6 +183,7 @@ const AuditLogViewer = Object.assign(AuditLogViewerRoot, {
   Empty: AuditLogEmpty,
   Disclosure: AuditLogDisclosure,
   Detail: AuditLogDetail,
+  Skeleton: AuditLogSkeleton,
 })
 
 export { AuditLogViewer }

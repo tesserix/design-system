@@ -399,3 +399,31 @@ describe("AuditLogViewer severity", () => {
     expect(screen.getByText("Critique")).toHaveClass("sr-only")
   })
 })
+
+describe("AuditLogViewer loading", () => {
+  it("renders skeleton rows while loading", () => {
+    render(<AuditLogViewer entries={[]} loading />)
+    expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true")
+    expect(screen.queryByText("No audit entries")).not.toBeInTheDocument()
+  })
+
+  it("honours loadingRowCount", () => {
+    render(<AuditLogViewer entries={[]} loading loadingRowCount={5} />)
+    expect(screen.getByRole("status").querySelectorAll("[data-slot='audit-log-skeleton-row']")).toHaveLength(5)
+  })
+
+  it("prefers entries over the loading state once loaded", () => {
+    const entries = [
+      {
+        id: "1",
+        actor: "Mahesh",
+        action: "updated",
+        target: "settings",
+        timestamp: "2026-02-24",
+      },
+    ]
+    render(<AuditLogViewer entries={entries} />)
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(screen.getByText(/mahesh updated settings/i)).toBeInTheDocument()
+  })
+})
