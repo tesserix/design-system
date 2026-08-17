@@ -61,20 +61,45 @@ function declarations(palette: AuroraPalette): string {
 }
 
 /**
+ * Brand colour used when a tenant's own is missing or unusable. A sign-in screen
+ * must render something; it must never white-screen over a palette value.
+ */
+export const AURORA_FALLBACK_BRAND = "#5B5FD6"
+
+/**
+ * `deriveAuroraPalette` rejects anything that is not a hex colour, which is the
+ * right contract for a pure utility and the wrong outcome for a login page —
+ * Zitadel leaves `LabelPolicy.primaryColor` empty until a tenant sets one.
+ */
+function safeDerivePalette(brandColor: string, options: { mode: AuroraMode; intensity: AuroraIntensity }) {
+  try {
+    return deriveAuroraPalette(brandColor, options)
+  } catch {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `AuroraAuthPanel: brandColor ${JSON.stringify(brandColor)} is not a hex colour; ` +
+          `falling back to ${AURORA_FALLBACK_BRAND}.`
+      )
+    }
+    return deriveAuroraPalette(AURORA_FALLBACK_BRAND, options)
+  }
+}
+
+/**
  * Resolves the surface a component paints. `auto` returns the light palette for
  * measurement and a stylesheet that hands the dark one to `.dark` descendants.
  */
 function useAuroraSurface(brandColor: string, mode: AuroraSurfaceMode, intensity: AuroraIntensity) {
   const scope = React.useId()
   return React.useMemo(() => {
-    const palette = deriveAuroraPalette(brandColor, {
+    const palette = safeDerivePalette(brandColor, {
       mode: mode === "auto" ? "light" : mode,
       intensity,
     })
     if (mode !== "auto") {
       return { palette, scope, style: auroraVariables(palette), css: null }
     }
-    const dark = deriveAuroraPalette(brandColor, { mode: "dark", intensity })
+    const dark = safeDerivePalette(brandColor, { mode: "dark", intensity })
     const selector = `[data-aurora-scope="${scope}"]`
     return {
       palette,

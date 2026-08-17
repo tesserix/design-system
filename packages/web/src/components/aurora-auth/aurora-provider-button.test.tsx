@@ -121,3 +121,15 @@ describe("AuroraProviderMark", () => {
     expect(document.querySelector("[data-provider-mark]")).toHaveAttribute("data-provider-mark", "sso")
   })
 })
+
+describe("resolveAuroraProvider prototype safety", () => {
+  it("treats an inherited Object key as an unknown IdP name", () => {
+    expect(resolveAuroraProvider("constructor")).toBe("sso")
+    expect(resolveAuroraProvider("toString")).toBe("sso")
+    expect(resolveAuroraProvider("hasOwnProperty")).toBe("sso")
+  })
+
+  it("renders an IdP named after an Object prototype key without crashing", () => {
+    expect(() => render(<AuroraProviderButton provider="constructor" />)).not.toThrow()
+  })
+})
