@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: 'Publish packages (npm + GitHub Packages)'
+        description: 'Publish packages to registry.npmjs.org'
         required: false
         type: boolean
         default: false
@@ -102,7 +102,6 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.publish == true)
     permissions:
       contents: write
-      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -149,24 +148,14 @@ jobs:
           git commit -m "chore: version packages" || echo "No version changes"
           git push
 
-      # GitHub Packages first, so a public-registry failure can no longer abort
-      # the job before this runs. That ordering — not `continue-on-error` — is
-      # what protects this step.
-      - name: Publish to GitHub Packages
-        if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
-        run: |
-          echo "@tesserix:registry=https://npm.pkg.github.com" > "$NPM_CONFIG_USERCONFIG"
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.ADMIN_TOKEN }}" >> "$NPM_CONFIG_USERCONFIG"
-          cp "$NPM_CONFIG_USERCONFIG" .npmrc
-          pnpm changeset publish
-
-      # Must NOT be continue-on-error. mark8ly's package-lock.json resolves
-      # @tesserix/web from registry.npmjs.org, so a silent failure here strands
-      # every consumer on the previous version — which is exactly what happened
-      # to @tesserix/otto-widget@0.6.0 and @tesserix/web@1.8.0.
+      # registry.npmjs.org is the only registry these packages publish to.
+      # Must NOT be continue-on-error: a silent failure here strands every
+      # consumer on the previous version — which is exactly what happened to
+      # @tesserix/otto-widget@0.6.0 and @tesserix/web@1.8.0.
       - name: Publish to npm (public registry)
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
+          # Clear any per-package registry pin before publishing.
           rm -f packages/web/.npmrc
           # An unset or empty secret still renders as an empty string here, which
           # produces a syntactically valid but unauthenticated .npmrc. Name that
