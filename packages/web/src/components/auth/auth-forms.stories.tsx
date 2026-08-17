@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect, fireEvent, within } from "storybook/test"
+import { expect, fireEvent, waitFor, within } from "storybook/test"
 
 import { AuthPanel } from "./auth-panel"
 import { AuthCredentialForm, type AuthCredentialValues } from "./auth-credential-form"
@@ -228,6 +228,9 @@ export const SmokeTest: Story = {
     await expect(password).toHaveAttribute("type", "password")
 
     fireEvent.click(canvas.getByRole("button", { name: "Show password" }))
-    await expect(password).toHaveAttribute("type", "text")
+
+    // A real browser does not flush React's state update synchronously the way
+    // jsdom's act()-wrapped fireEvent does, so the reveal has to be awaited.
+    await waitFor(() => expect(password).toHaveAttribute("type", "text"))
   },
 }
