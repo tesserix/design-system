@@ -4,7 +4,7 @@
 
 AuditLogViewer: per-entry expand/collapse, composable parts, and accessibility fixes.
 
-`@tesserix/web` now requires `lucide-react` as a peer dependency (via `@tesserix/icons`). `@tesserix/icons` is now a runtime dependency of `@tesserix/web`.
+`AuditLogViewer` needs `lucide-react` installed to render its disclosure chevron (via `@tesserix/icons`). `lucide-react` is declared as an **optional** peer dependency of `@tesserix/web`, so it will not fail installs for consumers who don't have it — just be aware the chevron requires it. `@tesserix/icons` is now a runtime dependency of `@tesserix/web`.
 
 - Rows can now carry collapsible `detail` (or supply it via `renderDetail`), revealed by a disclosure button that is a sibling of the row summary rather than nested inside it.
 - The component is now composable: `AuditLogRoot`, `AuditLogRow`, `AuditLogSummary`, `AuditLogDisclosure`, `AuditLogDetail` and friends are exported, and also attached as `AuditLogViewer.Row` etc. The `entries` prop remains the default path and is unchanged.

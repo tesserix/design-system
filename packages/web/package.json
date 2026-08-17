@@ -60,6 +60,9 @@
   "peerDependenciesMeta": {
     "framer-motion": {
       "optional": true
+    },
+    "lucide-react": {
+      "optional": true
     }
   },
   "dependencies": {
