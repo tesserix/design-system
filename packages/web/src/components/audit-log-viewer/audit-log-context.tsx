@@ -20,6 +20,8 @@ export const defaultAuditLogLabels: AuditLogLabels = {
 export interface AuditLogViewerContextValue {
   labels: AuditLogLabels
   onEntrySelect?: (entryId: string) => void
+  /** Id of the viewer's heading, for `aria-labelledby` on the list. */
+  headingId: string
 }
 
 const AuditLogViewerContext = React.createContext<AuditLogViewerContextValue | undefined>(undefined)

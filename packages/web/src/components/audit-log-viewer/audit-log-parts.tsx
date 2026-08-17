@@ -24,9 +24,11 @@ const AuditLogRoot = React.forwardRef<HTMLDivElement, AuditLogRootProps>(
       () => ({ ...defaultAuditLogLabels, ...labels }),
       [labels]
     )
+    const reactId = React.useId()
+    const headingId = `${reactId}-heading`
     const value = React.useMemo(
-      () => ({ labels: mergedLabels, onEntrySelect }),
-      [mergedLabels, onEntrySelect]
+      () => ({ labels: mergedLabels, onEntrySelect, headingId }),
+      [mergedLabels, onEntrySelect, headingId]
     )
 
     return (
@@ -47,10 +49,22 @@ const AuditLogHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
 )
 AuditLogHeader.displayName = "AuditLogHeader"
 
-const AuditLogTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("text-sm font-semibold", className)} {...props} />
-  )
+export interface AuditLogTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  /** Heading level. Default 3 — set it to keep a consuming page's outline correct. */
+  level?: 2 | 3 | 4 | 5 | 6
+}
+
+const AuditLogTitle = React.forwardRef<HTMLHeadingElement, AuditLogTitleProps>(
+  ({ className, level = 3, children, ...props }, ref) => {
+    const { labels, headingId } = useAuditLogViewer()
+    const Heading = `h${level}` as "h2" | "h3" | "h4" | "h5" | "h6"
+
+    return (
+      <Heading ref={ref} id={headingId} className={cn("text-sm font-semibold", className)} {...props}>
+        {children ?? labels.title}
+      </Heading>
+    )
+  }
 )
 AuditLogTitle.displayName = "AuditLogTitle"
 
@@ -62,9 +76,12 @@ const AuditLogCount = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTM
 AuditLogCount.displayName = "AuditLogCount"
 
 const AuditLogList = React.forwardRef<HTMLOListElement, React.OlHTMLAttributes<HTMLOListElement>>(
-  ({ className, ...props }, ref) => (
-    <ol ref={ref} className={cn("space-y-2", className)} {...props} />
-  )
+  ({ className, ...props }, ref) => {
+    const { headingId } = useAuditLogViewer()
+    return (
+      <ol ref={ref} aria-labelledby={headingId} className={cn("space-y-2", className)} {...props} />
+    )
+  }
 )
 AuditLogList.displayName = "AuditLogList"
 

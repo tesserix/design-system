@@ -13,6 +13,7 @@ import {
   AuditLogTime,
   AuditLogTitle,
 } from "./audit-log-parts"
+import { defaultAuditLogLabels, type AuditLogLabels } from "./audit-log-context"
 
 export interface AuditLogEntry {
   id: string
@@ -33,52 +34,70 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   renderSource?: (source: string) => React.ReactNode
   /** Renders an entry's `metadata`. Defaults to the raw string. */
   renderMetadata?: (metadata: string) => React.ReactNode
+  /** Overrides for user-visible strings. Unspecified keys keep their English default. */
+  labels?: Partial<AuditLogLabels>
+  /** Heading level for the viewer title. Default 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6
 }
 
 const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
   (
-    { className, entries, emptyMessage = "No audit entries", onEntrySelect, renderSource, renderMetadata, ...props },
+    {
+      className,
+      entries,
+      emptyMessage,
+      onEntrySelect,
+      renderSource,
+      renderMetadata,
+      labels,
+      headingLevel = 3,
+      ...props
+    },
     ref
-  ) => (
-    <AuditLogRoot ref={ref} className={className} onEntrySelect={onEntrySelect} {...props}>
-      <AuditLogHeader>
-        <AuditLogTitle>Audit Log</AuditLogTitle>
-        <AuditLogCount>{entries.length} entries</AuditLogCount>
-      </AuditLogHeader>
+  ) => {
+    const mergedCountLabel = labels?.countLabel ?? defaultAuditLogLabels.countLabel
 
-      {entries.length === 0 ? (
-        <AuditLogEmpty>{emptyMessage}</AuditLogEmpty>
-      ) : (
-        <AuditLogList>
-          {entries.map((entry) => (
-            <AuditLogRow key={entry.id} entryId={entry.id}>
-              <AuditLogSummary>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium">
-                    {entry.actor} {entry.action}
-                    {entry.target ? ` ${entry.target}` : ""}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    {entry.source ? (
-                      <AuditLogSource>
-                        {renderSource ? renderSource(entry.source) : entry.source}
-                      </AuditLogSource>
-                    ) : null}
-                    <AuditLogTime>{entry.timestamp}</AuditLogTime>
+    return (
+      <AuditLogRoot ref={ref} className={className} onEntrySelect={onEntrySelect} labels={labels} {...props}>
+        <AuditLogHeader>
+          <AuditLogTitle level={headingLevel} />
+          <AuditLogCount>{mergedCountLabel(entries.length)}</AuditLogCount>
+        </AuditLogHeader>
+
+        {entries.length === 0 ? (
+          <AuditLogEmpty>{emptyMessage}</AuditLogEmpty>
+        ) : (
+          <AuditLogList>
+            {entries.map((entry) => (
+              <AuditLogRow key={entry.id} entryId={entry.id}>
+                <AuditLogSummary>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-medium">
+                      {entry.actor} {entry.action}
+                      {entry.target ? ` ${entry.target}` : ""}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {entry.source ? (
+                        <AuditLogSource>
+                          {renderSource ? renderSource(entry.source) : entry.source}
+                        </AuditLogSource>
+                      ) : null}
+                      <AuditLogTime>{entry.timestamp}</AuditLogTime>
+                    </div>
                   </div>
-                </div>
-                {entry.metadata ? (
-                  <AuditLogMetadata>
-                    {renderMetadata ? renderMetadata(entry.metadata) : entry.metadata}
-                  </AuditLogMetadata>
-                ) : null}
-              </AuditLogSummary>
-            </AuditLogRow>
-          ))}
-        </AuditLogList>
-      )}
-    </AuditLogRoot>
-  )
+                  {entry.metadata ? (
+                    <AuditLogMetadata>
+                      {renderMetadata ? renderMetadata(entry.metadata) : entry.metadata}
+                    </AuditLogMetadata>
+                  ) : null}
+                </AuditLogSummary>
+              </AuditLogRow>
+            ))}
+          </AuditLogList>
+        )}
+      </AuditLogRoot>
+    )
+  }
 )
 AuditLogViewerRoot.displayName = "AuditLogViewer"
 

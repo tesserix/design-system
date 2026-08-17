@@ -130,3 +130,65 @@ describe("AuditLogViewer parts", () => {
     spy.mockRestore()
   })
 })
+
+describe("AuditLogViewer labels and headings", () => {
+  const entries = [
+    {
+      id: "1",
+      actor: "Mahesh",
+      action: "updated",
+      target: "settings",
+      timestamp: "2026-02-24",
+    },
+  ]
+
+  it("pluralizes the entry count", () => {
+    const { rerender } = render(<AuditLogViewer entries={[]} />)
+    expect(screen.getByText("0 entries")).toBeInTheDocument()
+
+    rerender(<AuditLogViewer entries={entries} />)
+    expect(screen.getByText("1 entry")).toBeInTheDocument()
+
+    rerender(<AuditLogViewer entries={[entries[0], { ...entries[0], id: "2" }]} />)
+    expect(screen.getByText("2 entries")).toBeInTheDocument()
+  })
+
+  it("renders an h3 heading by default", () => {
+    render(<AuditLogViewer entries={entries} />)
+    expect(screen.getByRole("heading", { level: 3, name: "Audit Log" })).toBeInTheDocument()
+  })
+
+  it("honours headingLevel", () => {
+    render(<AuditLogViewer entries={entries} headingLevel={2} />)
+    expect(screen.getByRole("heading", { level: 2, name: "Audit Log" })).toBeInTheDocument()
+  })
+
+  it("labels the entry list with the heading", () => {
+    render(<AuditLogViewer entries={entries} />)
+    const heading = screen.getByRole("heading", { name: "Audit Log" })
+    expect(screen.getByRole("list")).toHaveAttribute("aria-labelledby", heading.id)
+    expect(heading.id).toBeTruthy()
+  })
+
+  it("overrides every string via labels", () => {
+    render(
+      <AuditLogViewer
+        entries={[]}
+        labels={{
+          title: "Journal d'audit",
+          countLabel: (count) => `${count} entrée(s)`,
+          empty: "Aucune entrée",
+        }}
+      />
+    )
+    expect(screen.getByRole("heading", { name: "Journal d'audit" })).toBeInTheDocument()
+    expect(screen.getByText("0 entrée(s)")).toBeInTheDocument()
+    expect(screen.getByText("Aucune entrée")).toBeInTheDocument()
+  })
+
+  it("prefers the legacy emptyMessage prop over labels.empty", () => {
+    render(<AuditLogViewer entries={[]} emptyMessage="Nothing here" labels={{ empty: "ignored" }} />)
+    expect(screen.getByText("Nothing here")).toBeInTheDocument()
+    expect(screen.queryByText("ignored")).not.toBeInTheDocument()
+  })
+})
