@@ -263,3 +263,101 @@ describe("AuditLogViewer focus and selection", () => {
     expect(screen.getByRole("button")).not.toHaveAttribute("aria-current")
   })
 })
+
+describe("AuditLogViewer disclosure", () => {
+  const entries = [
+    {
+      id: "1",
+      actor: "Mahesh",
+      action: "updated",
+      target: "settings",
+      timestamp: "2026-02-24",
+    },
+  ]
+  const withDetail = [{ ...entries[0], detail: "Full event payload" }]
+
+  it("renders no disclosure for an entry without detail", () => {
+    render(<AuditLogViewer entries={entries} />)
+    expect(screen.queryByRole("button", { name: /show details/i })).not.toBeInTheDocument()
+  })
+
+  it("renders a collapsed disclosure for an entry with detail", () => {
+    render(<AuditLogViewer entries={withDetail} />)
+    const toggle = screen.getByRole("button", { name: /show details/i })
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+    expect(screen.queryByText("Full event payload")).not.toBeInTheDocument()
+  })
+
+  it("expands and collapses on click", () => {
+    render(<AuditLogViewer entries={withDetail} />)
+    const toggle = screen.getByRole("button", { name: /show details/i })
+
+    fireEvent.click(toggle)
+    expect(screen.getByText("Full event payload")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /hide details/i })).toHaveAttribute("aria-expanded", "true")
+
+    fireEvent.click(screen.getByRole("button", { name: /hide details/i }))
+    expect(screen.queryByText("Full event payload")).not.toBeInTheDocument()
+  })
+
+  it("points the disclosure at the detail region it controls", () => {
+    render(<AuditLogViewer entries={withDetail} defaultExpandedIds={["1"]} />)
+    const toggle = screen.getByRole("button", { name: /hide details/i })
+    const region = screen.getByRole("region")
+    expect(toggle).toHaveAttribute("aria-controls", region.id)
+    expect(region.id).toBeTruthy()
+  })
+
+  it("names the disclosure after its entry", () => {
+    render(<AuditLogViewer entries={withDetail} />)
+    expect(
+      screen.getByRole("button", { name: /show details.*mahesh updated settings/i })
+    ).toBeInTheDocument()
+  })
+
+  it("honours defaultExpandedIds", () => {
+    render(<AuditLogViewer entries={withDetail} defaultExpandedIds={["1"]} />)
+    expect(screen.getByText("Full event payload")).toBeInTheDocument()
+  })
+
+  it("supports controlled expansion", () => {
+    const onExpandedChange = vi.fn()
+    render(
+      <AuditLogViewer entries={withDetail} expandedIds={[]} onExpandedChange={onExpandedChange} />
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: /show details/i }))
+    expect(onExpandedChange).toHaveBeenCalledWith(["1"])
+    // Controlled: stays collapsed until the parent says otherwise.
+    expect(screen.queryByText("Full event payload")).not.toBeInTheDocument()
+  })
+
+  it("builds detail from renderDetail when the entry has none", () => {
+    render(
+      <AuditLogViewer
+        entries={entries}
+        renderDetail={(entry) => <span>payload for {entry.id}</span>}
+        defaultExpandedIds={["1"]}
+      />
+    )
+    expect(screen.getByText(/payload for 1/)).toBeInTheDocument()
+  })
+
+  it("never nests the disclosure inside the selectable summary", () => {
+    render(<AuditLogViewer entries={withDetail} onEntrySelect={vi.fn()} />)
+    const summary = screen.getByRole("button", { name: /^mahesh updated settings/i })
+    expect(summary.querySelector("button")).toBeNull()
+    expect(screen.getByRole("button", { name: /show details/i })).toBeInTheDocument()
+  })
+
+  it("keeps selection and disclosure independent", () => {
+    const onEntrySelect = vi.fn()
+    render(<AuditLogViewer entries={withDetail} onEntrySelect={onEntrySelect} />)
+
+    fireEvent.click(screen.getByRole("button", { name: /show details/i }))
+    expect(onEntrySelect).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole("button", { name: /^mahesh updated settings/i }))
+    expect(onEntrySelect).toHaveBeenCalledWith("1")
+  })
+})

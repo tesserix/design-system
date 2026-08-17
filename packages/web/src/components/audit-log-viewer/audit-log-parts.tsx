@@ -1,10 +1,12 @@
 import * as React from "react"
+import { ChevronDown } from "@tesserix/icons/web"
 
 import { cn } from "../../lib/utils"
 import {
   AuditLogRowProvider,
   AuditLogViewerProvider,
   defaultAuditLogLabels,
+  useAuditLogExpansion,
   useAuditLogRow,
   useAuditLogViewer,
   type AuditLogLabels,
@@ -16,20 +18,48 @@ export interface AuditLogRootProps extends React.HTMLAttributes<HTMLDivElement> 
   labels?: Partial<AuditLogLabels>
   onEntrySelect?: (entryId: string) => void
   selectedEntryId?: string
+  expandedIds?: string[]
+  defaultExpandedIds?: string[]
+  onExpandedChange?: (expandedIds: string[]) => void
 }
 
 /** The card container. Owns viewer-wide context for every nested part. */
 const AuditLogRoot = React.forwardRef<HTMLDivElement, AuditLogRootProps>(
-  ({ className, labels, onEntrySelect, selectedEntryId, children, ...props }, ref) => {
+  (
+    {
+      className,
+      labels,
+      onEntrySelect,
+      selectedEntryId,
+      expandedIds,
+      defaultExpandedIds,
+      onExpandedChange,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const mergedLabels = React.useMemo<AuditLogLabels>(
       () => ({ ...defaultAuditLogLabels, ...labels }),
       [labels]
     )
     const reactId = React.useId()
     const headingId = `${reactId}-heading`
+    const { expandedIds: expanded, toggleEntry } = useAuditLogExpansion({
+      expandedIds,
+      defaultExpandedIds,
+      onExpandedChange,
+    })
     const value = React.useMemo(
-      () => ({ labels: mergedLabels, onEntrySelect, headingId, selectedEntryId }),
-      [mergedLabels, onEntrySelect, headingId, selectedEntryId]
+      () => ({
+        labels: mergedLabels,
+        onEntrySelect,
+        selectedEntryId,
+        headingId,
+        expandedIds: expanded,
+        toggleEntry,
+      }),
+      [mergedLabels, onEntrySelect, selectedEntryId, headingId, expanded, toggleEntry]
     )
 
     return (
@@ -88,15 +118,32 @@ AuditLogList.displayName = "AuditLogList"
 
 export interface AuditLogRowProps extends React.LiHTMLAttributes<HTMLLIElement> {
   entryId: string
+  /** Plain-text row name, used to name the disclosure button. */
+  entryLabel?: string
 }
 
 /** One entry. Provides row-scoped ids so summary and detail can reference each other. */
 const AuditLogRow = React.forwardRef<HTMLLIElement, AuditLogRowProps>(
-  ({ className, entryId, children, ...props }, ref) => {
+  ({ className, entryId, entryLabel, children, ...props }, ref) => {
     const reactId = React.useId()
+    const { expandedIds, toggleEntry } = useAuditLogViewer()
+    const [hasDetail, setHasDetail] = React.useState(false)
+
+    const registerDetail = React.useCallback((next: boolean) => setHasDetail(next), [])
+    const toggle = React.useCallback(() => toggleEntry(entryId), [toggleEntry, entryId])
+
     const value = React.useMemo(
-      () => ({ entryId, summaryId: `${reactId}-summary` }),
-      [entryId, reactId]
+      () => ({
+        entryId,
+        summaryId: `${reactId}-summary`,
+        detailId: `${reactId}-detail`,
+        expanded: expandedIds.has(entryId),
+        toggle,
+        hasDetail,
+        registerDetail,
+        entryLabel,
+      }),
+      [entryId, reactId, expandedIds, toggle, hasDetail, registerDetail, entryLabel]
     )
 
     return (
@@ -193,6 +240,77 @@ const AuditLogEmpty = React.forwardRef<HTMLParagraphElement, React.HTMLAttribute
 )
 AuditLogEmpty.displayName = "AuditLogEmpty"
 
+export interface AuditLogDisclosureProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> {}
+
+/**
+ * Toggles the row's detail. A SIBLING of `AuditLogSummary`, never a child —
+ * HTML forbids a button inside a button, and the summary is itself a button
+ * whenever the viewer tracks selection.
+ */
+const AuditLogDisclosure = React.forwardRef<HTMLButtonElement, AuditLogDisclosureProps>(
+  ({ className, ...props }, ref) => {
+    const { labels } = useAuditLogViewer()
+    const { detailId, expanded, toggle, entryLabel } = useAuditLogRow()
+    const action = expanded ? labels.collapse : labels.expand
+
+    return (
+      <button
+        ref={ref}
+        type="button"
+        aria-expanded={expanded}
+        aria-controls={detailId}
+        aria-label={entryLabel ? `${action}: ${entryLabel}` : action}
+        onClick={toggle}
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          className
+        )}
+        {...props}
+      >
+        <ChevronDown
+          aria-hidden="true"
+          className={cn("h-4 w-4 shrink-0 transition-transform duration-200", expanded && "rotate-180")}
+        />
+      </button>
+    )
+  }
+)
+AuditLogDisclosure.displayName = "AuditLogDisclosure"
+
+/**
+ * The row's collapsible detail. Unmounts when collapsed, so hidden content
+ * stays out of the accessibility tree entirely.
+ */
+const AuditLogDetail = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, children, ...props }, ref) => {
+    const { detailId, summaryId, expanded, registerDetail } = useAuditLogRow()
+
+    React.useEffect(() => {
+      registerDetail(true)
+      return () => registerDetail(false)
+    }, [registerDetail])
+
+    if (!expanded) {
+      return null
+    }
+
+    return (
+      <div
+        ref={ref}
+        id={detailId}
+        role="region"
+        aria-labelledby={summaryId}
+        className={cn("mt-2 break-words rounded-md border bg-muted/40 p-3 text-xs", className)}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  }
+)
+AuditLogDetail.displayName = "AuditLogDetail"
+
 export {
   AuditLogRoot,
   AuditLogHeader,
@@ -205,4 +323,6 @@ export {
   AuditLogSource,
   AuditLogMetadata,
   AuditLogEmpty,
+  AuditLogDisclosure,
+  AuditLogDetail,
 }

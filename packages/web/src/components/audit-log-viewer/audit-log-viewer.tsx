@@ -2,6 +2,8 @@ import * as React from "react"
 
 import {
   AuditLogCount,
+  AuditLogDetail,
+  AuditLogDisclosure,
   AuditLogEmpty,
   AuditLogHeader,
   AuditLogList,
@@ -29,6 +31,8 @@ export interface AuditLogEntry {
    * attribute is emitted — an invalid `dateTime` is worse than none.
    */
   dateTime?: string
+  /** Collapsible detail for this entry. Renders a disclosure when present. */
+  detail?: React.ReactNode
 }
 
 export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -50,6 +54,13 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   labels?: Partial<AuditLogLabels>
   /** Heading level for the viewer title. Default 3. */
   headingLevel?: 2 | 3 | 4 | 5 | 6
+  /** Builds collapsible detail for entries that carry none of their own. */
+  renderDetail?: (entry: AuditLogEntry) => React.ReactNode
+  /** Expanded entry ids (controlled). */
+  expandedIds?: string[]
+  /** Initially expanded entry ids (uncontrolled). */
+  defaultExpandedIds?: string[]
+  onExpandedChange?: (expandedIds: string[]) => void
 }
 
 const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>(
@@ -65,6 +76,10 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
       renderSummary,
       labels,
       headingLevel = 3,
+      renderDetail,
+      expandedIds,
+      defaultExpandedIds,
+      onExpandedChange,
       ...props
     },
     ref
@@ -72,7 +87,17 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
     const mergedCountLabel = labels?.countLabel ?? defaultAuditLogLabels.countLabel
 
     return (
-      <AuditLogRoot ref={ref} className={className} onEntrySelect={onEntrySelect} selectedEntryId={selectedEntryId} labels={labels} {...props}>
+      <AuditLogRoot
+        ref={ref}
+        className={className}
+        onEntrySelect={onEntrySelect}
+        selectedEntryId={selectedEntryId}
+        labels={labels}
+        expandedIds={expandedIds}
+        defaultExpandedIds={defaultExpandedIds}
+        onExpandedChange={onExpandedChange}
+        {...props}
+      >
         <AuditLogHeader>
           <AuditLogTitle level={headingLevel} />
           <AuditLogCount>{mergedCountLabel(entries.length)}</AuditLogCount>
@@ -82,32 +107,43 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
           <AuditLogEmpty>{emptyMessage}</AuditLogEmpty>
         ) : (
           <AuditLogList>
-            {entries.map((entry) => (
-              <AuditLogRow key={entry.id} entryId={entry.id}>
-                <AuditLogSummary>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-medium">
-                      {renderSummary
-                        ? renderSummary(entry)
-                        : `${entry.actor} ${entry.action}${entry.target ? ` ${entry.target}` : ""}`}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      {entry.source ? (
-                        <AuditLogSource>
-                          {renderSource ? renderSource(entry.source) : entry.source}
-                        </AuditLogSource>
+            {entries.map((entry) => {
+              const detail = entry.detail ?? renderDetail?.(entry)
+              const entryLabel = `${entry.actor} ${entry.action}${entry.target ? ` ${entry.target}` : ""}`
+
+              return (
+                <AuditLogRow
+                  key={entry.id}
+                  entryId={entry.id}
+                  entryLabel={entryLabel}
+                >
+                  <div className="flex items-start gap-2">
+                    <AuditLogSummary className="flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-medium">
+                          {renderSummary ? renderSummary(entry) : entryLabel}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          {entry.source ? (
+                            <AuditLogSource>
+                              {renderSource ? renderSource(entry.source) : entry.source}
+                            </AuditLogSource>
+                          ) : null}
+                          <AuditLogTime dateTime={entry.dateTime}>{entry.timestamp}</AuditLogTime>
+                        </div>
+                      </div>
+                      {entry.metadata ? (
+                        <AuditLogMetadata>
+                          {renderMetadata ? renderMetadata(entry.metadata) : entry.metadata}
+                        </AuditLogMetadata>
                       ) : null}
-                      <AuditLogTime dateTime={entry.dateTime}>{entry.timestamp}</AuditLogTime>
-                    </div>
+                    </AuditLogSummary>
+                    {detail ? <AuditLogDisclosure /> : null}
                   </div>
-                  {entry.metadata ? (
-                    <AuditLogMetadata>
-                      {renderMetadata ? renderMetadata(entry.metadata) : entry.metadata}
-                    </AuditLogMetadata>
-                  ) : null}
-                </AuditLogSummary>
-              </AuditLogRow>
-            ))}
+                  {detail ? <AuditLogDetail>{detail}</AuditLogDetail> : null}
+                </AuditLogRow>
+              )
+            })}
           </AuditLogList>
         )}
       </AuditLogRoot>
@@ -133,6 +169,8 @@ const AuditLogViewer = Object.assign(AuditLogViewerRoot, {
   Source: AuditLogSource,
   Metadata: AuditLogMetadata,
   Empty: AuditLogEmpty,
+  Disclosure: AuditLogDisclosure,
+  Detail: AuditLogDetail,
 })
 
 export { AuditLogViewer }

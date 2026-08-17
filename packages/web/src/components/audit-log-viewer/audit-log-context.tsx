@@ -24,6 +24,8 @@ export interface AuditLogViewerContextValue {
   headingId: string
   /** Id of the currently selected entry, if the surface tracks selection. */
   selectedEntryId?: string
+  expandedIds: ReadonlySet<string>
+  toggleEntry: (entryId: string) => void
 }
 
 const AuditLogViewerContext = React.createContext<AuditLogViewerContextValue | undefined>(undefined)
@@ -41,6 +43,14 @@ export function useAuditLogViewer(): AuditLogViewerContextValue {
 export interface AuditLogRowContextValue {
   entryId: string
   summaryId: string
+  detailId: string
+  expanded: boolean
+  toggle: () => void
+  /** True once an `AuditLogDetail` has registered for this row. */
+  hasDetail: boolean
+  registerDetail: (hasDetail: boolean) => void
+  /** Plain-text name of the row, for the disclosure's accessible name. */
+  entryLabel?: string
 }
 
 const AuditLogRowContext = React.createContext<AuditLogRowContextValue | undefined>(undefined)
@@ -53,4 +63,51 @@ export function useAuditLogRow(): AuditLogRowContextValue {
     throw new Error("AuditLog row parts must be used within AuditLogRow")
   }
   return context
+}
+
+export interface UseAuditLogExpansionOptions {
+  expandedIds?: string[]
+  defaultExpandedIds?: string[]
+  onExpandedChange?: (expandedIds: string[]) => void
+}
+
+export interface AuditLogExpansion {
+  expandedIds: ReadonlySet<string>
+  toggleEntry: (entryId: string) => void
+}
+
+/**
+ * Multiple-open expansion state. Controlled when `expandedIds` is passed;
+ * otherwise self-managed from `defaultExpandedIds`.
+ */
+export function useAuditLogExpansion({
+  expandedIds,
+  defaultExpandedIds,
+  onExpandedChange,
+}: UseAuditLogExpansionOptions): AuditLogExpansion {
+  const [uncontrolled, setUncontrolled] = React.useState<ReadonlySet<string>>(
+    () => new Set(defaultExpandedIds ?? [])
+  )
+  const isControlled = expandedIds !== undefined
+  const controlled = React.useMemo(() => new Set(expandedIds ?? []), [expandedIds])
+  const current = isControlled ? controlled : uncontrolled
+
+  const toggleEntry = React.useCallback(
+    (entryId: string) => {
+      const next = new Set(current)
+      if (next.has(entryId)) {
+        next.delete(entryId)
+      } else {
+        next.add(entryId)
+      }
+
+      if (!isControlled) {
+        setUncontrolled(next)
+      }
+      onExpandedChange?.(Array.from(next))
+    },
+    [current, isControlled, onExpandedChange]
+  )
+
+  return { expandedIds: current, toggleEntry }
 }
