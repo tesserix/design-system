@@ -173,10 +173,18 @@ jobs:
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
           version=$(node -p "require('./packages/web/package.json').version")
-          published=$(npm view "@tesserix/web@$version" version --registry https://registry.npmjs.org 2>/dev/null || true)
-          if [ "$published" != "$version" ]; then
-            echo "::error::@tesserix/web@$version is not on registry.npmjs.org after publishing. Consumers resolving from the public registry are stranded on the previous version."
-            exit 1
-          fi
-          echo "Verified @tesserix/web@$version on registry.npmjs.org"
+          # npm's read path is eventually consistent: a version that has just
+          # been accepted is briefly invisible to `npm view`, so a single check
+          # reports a false failure for a publish that actually succeeded.
+          for attempt in 1 2 3 4 5 6; do
+            published=$(npm view "@tesserix/web@$version" version --registry https://registry.npmjs.org 2>/dev/null || true)
+            if [ "$published" = "$version" ]; then
+              echo "Verified @tesserix/web@$version on registry.npmjs.org (attempt $attempt)"
+              exit 0
+            fi
+            echo "Not visible yet (attempt $attempt); waiting for the registry to catch up."
+            sleep 10
+          done
+          echo "::error::@tesserix/web@$version is not on registry.npmjs.org 60s after publishing. Consumers resolving from the public registry are stranded on the previous version."
+          exit 1
 
