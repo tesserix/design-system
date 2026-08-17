@@ -10,6 +10,7 @@ import {
   useAuditLogRow,
   useAuditLogViewer,
   type AuditLogLabels,
+  type AuditLogSeverity,
 } from "./audit-log-context"
 
 export const AUDIT_LOG_ROW_CLASSNAME = "w-full rounded-md border p-3 text-left"
@@ -120,13 +121,20 @@ export interface AuditLogRowProps extends React.LiHTMLAttributes<HTMLLIElement> 
   entryId: string
   /** Plain-text row name, used to name the disclosure button. */
   entryLabel?: string
+  severity?: AuditLogSeverity
+}
+
+const SEVERITY_CLASSNAMES: Record<AuditLogSeverity, string> = {
+  info: "border-l-4 border-l-primary pl-1",
+  warning: "border-l-4 border-l-warning pl-1",
+  critical: "border-l-4 border-l-destructive pl-1",
 }
 
 /** One entry. Provides row-scoped ids so summary and detail can reference each other. */
 const AuditLogRow = React.forwardRef<HTMLLIElement, AuditLogRowProps>(
-  ({ className, entryId, entryLabel, children, ...props }, ref) => {
+  ({ className, entryId, entryLabel, severity, children, ...props }, ref) => {
     const reactId = React.useId()
-    const { expandedIds, toggleEntry } = useAuditLogViewer()
+    const { expandedIds, toggleEntry, labels } = useAuditLogViewer()
     const [hasDetail, setHasDetail] = React.useState(false)
 
     const registerDetail = React.useCallback((next: boolean) => setHasDetail(next), [])
@@ -148,7 +156,8 @@ const AuditLogRow = React.forwardRef<HTMLLIElement, AuditLogRowProps>(
 
     return (
       <AuditLogRowProvider value={value}>
-        <li ref={ref} className={className} {...props}>
+        <li ref={ref} className={cn(severity && SEVERITY_CLASSNAMES[severity], className)} {...props}>
+          {severity ? <span className="sr-only">{labels.severityLabel(severity)}</span> : null}
           {children}
         </li>
       </AuditLogRowProvider>

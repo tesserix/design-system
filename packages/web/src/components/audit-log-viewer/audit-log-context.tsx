@@ -1,5 +1,7 @@
 import * as React from "react"
 
+export type AuditLogSeverity = "info" | "warning" | "critical"
+
 /** Every user-visible string the viewer renders. Override to localize. */
 export interface AuditLogLabels {
   title: string
@@ -7,6 +9,7 @@ export interface AuditLogLabels {
   expand: string
   collapse: string
   empty: string
+  severityLabel: (severity: AuditLogSeverity) => string
 }
 
 export const defaultAuditLogLabels: AuditLogLabels = {
@@ -15,6 +18,8 @@ export const defaultAuditLogLabels: AuditLogLabels = {
   expand: "Show details",
   collapse: "Hide details",
   empty: "No audit entries",
+  severityLabel: (severity) =>
+    ({ info: "Info", warning: "Warning", critical: "Critical" })[severity],
 }
 
 export interface AuditLogViewerContextValue {

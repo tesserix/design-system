@@ -361,3 +361,41 @@ describe("AuditLogViewer disclosure", () => {
     expect(onEntrySelect).toHaveBeenCalledWith("1")
   })
 })
+
+describe("AuditLogViewer severity", () => {
+  const entries = [
+    {
+      id: "1",
+      actor: "Mahesh",
+      action: "updated",
+      target: "settings",
+      timestamp: "2026-02-24",
+    },
+  ]
+
+  it("tints a critical row and names the severity in text", () => {
+    render(<AuditLogViewer entries={[{ ...entries[0], severity: "critical" }]} />)
+    expect(screen.getByRole("listitem")).toHaveClass("border-l-destructive")
+    expect(screen.getByText("Critical")).toHaveClass("sr-only")
+  })
+
+  it("tints a warning row", () => {
+    render(<AuditLogViewer entries={[{ ...entries[0], severity: "warning" }]} />)
+    expect(screen.getByRole("listitem")).toHaveClass("border-l-warning")
+  })
+
+  it("adds no severity affordance when the entry has none", () => {
+    render(<AuditLogViewer entries={entries} />)
+    expect(screen.getByRole("listitem").className).not.toMatch(/border-l-/)
+  })
+
+  it("localizes the severity word", () => {
+    render(
+      <AuditLogViewer
+        entries={[{ ...entries[0], severity: "critical" }]}
+        labels={{ severityLabel: () => "Critique" }}
+      />
+    )
+    expect(screen.getByText("Critique")).toHaveClass("sr-only")
+  })
+})

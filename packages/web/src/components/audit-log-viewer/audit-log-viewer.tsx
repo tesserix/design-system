@@ -15,7 +15,7 @@ import {
   AuditLogTime,
   AuditLogTitle,
 } from "./audit-log-parts"
-import { defaultAuditLogLabels, type AuditLogLabels } from "./audit-log-context"
+import { defaultAuditLogLabels, type AuditLogLabels, type AuditLogSeverity } from "./audit-log-context"
 
 export interface AuditLogEntry {
   id: string
@@ -33,6 +33,8 @@ export interface AuditLogEntry {
   dateTime?: string
   /** Collapsible detail for this entry. Renders a disclosure when present. */
   detail?: React.ReactNode
+  /** Severity level for this entry. Rendered as a colored left border and sr-only text. */
+  severity?: AuditLogSeverity
 }
 
 export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -116,6 +118,7 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
                   key={entry.id}
                   entryId={entry.id}
                   entryLabel={entryLabel}
+                  severity={entry.severity}
                 >
                   <div className="flex items-start gap-2">
                     <AuditLogSummary className="flex-1">
