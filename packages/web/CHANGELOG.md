@@ -1,5 +1,19 @@
 # @tesserix/web
 
+## 1.13.0
+
+### Minor Changes
+
+- 42fd2b3: Let `AuditLogViewer` attribute a row to its source. Entries take an optional opaque `source`, and a new `renderSource` prop turns that id into a label — so a merged multi-source timeline no longer has to smuggle attribution through `target` or `metadata`. A matching `renderMetadata` prop formats the stringified JSON consumers put in `metadata` instead of rendering it raw. Rows now render as a `<button>` only when `onEntrySelect` is supplied, so a read-only log stops emitting focusable controls that do nothing.
+
+### Patch Changes
+
+- 822214d: Stop `AuroraAuthPanel` from white-screening the sign-in page over tenant configuration.
+
+  `deriveAuroraPalette` throws on anything that is not a hex colour — correct for a pure utility, fatal for a login screen, because `brandColor` comes straight from a tenant's Zitadel `LabelPolicy.primaryColor`, which is empty until someone sets one. `AuroraAuthPanel` and `AuroraBackground` now fall back to `AURORA_FALLBACK_BRAND` (exported) and warn outside production instead of throwing. The utility keeps its strict contract.
+
+  Also fixes `resolveAuroraProvider` resolving an IdP display name like `constructor` or `toString` to an `Object.prototype` member, which rendered a non-component and crashed the provider button. It now checks own keys only.
+
 ## 1.12.0
 
 ### Minor Changes
