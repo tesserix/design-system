@@ -52,7 +52,7 @@ describe("AuroraAuthPanel", () => {
 
     const panel = screen.getByTestId("panel")
     expect(panel.style.getPropertyValue("--aurora-accent")).toBe("#5B5FD6")
-    expect(panel.style.getPropertyValue("--aurora-canvas")).toBe("#F6F6FC")
+    expect(panel.style.getPropertyValue("--aurora-canvas")).toBe("var(--background, #F6F6FC)")
     expect(panel.style.getPropertyValue("--aurora-button")).toContain("linear-gradient")
   })
 
@@ -65,7 +65,7 @@ describe("AuroraAuthPanel", () => {
   it("switches to the dark surface when asked", () => {
     render(<AuroraAuthPanel brandColor="#9333EA" title="Sign in" mode="dark" data-testid="panel" />)
 
-    expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("#0F0E2A")
+    expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("var(--background, #0F0E2A)")
   })
 
   it("publishes both surfaces at auto so the panel follows the host's dark class", () => {
@@ -74,8 +74,8 @@ describe("AuroraAuthPanel", () => {
     )
 
     const css = container.querySelector("style")?.textContent ?? ""
-    expect(css).toContain("--aurora-canvas:#F6F6FC")
-    expect(css).toContain("--aurora-canvas:#0F0E2A")
+    expect(css).toContain("--aurora-canvas:var(--background, #F6F6FC)")
+    expect(css).toContain("--aurora-canvas:var(--background, #0F0E2A)")
     expect(css).toMatch(/\.dark \[data-aurora-scope=/)
   })
 
@@ -100,7 +100,7 @@ describe("AuroraAuthPanel", () => {
   it("keeps a fixed mode inline so it never inherits the host's dark class", () => {
     render(<AuroraAuthPanel brandColor="#5B5FD6" title="Sign in" mode="light" data-testid="panel" />)
 
-    expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("#F6F6FC")
+    expect(screen.getByTestId("panel").style.getPropertyValue("--aurora-canvas")).toBe("var(--background, #F6F6FC)")
   })
 
   it("sizes itself to the small viewport so mobile browser chrome cannot clip the card", () => {
@@ -216,5 +216,107 @@ describe("AuroraAuthPanel brand colour resilience", () => {
   it("keeps painting a valid brand colour exactly as before", () => {
     expect(() => render(<AuroraBackground brandColor="#5469D4" />)).not.toThrow()
     expect(() => render(<AuroraBackground brandColor="" />)).not.toThrow()
+  })
+})
+
+describe("AuroraAuthPanel theming", () => {
+  const styleOf = (container: HTMLElement) =>
+    (container.querySelector("[data-aurora-scope]") as HTMLElement).getAttribute("style") ?? ""
+
+  it("defers to the host's design tokens when a role is not supplied", () => {
+    const { container } = render(<AuroraAuthPanel brandColor="#5469D4">x</AuroraAuthPanel>)
+    const style = styleOf(container)
+
+    expect(style).toContain("var(--background,")
+    expect(style).toContain("var(--foreground,")
+    expect(style).toContain("var(--muted-foreground,")
+  })
+
+  it("keeps the platform default as the token fallback so a standalone page is unchanged", () => {
+    const { container } = render(<AuroraAuthPanel brandColor="#5469D4">x</AuroraAuthPanel>)
+
+    expect(styleOf(container)).toContain("var(--background, #F6F6FC)")
+  })
+
+  it("paints a tenant's LabelPolicy colour literally, overriding the token", () => {
+    const { container } = render(
+      <AuroraAuthPanel brandColor="#5469D4" labelPolicy={{ backgroundColor: "#101820" }}>
+        x
+      </AuroraAuthPanel>
+    )
+    const style = styleOf(container)
+
+    expect(style).toContain("#101820")
+    expect(style).not.toContain("var(--background,")
+  })
+
+  it("lets an explicit colours prop beat the label policy", () => {
+    const { container } = render(
+      <AuroraAuthPanel
+        brandColor="#5469D4"
+        labelPolicy={{ backgroundColor: "#101820" }}
+        colors={{ background: "#FFEECC" }}
+      >
+        x
+      </AuroraAuthPanel>
+    )
+
+    expect(styleOf(container)).toContain("#FFEECC")
+  })
+
+  it("exposes radius and font as overridable custom properties", () => {
+    const { container } = render(
+      <AuroraAuthPanel brandColor="#5469D4" metrics={{ radius: "0px", fontFamily: "Inter, sans-serif" }}>
+        x
+      </AuroraAuthPanel>
+    )
+    const style = styleOf(container)
+
+    expect(style).toContain("--aurora-radius: 0px")
+    expect(style).toContain("--aurora-font: Inter, sans-serif")
+  })
+
+  it("defaults radius to the design system's --radius token", () => {
+    const { container } = render(<AuroraAuthPanel brandColor="#5469D4">x</AuroraAuthPanel>)
+
+    expect(styleOf(container)).toContain("var(--radius, 1.25rem)")
+  })
+
+  it("honours disableWatermark from the tenant's policy", () => {
+    const { rerender } = render(
+      <AuroraAuthPanel brandColor="#5469D4" watermark watermarkLabel="Secured by Tesserix">
+        x
+      </AuroraAuthPanel>
+    )
+    expect(screen.getByText("Secured by Tesserix")).toBeInTheDocument()
+
+    rerender(
+      <AuroraAuthPanel
+        brandColor="#5469D4"
+        watermark
+        watermarkLabel="Secured by Tesserix"
+        labelPolicy={{ disableWatermark: true }}
+      >
+        x
+      </AuroraAuthPanel>
+    )
+    expect(screen.queryByText("Secured by Tesserix")).not.toBeInTheDocument()
+  })
+
+  it("uses the dark LabelPolicy variants for the dark half of auto mode", () => {
+    const { container } = render(
+      <AuroraAuthPanel
+        brandColor="#5469D4"
+        mode="auto"
+        labelPolicy={{ backgroundColor: "#FFFFFF", backgroundColorDark: "#101820" }}
+      >
+        x
+      </AuroraAuthPanel>
+    )
+    const css = container.querySelector("style")?.textContent ?? ""
+
+    expect(css).toContain("#FFFFFF")
+    expect(css).toContain("#101820")
+    expect(css).toMatch(/\.dark \[data-aurora-scope/)
   })
 })

@@ -2,9 +2,27 @@ export type AuroraMode = "light" | "dark"
 
 export type AuroraIntensity = "subtle" | "full" | "flat"
 
+/**
+ * Tenant-supplied surface colours. Each maps onto a Zitadel `LabelPolicy` field
+ * and overrides the platform default for that one role; anything omitted keeps
+ * the platform surface. An unparseable value is ignored rather than fatal — a
+ * bad colour must not cost a tenant their sign-in page.
+ */
+export interface AuroraBrandColors {
+  /** `LabelPolicy.primaryColor`. Overrides the `brandColor` argument. */
+  primary?: string
+  /** `LabelPolicy.backgroundColor` — the page canvas behind the washes. */
+  background?: string
+  /** `LabelPolicy.fontColor` — primary text on the card. */
+  font?: string
+  /** `LabelPolicy.warnColor` — destructive and error text. */
+  warn?: string
+}
+
 export interface AuroraPaletteOptions {
   mode?: AuroraMode
   intensity?: AuroraIntensity
+  colors?: AuroraBrandColors
 }
 
 export interface AuroraPalette {
@@ -12,6 +30,8 @@ export interface AuroraPalette {
   intensity: AuroraIntensity
   /** Brand colour lifted until it reads AA against the card it sits on. */
   accent: string
+  /** Destructive/error text, lifted to AA against the card. */
+  warn: string
   canvas: string
   cardBase: string
   cardBackground: string
@@ -81,13 +101,75 @@ const SURFACE = {
 const WASH_HUE_ROTATION = [0, 38, -42]
 const WASH_STOP = [62, 64, 66]
 
+const WARN_DEFAULT = { light: "#B3261E", dark: "#F2B8B5" } as const
+
+/**
+ * Parses an optional override, returning `undefined` for anything unusable so
+ * the caller falls through to the platform surface.
+ */
+function optionalHex(input: string | undefined): string | undefined {
+  if (!input) return undefined
+  try {
+    return normalizeHex(input)
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Selects the colours for a surface from a Zitadel `LabelPolicy`, falling back
+ * to the light variant whenever a dark one is unset — which is what Zitadel's
+ * own console does.
+ */
+export function zitadelLabelPolicyColors(
+  policy: {
+    primaryColor?: string
+    backgroundColor?: string
+    warnColor?: string
+    fontColor?: string
+    primaryColorDark?: string
+    backgroundColorDark?: string
+    warnColorDark?: string
+    fontColorDark?: string
+  },
+  mode: AuroraMode = "light"
+): AuroraBrandColors {
+  const pick = (light?: string, dark?: string) => (mode === "dark" ? (dark ?? light) : light)
+
+  return {
+    primary: pick(policy.primaryColor, policy.primaryColorDark),
+    background: pick(policy.backgroundColor, policy.backgroundColorDark),
+    font: pick(policy.fontColor, policy.fontColorDark),
+    warn: pick(policy.warnColor, policy.warnColorDark),
+  }
+}
+
 export function deriveAuroraPalette(
   brandColor: string,
-  { mode = "light", intensity = "full" }: AuroraPaletteOptions = {}
+  { mode = "light", intensity = "full", colors = {} }: AuroraPaletteOptions = {}
 ): AuroraPalette {
-  const brand = normalizeHex(brandColor)
+  const brand = normalizeHex(colors.primary ?? brandColor)
   const surface = SURFACE[mode]
   const opacity = intensity === "flat" ? 0 : intensity === "subtle" ? 0.5 : 1
+
+  const canvas = optionalHex(colors.background) ?? surface.canvas
+  const font = optionalHex(colors.font)
+  const foreground = font ?? surface.foreground
+  const warn = ensureReadable(optionalHex(colors.warn) ?? WARN_DEFAULT[mode], surface.cardBase)
+  // A tenant that recolours its text must not lose the muted/label/subtle ramp,
+  // so those are mixed from the chosen font colour toward the card rather than
+  // left on the platform greys.
+  const ramp = font
+    ? {
+        muted: mix(font, surface.cardBase, 0.32),
+        label: mix(font, surface.cardBase, 0.2),
+        subtle: mix(font, surface.cardBase, 0.52),
+      }
+    : {
+        muted: surface.mutedForeground,
+        label: surface.labelForeground,
+        subtle: surface.subtleForeground,
+      }
 
   const swatchHexes = WASH_HUE_ROTATION.map((rotation, i) =>
     toHex(shift(brand, rotation, surface.washLift[i]))
@@ -97,15 +179,16 @@ export function deriveAuroraPalette(
     mode,
     intensity,
     accent: ensureReadable(brand, surface.cardBase),
-    canvas: surface.canvas,
+    warn,
+    canvas,
     cardBase: surface.cardBase,
     cardBackground: surface.cardBackground,
     cardBorder: `1px solid ${rgba(brand, surface.borderAlpha)}`,
     cardShadow: surface.cardShadow,
-    foreground: surface.foreground,
-    mutedForeground: surface.mutedForeground,
-    labelForeground: surface.labelForeground,
-    subtleForeground: surface.subtleForeground,
+    foreground,
+    mutedForeground: ramp.muted,
+    labelForeground: ramp.label,
+    subtleForeground: ramp.subtle,
     inputBackground: surface.inputBackground,
     inputBorder: rgba(brand, surface.inputBorderAlpha),
     surfaceHover: surface.surfaceHover,
@@ -195,6 +278,20 @@ function fromHsl(h: number, s: number, l: number): Rgb {
     Math.round((g + m) * 255),
     Math.round((b + m) * 255),
   ]
+}
+
+/** Blends `hex` toward `toward` by `amount` (0 = untouched, 1 = fully `toward`). */
+function mix(hex: string, toward: string, amount: number): string {
+  const a = toRgb(hex)
+  const b = toRgb(toward)
+  const t = clamp(amount, 0, 1)
+  // Channels must be integers: `round` here is the 3-decimal helper used for
+  // HSL maths, and a fractional channel makes `toHex` emit garbage.
+  return toHex([
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ])
 }
 
 function shift(hex: string, deltaHue: number, deltaLightness: number): Rgb {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 
-import { deriveAuroraPalette } from "./aurora-palette"
+import { deriveAuroraPalette, zitadelLabelPolicyColors } from "./aurora-palette"
 
 const TESSERIX = "#5B5FD6"
 
@@ -85,6 +85,72 @@ describe("deriveAuroraPalette", () => {
 
   it("rejects a colour it cannot parse", () => {
     expect(() => deriveAuroraPalette("cornflowerblue")).toThrow(/hex colour/i)
+  })
+})
+
+describe("deriveAuroraPalette theme colour overrides", () => {
+  it("paints the canvas with the tenant's background colour", () => {
+    const palette = deriveAuroraPalette(TESSERIX, { colors: { background: "#101820" } })
+    expect(palette.canvas).toBe("#101820")
+  })
+
+  it("uses the tenant's font colour for foreground text", () => {
+    const palette = deriveAuroraPalette(TESSERIX, { colors: { font: "#123456" } })
+    expect(palette.foreground).toBe("#123456")
+  })
+
+  it("exposes the tenant's warn colour", () => {
+    const palette = deriveAuroraPalette(TESSERIX, { colors: { warn: "#B3261E" } })
+    expect(palette.warn).toBe("#B3261E")
+  })
+
+  it("falls back to the platform surface when a colour is not overridden", () => {
+    const base = deriveAuroraPalette(TESSERIX)
+    const partial = deriveAuroraPalette(TESSERIX, { colors: { warn: "#B3261E" } })
+    expect(partial.canvas).toBe(base.canvas)
+    expect(partial.foreground).toBe(base.foreground)
+  })
+
+  it("ignores an unparseable override rather than throwing", () => {
+    const base = deriveAuroraPalette(TESSERIX)
+    const palette = deriveAuroraPalette(TESSERIX, { colors: { background: "not-a-colour" } })
+    expect(palette.canvas).toBe(base.canvas)
+  })
+
+  it("derives muted text from an overridden font colour so it stays legible", () => {
+    const palette = deriveAuroraPalette(TESSERIX, { colors: { font: "#123456" } })
+    expect(palette.mutedForeground).not.toBe(palette.foreground)
+    expect(contrast(palette.mutedForeground, palette.cardBase)).toBeGreaterThanOrEqual(3)
+  })
+})
+
+describe("zitadelLabelPolicyColors", () => {
+  it("picks the light colours for a light surface", () => {
+    expect(
+      zitadelLabelPolicyColors(
+        { primaryColor: "#111111", backgroundColor: "#222222", fontColor: "#333333", warnColor: "#444444" },
+        "light"
+      )
+    ).toEqual({ primary: "#111111", background: "#222222", font: "#333333", warn: "#444444" })
+  })
+
+  it("picks the dark colours for a dark surface", () => {
+    expect(
+      zitadelLabelPolicyColors(
+        {
+          primaryColor: "#111111",
+          primaryColorDark: "#AAAAAA",
+          backgroundColorDark: "#BBBBBB",
+          fontColorDark: "#CCCCCC",
+          warnColorDark: "#DDDDDD",
+        },
+        "dark"
+      )
+    ).toEqual({ primary: "#AAAAAA", background: "#BBBBBB", font: "#CCCCCC", warn: "#DDDDDD" })
+  })
+
+  it("falls back to the light colour when a dark variant is unset", () => {
+    expect(zitadelLabelPolicyColors({ primaryColor: "#111111" }, "dark").primary).toBe("#111111")
   })
 })
 
