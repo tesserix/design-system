@@ -29,23 +29,29 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+/**
+ * No `brandColor`: the surface takes its accent, background, text and radius
+ * from the host's design tokens and paints no washes. This is the default the
+ * forms are shown against, because most products want their own theme rather
+ * than a tenant's brand.
+ */
 function Surface({ children, title }: { children: React.ReactNode; title?: string }) {
   return (
-    <AuthPanel brandColor={BRAND} title={title} tagline="Welcome back.">
+    <AuthPanel title={title} tagline="Welcome back.">
       {children}
     </AuthPanel>
   )
 }
 
 /**
- * No brand colour: the surface takes its accent, background, text and radius
- * from the host's design tokens and paints no washes.
+ * The white-label case: a tenant supplies a brand colour, so the accent, input
+ * border, button gradient and the three washes are all derived from it.
  */
-export const DesignTokensOnly: Story = {
-  render: function DesignTokensOnlyStory() {
+export const BrandedTenant: Story = {
+  render: function BrandedTenantStory() {
     const [values, setValues] = React.useState<AuthCredentialValues>({ loginName: "", password: "" })
     return (
-      <AuthPanel title="Sign in" tagline="Welcome back.">
+      <AuthPanel brandColor={BRAND} title="Sign in" tagline="Welcome back.">
         <AuthCredentialForm values={values} onValuesChange={setValues} onSubmit={() => {}} />
       </AuthPanel>
     )
