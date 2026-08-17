@@ -3,8 +3,10 @@ packages:
   - 'apps/*'
 
 allowBuilds:
+  '@swc/core': false
   esbuild: false
   sharp: false
+  unrs-resolver: false
 
 # Transitive dependency pins. pnpm 11 no longer reads `pnpm.overrides` from
 # package.json — this is the only place overrides are honoured.
