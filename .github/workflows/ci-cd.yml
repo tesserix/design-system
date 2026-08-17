@@ -168,6 +168,13 @@ jobs:
         if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
         run: |
           rm -f packages/web/.npmrc
+          # An unset or empty secret still renders as an empty string here, which
+          # produces a syntactically valid but unauthenticated .npmrc. Name that
+          # case directly rather than letting it surface as ENEEDAUTH further on.
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::NPM_TOKEN is unset or empty. Add an npm Automation token with publish rights on the @tesserix scope as the NPM_TOKEN repository secret, then re-run this job."
+            exit 1
+          fi
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$NPM_CONFIG_USERCONFIG"
           cp "$NPM_CONFIG_USERCONFIG" .npmrc
           # npm answers an unauthorised publish with E404, so name the account first.
@@ -177,4 +184,18 @@ jobs:
           fi
           echo "Publishing to registry.npmjs.org as $who"
           pnpm release
+
+      # `changeset publish` exits 0 when it decides a version is already present,
+      # so a successful step is not proof the public registry actually has it.
+      # Ask registry.npmjs.org directly for the version in the repo.
+      - name: Verify the public registry has the published version
+        if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+        run: |
+          version=$(node -p "require('./packages/web/package.json').version")
+          published=$(npm view "@tesserix/web@$version" version --registry https://registry.npmjs.org 2>/dev/null || true)
+          if [ "$published" != "$version" ]; then
+            echo "::error::@tesserix/web@$version is not on registry.npmjs.org after publishing. Consumers resolving from the public registry are stranded on the previous version."
+            exit 1
+          fi
+          echo "Verified @tesserix/web@$version on registry.npmjs.org"
 
