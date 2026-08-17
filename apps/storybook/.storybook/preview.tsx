@@ -225,7 +225,10 @@ const preview: Preview = {
   globalTypes: {
     theme: {
       description: 'Theme Variant',
-      defaultValue: 'slate',
+      // The design system's own default, so Storybook shows the tokens a
+      // consumer gets out of the box. Opening on a named variant made every
+      // primary surface look slate-blue and read as the system's default.
+      defaultValue: 'default',
       toolbar: {
         title: 'Theme',
         icon: 'paintbrush',
