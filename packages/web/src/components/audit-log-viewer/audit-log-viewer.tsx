@@ -35,6 +35,8 @@ export interface AuditLogViewerProps extends React.HTMLAttributes<HTMLDivElement
   entries: AuditLogEntry[]
   emptyMessage?: string
   onEntrySelect?: (entryId: string) => void
+  /** Id of the selected entry. Marks that row `aria-current` and tints it. */
+  selectedEntryId?: string
   /** Renders the label for an entry's `source`. Defaults to the raw id. */
   renderSource?: (source: string) => React.ReactNode
   /** Renders an entry's `metadata`. Defaults to the raw string. */
@@ -57,6 +59,7 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
       entries,
       emptyMessage,
       onEntrySelect,
+      selectedEntryId,
       renderSource,
       renderMetadata,
       renderSummary,
@@ -69,7 +72,7 @@ const AuditLogViewerRoot = React.forwardRef<HTMLDivElement, AuditLogViewerProps>
     const mergedCountLabel = labels?.countLabel ?? defaultAuditLogLabels.countLabel
 
     return (
-      <AuditLogRoot ref={ref} className={className} onEntrySelect={onEntrySelect} labels={labels} {...props}>
+      <AuditLogRoot ref={ref} className={className} onEntrySelect={onEntrySelect} selectedEntryId={selectedEntryId} labels={labels} {...props}>
         <AuditLogHeader>
           <AuditLogTitle level={headingLevel} />
           <AuditLogCount>{mergedCountLabel(entries.length)}</AuditLogCount>

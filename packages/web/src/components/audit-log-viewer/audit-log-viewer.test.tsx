@@ -236,3 +236,30 @@ describe("AuditLogViewer time and summary", () => {
     expect(screen.getByText("x".repeat(400))).toHaveClass("break-words")
   })
 })
+
+describe("AuditLogViewer focus and selection", () => {
+  const entries = [
+    {
+      id: "1",
+      actor: "Mahesh",
+      action: "updated",
+      target: "settings",
+      timestamp: "2026-02-24",
+    },
+  ]
+
+  it("gives a selectable row a visible focus ring", () => {
+    render(<AuditLogViewer entries={entries} onEntrySelect={vi.fn()} />)
+    expect(screen.getByRole("button")).toHaveClass("focus-visible:ring-2")
+  })
+
+  it("marks the selected entry with aria-current", () => {
+    render(<AuditLogViewer entries={entries} onEntrySelect={vi.fn()} selectedEntryId="1" />)
+    expect(screen.getByRole("button")).toHaveAttribute("aria-current", "true")
+  })
+
+  it("leaves unselected entries without aria-current", () => {
+    render(<AuditLogViewer entries={entries} onEntrySelect={vi.fn()} selectedEntryId="other" />)
+    expect(screen.getByRole("button")).not.toHaveAttribute("aria-current")
+  })
+})

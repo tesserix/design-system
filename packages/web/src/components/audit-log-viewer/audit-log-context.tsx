@@ -22,6 +22,8 @@ export interface AuditLogViewerContextValue {
   onEntrySelect?: (entryId: string) => void
   /** Id of the viewer's heading, for `aria-labelledby` on the list. */
   headingId: string
+  /** Id of the currently selected entry, if the surface tracks selection. */
+  selectedEntryId?: string
 }
 
 const AuditLogViewerContext = React.createContext<AuditLogViewerContextValue | undefined>(undefined)

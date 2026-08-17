@@ -15,11 +15,12 @@ export const AUDIT_LOG_ROW_CLASSNAME = "w-full rounded-md border p-3 text-left"
 export interface AuditLogRootProps extends React.HTMLAttributes<HTMLDivElement> {
   labels?: Partial<AuditLogLabels>
   onEntrySelect?: (entryId: string) => void
+  selectedEntryId?: string
 }
 
 /** The card container. Owns viewer-wide context for every nested part. */
 const AuditLogRoot = React.forwardRef<HTMLDivElement, AuditLogRootProps>(
-  ({ className, labels, onEntrySelect, children, ...props }, ref) => {
+  ({ className, labels, onEntrySelect, selectedEntryId, children, ...props }, ref) => {
     const mergedLabels = React.useMemo<AuditLogLabels>(
       () => ({ ...defaultAuditLogLabels, ...labels }),
       [labels]
@@ -27,8 +28,8 @@ const AuditLogRoot = React.forwardRef<HTMLDivElement, AuditLogRootProps>(
     const reactId = React.useId()
     const headingId = `${reactId}-heading`
     const value = React.useMemo(
-      () => ({ labels: mergedLabels, onEntrySelect, headingId }),
-      [mergedLabels, onEntrySelect, headingId]
+      () => ({ labels: mergedLabels, onEntrySelect, headingId, selectedEntryId }),
+      [mergedLabels, onEntrySelect, headingId, selectedEntryId]
     )
 
     return (
@@ -116,8 +117,9 @@ AuditLogRow.displayName = "AuditLogRow"
  */
 const AuditLogSummary = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
   ({ className, children, ...props }, ref) => {
-    const { onEntrySelect } = useAuditLogViewer()
+    const { onEntrySelect, selectedEntryId } = useAuditLogViewer()
     const { entryId, summaryId } = useAuditLogRow()
+    const selected = selectedEntryId === entryId
 
     if (!onEntrySelect) {
       return (
@@ -137,7 +139,13 @@ const AuditLogSummary = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLE
         ref={ref as React.Ref<HTMLButtonElement>}
         id={summaryId}
         type="button"
-        className={cn(AUDIT_LOG_ROW_CLASSNAME, "hover:bg-accent", className)}
+        aria-current={selected ? "true" : undefined}
+        className={cn(
+          AUDIT_LOG_ROW_CLASSNAME,
+          "transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          selected && "border-primary bg-accent",
+          className
+        )}
         onClick={() => onEntrySelect(entryId)}
         {...props}
       >
