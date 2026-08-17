@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect, fireEvent, within } from "storybook/test"
+import { expect, fireEvent, waitFor, within } from "storybook/test"
 
 import { CommandPalette } from "./command-palette"
 
@@ -98,6 +98,11 @@ export const SmokeTest: Story = {
     const body = within(document.body)
     const input = body.getByPlaceholderText(/search commands/i)
     fireEvent.keyDown(input, { key: "ArrowDown" })
-    await expect(body.getByRole("option", { name: /create project/i })).toHaveAttribute("data-active", "true")
+
+    // A real browser does not flush React's state update synchronously the way
+    // jsdom's act()-wrapped fireEvent does, so the highlight has to be awaited.
+    await waitFor(() =>
+      expect(body.getByRole("option", { name: /create project/i })).toHaveAttribute("data-active", "true")
+    )
   },
 }
