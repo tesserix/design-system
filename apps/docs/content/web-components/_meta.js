@@ -8,7 +8,7 @@ export default {
   "app-store-badges": "App Store Badges",
   "aspect-ratio": "Aspect Ratio",
   "audit-log-viewer": "Audit Log Viewer",
-  "aurora-auth": "Aurora Auth",
+  "auth": "Auth",
   "auth-layout": "Auth Layout",
   "autocomplete": "Autocomplete",
   "avatar": "Avatar",

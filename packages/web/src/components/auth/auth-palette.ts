@@ -1,33 +1,33 @@
-export type AuroraMode = "light" | "dark"
+export type AuthSurfaceTheme = "light" | "dark"
 
-export type AuroraIntensity = "subtle" | "full" | "flat"
+export type AuthIntensity = "subtle" | "full" | "flat"
 
 /**
- * Tenant-supplied surface colours. Each maps onto a Zitadel `LabelPolicy` field
- * and overrides the platform default for that one role; anything omitted keeps
- * the platform surface. An unparseable value is ignored rather than fatal — a
- * bad colour must not cost a tenant their sign-in page.
+ * Tenant-supplied surface colours. Each overrides the platform default for one
+ * role; anything omitted keeps the platform surface. An unparseable value is
+ * ignored rather than fatal — a bad colour must not cost a tenant their sign-in
+ * page.
  */
-export interface AuroraBrandColors {
-  /** `LabelPolicy.primaryColor`. Overrides the `brandColor` argument. */
+export interface AuthBrandColors {
+  /** Overrides the `brandColor` argument. */
   primary?: string
-  /** `LabelPolicy.backgroundColor` — the page canvas behind the washes. */
+  /** The page canvas behind the washes. */
   background?: string
-  /** `LabelPolicy.fontColor` — primary text on the card. */
+  /** Primary text on the card. */
   font?: string
-  /** `LabelPolicy.warnColor` — destructive and error text. */
+  /** Destructive and error text. */
   warn?: string
 }
 
-export interface AuroraPaletteOptions {
-  mode?: AuroraMode
-  intensity?: AuroraIntensity
-  colors?: AuroraBrandColors
+export interface AuthPaletteOptions {
+  mode?: AuthSurfaceTheme
+  intensity?: AuthIntensity
+  colors?: AuthBrandColors
 }
 
-export interface AuroraPalette {
-  mode: AuroraMode
-  intensity: AuroraIntensity
+export interface AuthPalette {
+  mode: AuthSurfaceTheme
+  intensity: AuthIntensity
   /** Brand colour lifted until it reads AA against the card it sits on. */
   accent: string
   /** Destructive/error text, lifted to AA against the card. */
@@ -116,38 +116,10 @@ function optionalHex(input: string | undefined): string | undefined {
   }
 }
 
-/**
- * Selects the colours for a surface from a Zitadel `LabelPolicy`, falling back
- * to the light variant whenever a dark one is unset — which is what Zitadel's
- * own console does.
- */
-export function zitadelLabelPolicyColors(
-  policy: {
-    primaryColor?: string
-    backgroundColor?: string
-    warnColor?: string
-    fontColor?: string
-    primaryColorDark?: string
-    backgroundColorDark?: string
-    warnColorDark?: string
-    fontColorDark?: string
-  },
-  mode: AuroraMode = "light"
-): AuroraBrandColors {
-  const pick = (light?: string, dark?: string) => (mode === "dark" ? (dark ?? light) : light)
-
-  return {
-    primary: pick(policy.primaryColor, policy.primaryColorDark),
-    background: pick(policy.backgroundColor, policy.backgroundColorDark),
-    font: pick(policy.fontColor, policy.fontColorDark),
-    warn: pick(policy.warnColor, policy.warnColorDark),
-  }
-}
-
-export function deriveAuroraPalette(
+export function deriveAuthPalette(
   brandColor: string,
-  { mode = "light", intensity = "full", colors = {} }: AuroraPaletteOptions = {}
-): AuroraPalette {
+  { mode = "light", intensity = "full", colors = {} }: AuthPaletteOptions = {}
+): AuthPalette {
   const brand = normalizeHex(colors.primary ?? brandColor)
   const surface = SURFACE[mode]
   const opacity = intensity === "flat" ? 0 : intensity === "subtle" ? 0.5 : 1
@@ -217,7 +189,7 @@ function normalizeHex(input: string): string {
           .join("")
       : raw
   if (!/^[0-9a-fA-F]{6}$/.test(expanded)) {
-    throw new TypeError(`deriveAuroraPalette: "${input}" is not a 3- or 6-digit hex colour`)
+    throw new TypeError(`deriveAuthPalette: "${input}" is not a 3- or 6-digit hex colour`)
   }
   return `#${expanded.toUpperCase()}`
 }

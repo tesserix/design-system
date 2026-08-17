@@ -1,19 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
-import { AuroraAuthPanel, useAuroraPalette } from "./aurora-auth"
-import { AuroraProviderButton } from "./aurora-provider-button"
-import { AuroraProviderList } from "./aurora-provider-list"
+import { AuthPanel, useAuthPalette } from "./auth-panel"
+import { AuthProviderButton } from "./auth-provider-button"
+import { AuthProviderList } from "./auth-provider-list"
 
 const meta = {
-  title: "Patterns/AuroraAuthPanel",
-  component: AuroraAuthPanel,
+  title: "Patterns/AuthPanel",
+  component: AuthPanel,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
     docs: {
       description: {
         component:
-          "White-label sign-in surface. The aurora washes are derived from the tenant's primary colour — hue +38° and −42° — so a tenant supplies one colour, not three, and no two tenants land on the same background. The accent is lifted until it reads AA against its own card.",
+          "White-label sign-in surface. The auth washes are derived from the tenant's primary colour — hue +38° and −42° — so a tenant supplies one colour, not three, and no two tenants land on the same background. The accent is lifted until it reads AA against its own card.",
       },
     },
   },
@@ -21,13 +21,13 @@ const meta = {
     mode: { control: "inline-radio", options: ["light", "dark", "auto"] },
     intensity: { control: "inline-radio", options: ["subtle", "full", "flat"] },
   },
-} satisfies Meta<typeof AuroraAuthPanel>
+} satisfies Meta<typeof AuthPanel>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 function Wordmark({ name, glyph }: { name: string; glyph: React.ReactNode }) {
-  const { accent, mode, foreground } = useAuroraPalette()
+  const { accent, mode, foreground } = useAuthPalette()
   const color = mode === "dark" ? foreground : accent
   return (
     <svg viewBox="0 0 240 34" width="230" height="34" role="img" aria-label={name}>
@@ -43,11 +43,11 @@ function Wordmark({ name, glyph }: { name: string; glyph: React.ReactNode }) {
 
 /** `providers` mirrors what the tenant enabled in Zitadel — an empty list renders no section at all. */
 function SignInForm({ email, providers = [] }: { email: string; providers?: string[] }) {
-  const palette = useAuroraPalette()
+  const palette = useAuthPalette()
   const field = {
-    background: "var(--aurora-input)",
-    border: "var(--aurora-border)",
-    color: "var(--aurora-foreground)",
+    background: "var(--auth-input)",
+    border: "var(--auth-border)",
+    color: "var(--auth-foreground)",
   }
 
   return (
@@ -73,7 +73,7 @@ function SignInForm({ email, providers = [] }: { email: string; providers?: stri
         <label className="flex items-center gap-2" style={{ color: palette.mutedForeground }}>
           <input type="checkbox" defaultChecked /> Remember me
         </label>
-        <a href="#" className="font-medium" style={{ color: "var(--aurora-accent)" }}>
+        <a href="#" className="font-medium" style={{ color: "var(--auth-accent)" }}>
           Forgot password?
         </a>
       </div>
@@ -81,18 +81,18 @@ function SignInForm({ email, providers = [] }: { email: string; providers?: stri
         type="submit"
         className="w-full rounded-[0.625rem] py-3 text-[0.9375rem] font-semibold"
         style={{
-          background: "var(--aurora-button)",
-          color: "var(--aurora-button-foreground)",
-          boxShadow: "var(--aurora-button-shadow)",
+          background: "var(--auth-button)",
+          color: "var(--auth-button-foreground)",
+          boxShadow: "var(--auth-button-shadow)",
         }}
       >
         Continue
       </button>
-      <AuroraProviderList label="or continue with">
+      <AuthProviderList label="or continue with">
         {providers.map((provider) => (
-          <AuroraProviderButton key={provider} provider={provider} />
+          <AuthProviderButton key={provider} provider={provider} />
         ))}
-      </AuroraProviderList>
+      </AuthProviderList>
     </form>
   )
 }
@@ -180,7 +180,7 @@ export const Flat: Story = {
   args: {
     ...Default.args,
     intensity: "flat",
-    tagline: "Aurora off — for tenants who want a plain surface.",
+    tagline: "Auth off — for tenants who want a plain surface.",
   },
 }
 

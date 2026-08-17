@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest"
 import { render, screen } from "@testing-library/react"
 
-import { AuroraProviderButton } from "./aurora-provider-button"
-import { AuroraProviderList } from "./aurora-provider-list"
+import { AuthProviderButton } from "./auth-provider-button"
+import { AuthProviderList } from "./auth-provider-list"
 
-describe("AuroraProviderList", () => {
+describe("AuthProviderList", () => {
   it("renders nothing when the tenant has no identity provider enabled", () => {
-    const { container } = render(<AuroraProviderList label="or sign in with">{[]}</AuroraProviderList>)
+    const { container } = render(<AuthProviderList label="or sign in with">{[]}</AuthProviderList>)
 
     expect(container).toBeEmptyDOMElement()
     expect(screen.queryByText("or sign in with")).not.toBeInTheDocument()
@@ -15,10 +15,10 @@ describe("AuroraProviderList", () => {
   it("ignores providers the tenant switched off rather than leaving a bare divider", () => {
     const googleEnabled = false
     const { container } = render(
-      <AuroraProviderList label="or sign in with">
-        {googleEnabled && <AuroraProviderButton provider="google" />}
+      <AuthProviderList label="or sign in with">
+        {googleEnabled && <AuthProviderButton provider="google" />}
         {null}
-      </AuroraProviderList>
+      </AuthProviderList>
     )
 
     expect(container).toBeEmptyDOMElement()
@@ -26,9 +26,9 @@ describe("AuroraProviderList", () => {
 
   it("labels the section once the tenant enables a provider", () => {
     render(
-      <AuroraProviderList label="or sign in with">
-        <AuroraProviderButton provider="google" />
-      </AuroraProviderList>
+      <AuthProviderList label="or sign in with">
+        <AuthProviderButton provider="google" />
+      </AuthProviderList>
     )
 
     expect(screen.getByText("or sign in with")).toBeInTheDocument()
@@ -37,11 +37,11 @@ describe("AuroraProviderList", () => {
 
   it("stacks up to three providers with their labels visible", () => {
     render(
-      <AuroraProviderList label="OR">
-        <AuroraProviderButton provider="google" />
-        <AuroraProviderButton provider="microsoft" />
-        <AuroraProviderButton provider="apple" />
-      </AuroraProviderList>
+      <AuthProviderList label="OR">
+        <AuthProviderButton provider="google" />
+        <AuthProviderButton provider="microsoft" />
+        <AuthProviderButton provider="apple" />
+      </AuthProviderList>
     )
 
     expect(screen.getByRole("button", { name: "Continue with Google" })).toHaveTextContent("Continue with Google")
@@ -49,12 +49,12 @@ describe("AuroraProviderList", () => {
 
   it("collapses to icon-only buttons past three so a phone shows them in one row", () => {
     render(
-      <AuroraProviderList label="OR">
-        <AuroraProviderButton provider="google" />
-        <AuroraProviderButton provider="microsoft" />
-        <AuroraProviderButton provider="apple" />
-        <AuroraProviderButton provider="github" />
-      </AuroraProviderList>
+      <AuthProviderList label="OR">
+        <AuthProviderButton provider="google" />
+        <AuthProviderButton provider="microsoft" />
+        <AuthProviderButton provider="apple" />
+        <AuthProviderButton provider="github" />
+      </AuthProviderList>
     )
 
     const google = screen.getByRole("button", { name: "Continue with Google" })
@@ -64,12 +64,12 @@ describe("AuroraProviderList", () => {
 
   it("lets a single button opt out of the collapse", () => {
     render(
-      <AuroraProviderList label="OR">
-        <AuroraProviderButton provider="passkey" compact={false} />
-        <AuroraProviderButton provider="google" />
-        <AuroraProviderButton provider="microsoft" />
-        <AuroraProviderButton provider="apple" />
-      </AuroraProviderList>
+      <AuthProviderList label="OR">
+        <AuthProviderButton provider="passkey" compact={false} />
+        <AuthProviderButton provider="google" />
+        <AuthProviderButton provider="microsoft" />
+        <AuthProviderButton provider="apple" />
+      </AuthProviderList>
     )
 
     expect(screen.getByRole("button", { name: "Continue with a passkey" })).toHaveTextContent(
