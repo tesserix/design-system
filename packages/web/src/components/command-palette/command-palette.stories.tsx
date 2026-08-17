@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect, fireEvent } from "storybook/test"
+import { expect, fireEvent, within } from "storybook/test"
 
 import { CommandPalette } from "./command-palette"
 
@@ -90,11 +90,14 @@ export const ServerDrivenSearch: Story = {
 
 export const SmokeTest: Story = {
   render: Default.render,
-  play: async ({ canvas, canvasElement }) => {
+  play: async ({ canvasElement }) => {
     await expect(canvasElement).toBeTruthy()
 
-    const input = canvas.getByPlaceholderText(/search commands/i)
+    // CommandDialog portals its content out of the story canvas, so queries
+    // have to be scoped to the document rather than to canvasElement.
+    const body = within(document.body)
+    const input = body.getByPlaceholderText(/search commands/i)
     fireEvent.keyDown(input, { key: "ArrowDown" })
-    await expect(canvas.getByRole("option", { name: /create project/i })).toHaveAttribute("data-active", "true")
+    await expect(body.getByRole("option", { name: /create project/i })).toHaveAttribute("data-active", "true")
   },
 }
