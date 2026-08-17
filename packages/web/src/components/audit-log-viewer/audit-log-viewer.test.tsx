@@ -16,7 +16,7 @@ describe("AuditLogViewer", () => {
 
   it("renders entries", () => {
     render(<AuditLogViewer entries={entries} />)
-    expect(screen.getByRole("button", { name: /mahesh updated settings/i })).toBeInTheDocument()
+    expect(screen.getByText(/mahesh updated settings/i)).toBeInTheDocument()
   })
 
   it("shows empty state", () => {
@@ -30,5 +30,54 @@ describe("AuditLogViewer", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /mahesh updated settings/i }))
     expect(onEntrySelect).toHaveBeenCalledWith("1")
+  })
+
+  it("renders rows as buttons only when onEntrySelect is provided", () => {
+    const { rerender } = render(<AuditLogViewer entries={entries} />)
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+
+    rerender(<AuditLogViewer entries={entries} onEntrySelect={vi.fn()} />)
+    expect(screen.getByRole("button", { name: /mahesh updated settings/i })).toBeInTheDocument()
+  })
+
+  it("renders a source via renderSource", () => {
+    render(
+      <AuditLogViewer
+        entries={[{ ...entries[0], source: "mark8ly" }]}
+        renderSource={(source) => <span data-testid="source">{source.toUpperCase()}</span>}
+      />
+    )
+
+    expect(screen.getByTestId("source")).toHaveTextContent("MARK8LY")
+  })
+
+  it("ignores renderSource when an entry has no source", () => {
+    render(<AuditLogViewer entries={entries} renderSource={(source) => <span data-testid="source">{source}</span>} />)
+
+    expect(screen.queryByTestId("source")).not.toBeInTheDocument()
+  })
+
+  it("renders a raw source string when renderSource is omitted", () => {
+    render(<AuditLogViewer entries={[{ ...entries[0], source: "mark8ly" }]} />)
+
+    expect(screen.getByText("mark8ly")).toBeInTheDocument()
+  })
+
+  it("formats metadata via renderMetadata", () => {
+    render(
+      <AuditLogViewer
+        entries={[{ ...entries[0], metadata: '{"severity":"critical"}' }]}
+        renderMetadata={(metadata) => <span data-testid="meta">{JSON.parse(metadata).severity}</span>}
+      />
+    )
+
+    expect(screen.getByTestId("meta")).toHaveTextContent("critical")
+    expect(screen.queryByText('{"severity":"critical"}')).not.toBeInTheDocument()
+  })
+
+  it("falls back to raw metadata when renderMetadata is omitted", () => {
+    render(<AuditLogViewer entries={[{ ...entries[0], metadata: "Changed payout schedule" }]} />)
+
+    expect(screen.getByText("Changed payout schedule")).toBeInTheDocument()
   })
 })
