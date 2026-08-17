@@ -128,9 +128,14 @@ export const AUTH_FALLBACK_BRAND = "#5B5FD6"
  * a tenant's brand colour is routinely empty until someone sets one.
  */
 function safeDerivePalette(
-  brandColor: string,
+  brandColor: string | undefined,
   options: { mode: AuthSurfaceTheme; intensity: AuthIntensity; colors?: AuthBrandColors }
 ) {
+  // No brand colour at all is a supported choice, not a misconfiguration: the
+  // surface then paints from the host's design tokens. The wash geometry still
+  // needs a hex, but at `flat` intensity none of it is drawn.
+  if (!brandColor) return deriveAuthPalette(AUTH_FALLBACK_BRAND, options)
+
   try {
     return deriveAuthPalette(brandColor, options)
   } catch {
@@ -149,9 +154,9 @@ function safeDerivePalette(
  * measurement and a stylesheet that hands the dark one to `.dark` descendants.
  */
 function useAuthSurface(
-  brandColor: string,
+  brandColor: string | undefined,
   mode: AuthSurfaceMode,
-  intensity: AuthIntensity,
+  intensity: AuthIntensity | undefined,
   branding?: AuthBranding,
   colors?: AuthBrandColors,
   metrics?: AuthMetrics
@@ -177,9 +182,12 @@ function useAuthSurface(
         font: Boolean(roleColors.font),
         warn: Boolean(roleColors.warn),
       }
+      // Without a brand colour there is nothing to derive a wash from, so the
+      // surface stays flat and reads purely from the design tokens.
+      const resolvedIntensity: AuthIntensity = intensity ?? (supplied.brand ? "full" : "flat")
       const palette = safeDerivePalette(brandColor, {
         mode: surfaceMode,
-        intensity,
+        intensity: resolvedIntensity,
         colors: roleColors,
       })
       return { palette, supplied }
@@ -237,8 +245,11 @@ function AuthSurface({ washCount }: { washCount: number }) {
 }
 
 export interface AuthBackgroundProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Tenant primary colour; the whole wash palette is derived from it. */
-  brandColor: string
+  /**
+   * Tenant primary colour; the whole wash palette is derived from it. Omit it
+   * and the surface paints from the host's design tokens with no washes.
+   */
+  brandColor?: string
   mode?: AuthSurfaceMode
   intensity?: AuthIntensity
   /** Tenant branding; supplies every colour role the tenant configured. */
@@ -251,7 +262,7 @@ export interface AuthBackgroundProps extends React.HTMLAttributes<HTMLDivElement
 
 const AuthBackground = React.forwardRef<HTMLDivElement, AuthBackgroundProps>(
   (
-    { brandColor, mode = "light", intensity = "full", branding, colors, metrics, className, style, ...props },
+    { brandColor, mode = "light", intensity, branding, colors, metrics, className, style, ...props },
     ref
   ) => {
     const surface = useAuthSurface(brandColor, mode, intensity, branding, colors, metrics)
@@ -280,8 +291,11 @@ const AuthBackground = React.forwardRef<HTMLDivElement, AuthBackgroundProps>(
 AuthBackground.displayName = "AuthBackground"
 
 export interface AuthPanelProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  /** Tenant primary colour; the whole wash palette is derived from it. */
-  brandColor: string
+  /**
+   * Tenant primary colour; the whole wash palette is derived from it. Omit it
+   * and the surface paints from the host's design tokens with no washes.
+   */
+  brandColor?: string
   /** `auto` follows the host's `.dark` class; a fixed mode is pinned inline. */
   mode?: AuthSurfaceMode
   intensity?: AuthIntensity
@@ -311,7 +325,7 @@ const AuthPanel = React.forwardRef<HTMLDivElement, AuthPanelProps>(
     {
       brandColor,
       mode = "light",
-      intensity = "full",
+      intensity,
       title,
       tagline,
       logo,
