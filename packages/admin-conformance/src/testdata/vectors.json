@@ -1,0 +1,62 @@
+[
+  {
+    "name": "get-with-query",
+    "secret": "reference-secret-do-not-use",
+    "method": "GET",
+    "request_target": "/api/v1/platform/admin/audit-logs?since_hours=720&limit=200",
+    "path": "/api/v1/platform/admin/audit-logs",
+    "raw_query": "since_hours=720&limit=200",
+    "body": "",
+    "timestamp": "1755859200",
+    "nonce": "018f3c2a-0000-7000-8000-000000000001",
+    "operator": "op_7f3a",
+    "capability": "audit.read",
+    "canonical": "GET\n/api/v1/platform/admin/audit-logs\nlimit=200&since_hours=720\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n1755859200\n018f3c2a-0000-7000-8000-000000000001\nop_7f3a\naudit.read",
+    "signature": "a4a52f15375474634e9e2a94adc0741a026d69c95eeee45e0d25fdc54c74a778"
+  },
+  {
+    "name": "post-with-body",
+    "secret": "reference-secret-do-not-use",
+    "method": "POST",
+    "request_target": "/api/v1/platform/admin/tenants/t1/suspend",
+    "path": "/api/v1/platform/admin/tenants/t1/suspend",
+    "raw_query": "",
+    "body": "{\"reason_code\":\"fraud\"}",
+    "timestamp": "1755859200",
+    "nonce": "018f3c2a-0000-7000-8000-000000000002",
+    "operator": "op_7f3a",
+    "capability": "tenant.suspend",
+    "canonical": "POST\n/api/v1/platform/admin/tenants/t1/suspend\n\nce15d5c968f6d4e86f028006a4a56d25149a4e66eddb7f80b9f137a5f49eaf28\n1755859200\n018f3c2a-0000-7000-8000-000000000002\nop_7f3a\ntenant.suspend",
+    "signature": "272b412316afc9affaa0173d74a89bf86205c9fb34f64bb94d68cd759c746e27"
+  },
+  {
+    "name": "repeated-query-and-encoded-path",
+    "secret": "reference-secret-do-not-use",
+    "method": "GET",
+    "request_target": "/api/v1/platform/admin/tenants/t%20one?a=z&a=a&b=2",
+    "path": "/api/v1/platform/admin/tenants/t one",
+    "raw_query": "a=z&a=a&b=2",
+    "body": "",
+    "timestamp": "1755859200",
+    "nonce": "018f3c2a-0000-7000-8000-000000000003",
+    "operator": "op_7f3a",
+    "capability": "tenant.read",
+    "canonical": "GET\n/api/v1/platform/admin/tenants/t one\na=a&a=z&b=2\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n1755859200\n018f3c2a-0000-7000-8000-000000000003\nop_7f3a\ntenant.read",
+    "signature": "5c1910b7f1b6a6542de503b6f39547109a76f2c8d75d443ce9de5609937e4e88"
+  },
+  {
+    "name": "query-value-with-space",
+    "secret": "reference-secret-do-not-use",
+    "method": "GET",
+    "request_target": "/api/v1/platform/admin/audit-logs?actor=Jane%20Smith&action=product.deleted",
+    "path": "/api/v1/platform/admin/audit-logs",
+    "raw_query": "actor=Jane%20Smith&action=product.deleted",
+    "body": "",
+    "timestamp": "1755859200",
+    "nonce": "018f3c2a-0000-7000-8000-000000000004",
+    "operator": "op_7f3a",
+    "capability": "audit.read",
+    "canonical": "GET\n/api/v1/platform/admin/audit-logs\naction=product.deleted&actor=Jane+Smith\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n1755859200\n018f3c2a-0000-7000-8000-000000000004\nop_7f3a\naudit.read",
+    "signature": "4998e740617f47c75e1279d5588bb72aebb45cbec9031d92bc537841cf830072"
+  }
+]
