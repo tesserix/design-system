@@ -70,25 +70,74 @@ jobs:
             yq -i ".image.tag = \"$TAG\"" "$f"
           done
 
-      - name: Commit & push (with rebase retry)
+      # tesserix-k8s main is governed by a ruleset whose `pull_request` rule
+      # requires one code-owner approval, so this job opens a PR rather than
+      # pushing. It used to push straight to main; once the ruleset went on,
+      # every run failed with
+      #
+      #   ! [remote rejected] main -> main (push declined due to repository rule violations)
+      #
+      # and the tag stopped moving. Nothing else reports on this path — the
+      # images still build and push to the registry perfectly well — so the
+      # docs and storybook deployments quietly sat on a nine-day-old tag until
+      # someone read a workflow log.
+      - name: Open a bump PR on tesserix-k8s
         working-directory: tesserix-k8s
         env:
           TAG: ${{ steps.meta.outputs.tag }}
+          GH_TOKEN: ${{ secrets.ADMIN_TOKEN || secrets.TESSERIX_K8S_BOT }}
         run: |
           set -euo pipefail
-          git config user.name "tesserix-bot"
-          git config user.email "tesserix-bot@users.noreply.github.com"
+
+          # Committing as github-actions[bot] WITH its numeric account id is
+          # load-bearing, not cosmetic: the ruleset sets
+          # require_extra_approval_for_unattributed_changes, and a commit whose
+          # author address has no GitHub account behind it counts as
+          # unattributed — which would silently double the approvals each of
+          # these PRs needs. The previous identity, tesserix-bot@users.noreply,
+          # was exactly such an address.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           if git diff --quiet; then
-            echo "No tag changes — nothing to commit"; exit 0
+            echo "Charts already reference $TAG - nothing to do"
+            exit 0
           fi
+
+          branch="chore/design-system-images-$TAG"
+          git checkout -b "$branch"
           git add charts/apps/tesserix-docs/values.yaml \
                   charts/apps/tesserix-storybook/values.yaml
           git commit -m "chore: bump design-system images to $TAG"
-          for attempt in 1 2 3; do
-            if git push origin main; then
-              echo "Pushed on attempt $attempt"; exit 0
-            fi
-            echo "Push failed (attempt $attempt) — rebasing"
-            git pull --rebase origin main
-          done
-          echo "Push failed after 3 rebase attempts"; exit 1
+
+          # A re-run for the same tag should update its branch, not fail.
+          # The plain push comes first because --force-with-lease refuses with
+          # "stale info" when there is no remote-tracking ref to compare
+          # against, which is every first run. Only once the branch exists do
+          # we fetch it and lease against it — so a branch someone edited by
+          # hand is never silently discarded.
+          if ! git push origin "$branch"; then
+            echo "Branch $branch exists - updating it"
+            git fetch origin "$branch"
+            git push --force-with-lease origin "$branch"
+          fi
+
+          existing=$(gh pr list --repo tesserix/tesserix-k8s \
+            --head "$branch" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "Updated existing PR #$existing for $TAG"
+            exit 0
+          fi
+
+          cat > /tmp/pr-body.md <<EOF
+          Rolls the \`tesserix-docs\` and \`tesserix-storybook\` deployments onto \`$TAG\`, built from design-system commit \`$GITHUB_SHA\`.
+
+          Opened by design-system's \`bump-k8s\` workflow. It cannot merge itself: this repository requires a code-owner approval and has auto-merge disabled. That is deliberate — an image tag bump is a deployment.
+
+          Until this merges, both deployments stay on the tag they are currently pinned to.
+          EOF
+
+          gh pr create --repo tesserix/tesserix-k8s \
+            --head "$branch" --base main \
+            --title "chore: bump design-system images to $TAG" \
+            --body-file /tmp/pr-body.md
