@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { DECLARATION_FILENAME, loadDeclaration } from "./declaration"
 import { exitCode, formatReport } from "./report"
 import { runConformance } from "./runner"

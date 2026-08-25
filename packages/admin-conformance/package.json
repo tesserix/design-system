@@ -6,7 +6,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
-    "admin-conformance": "./dist/cli.js"
+    "admin-conformance": "dist/cli.js"
   },
   "exports": {
     ".": {
@@ -44,7 +44,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tesserix/design-system",
+    "url": "git+https://github.com/tesserix/design-system.git",
     "directory": "packages/admin-conformance"
   },
   "keywords": [
