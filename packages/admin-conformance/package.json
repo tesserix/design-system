@@ -1,0 +1,59 @@
+{
+  "name": "@tesserix/admin-conformance",
+  "version": "0.1.0",
+  "description": "Conformance suite for the Tesserix Product Admin Integration Contract — a product runs it against its own admin API in CI",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "admin-conformance": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^4.1.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tesserix/design-system",
+    "directory": "packages/admin-conformance"
+  },
+  "keywords": [
+    "tesserix",
+    "conformance",
+    "contract-testing",
+    "platform",
+    "admin-api"
+  ],
+  "author": "Tesserix",
+  "license": "MIT"
+}
