@@ -13,5 +13,8 @@ export default defineConfig({
   minify: false,
   // The published bin is `dist/cli.js` — CJS, so it runs under `npx` without
   // depending on the consuming repo's "type" field.
-  banner: { js: "" },
+  //
+  // The shebang is NOT set here: a tsup banner applies to every entry, and a
+  // "#!" line on the library entry is noise at best. It lives at the top of
+  // src/cli.ts instead, which esbuild preserves for an entry file.
 })
