@@ -101,23 +101,52 @@ describe("the items/total envelope", () => {
   })
 })
 
-describe("the flat map envelope", () => {
-  it("accepts a flat object of scalar metrics", () => {
-    const body = { orders_today: 42, revenue_trend: "up", degraded: false, last_sync_at: null }
-    expect(statuses(checkEnvelopeShape("kpis", "4.1", body, "flat-map"))).toEqual(["pass"])
+describe("the data-wrapped flat map envelope", () => {
+  it("accepts a data object of scalar metrics", () => {
+    const body = {
+      data: { orders_today: 42, revenue_trend: "up", degraded: false, last_sync_at: null },
+    }
+    expect(statuses(checkEnvelopeShape("kpis", "4.1", body, "data-flat-map"))).toEqual(["pass"])
   })
 
-  it("rejects an array, because a flat map is not a list", () => {
-    const findings = checkEnvelopeShape("kpis", "4.1", [{ orders: 1 }], "flat-map")
+  it("rejects an array, because the envelope is an object", () => {
+    const findings = checkEnvelopeShape("kpis", "4.1", [{ orders: 1 }], "data-flat-map")
     expect(statuses(findings)).toEqual(["fail"])
     expect(details(findings)).toContain("array")
   })
 
-  it("rejects a nested object value, which is what a wrapped envelope looks like", () => {
-    const body = { data: { orders_today: 42 } }
-    const findings = checkEnvelopeShape("kpis", "4.1", body, "flat-map")
-    expect(statuses(findings)).toContain("fail")
-    expect(details(findings)).toContain("data")
+  // The pre-amendment shape. Whoever hits this line is serving metrics that
+  // are themselves fine, so the detail has to say the contract moved.
+  it("rejects the bare flat map §3.1 used to specify, and says the contract was amended", () => {
+    const body = { orders_today: 42, chefs_active: 412 }
+    const findings = checkEnvelopeShape("kpis", "4.1", body, "data-flat-map")
+    expect(statuses(findings)).toEqual(["fail"])
+    expect(details(findings)).toMatch(/amended/i)
+    expect(details(findings)).toContain("orders_today")
+  })
+
+  it("rejects a data key that is not an object", () => {
+    for (const data of [[{ orders: 1 }], 42, null, "up"]) {
+      const findings = checkEnvelopeShape("kpis", "4.1", { data }, "data-flat-map")
+      expect(statuses(findings)).toEqual(["fail"])
+      expect(details(findings)).toMatch(/^data is /)
+    }
+  })
+
+  it("rejects a nested value inside data, which is a second envelope leaking in", () => {
+    const body = { data: { orders_today: 42, page: { total: 3 } } }
+    const findings = checkEnvelopeShape("kpis", "4.1", body, "data-flat-map")
+    expect(statuses(findings)).toEqual(["fail"])
+    expect(details(findings)).toContain("data.page")
+  })
+
+  // §4.1 fixes the shape and nothing else. "Never {}, 501 when uninstrumented"
+  // is the §3.1 endpoint rule, and checks.ts is where it is enforced —
+  // duplicating it here would report one deviation as two.
+  it("accepts an empty data map, which is a §3.1 concern rather than a §4.1 one", () => {
+    expect(statuses(checkEnvelopeShape("kpis", "4.1", { data: {} }, "data-flat-map"))).toEqual([
+      "pass",
+    ])
   })
 })
 

@@ -16,8 +16,14 @@ export const ENDPOINTS = {
     method: "GET",
     path: "/admin/kpis",
     section: "3.1",
-    /** A flat map, not the pagination envelope. */
-    envelope: "flat-map",
+    /**
+     * A flat map of scalars wrapped in `data` (amended 2026-08-26). §3.1
+     * originally specified a bare map at the top level; every other endpoint
+     * already answers with a `data` envelope, so the singleton was the odd one
+     * out and a generic client could not simply read `.data`. mark8ly, the only
+     * implementer, already returned the wrapped shape.
+     */
+    envelope: "data-flat-map",
     summary: "Headline business metrics; 501 when uninstrumented, never {}.",
   },
   inbox: {

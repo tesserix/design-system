@@ -20,7 +20,7 @@ export const ENVELOPE_SECTION = "4.1"
 const CHECK: Record<EnvelopeKind, string> = {
   "data-pagination": "responds with the { data, pagination } envelope",
   "items-total": "responds with the { items, total } envelope",
-  "flat-map": "responds with a flat map of scalar metrics",
+  "data-flat-map": "responds with { data } wrapping a flat map of scalar metrics",
   free: "has no envelope requirement",
 }
 
@@ -156,13 +156,53 @@ function checkItemsTotal(endpointId: string, section: string, body: Record<strin
 }
 
 /**
- * A flat map is flat all the way down: a nested object is almost always a
- * paginated envelope that leaked in, and a consumer rendering tiles cannot
- * display one.
+ * The metrics live under `data`, and that map is flat all the way down.
+ *
+ * §3.1 was amended on 2026-08-26: the endpoint used to be specified as a bare
+ * flat map at the top level, and is now the same map wrapped in `data`. The
+ * wrapping is what makes the estate uniform — §4.1's paginated envelope is
+ * `{ data, pagination }`, so after the amendment every contract endpoint puts
+ * its payload under `data` and a generic client can always read `.data`
+ * without knowing whether it asked for a list or a singleton.
+ *
+ * Inside `data`, a nested object is almost always a second envelope that
+ * leaked in, and a consumer rendering tiles cannot display one — that per-key
+ * failure is unchanged by the amendment.
+ *
+ * An empty `data` object passes here. "Never `{}`, 501 when uninstrumented" is
+ * a §3.1 endpoint rule, enforced in `checks.ts`; §4.1 only fixes the shape.
  */
-function checkFlatMap(endpointId: string, section: string, body: Record<string, unknown>): Finding[] {
-  const check = CHECK["flat-map"]
-  const nested = Object.entries(body).filter(
+function checkDataFlatMap(endpointId: string, section: string, body: Record<string, unknown>): Finding[] {
+  const check = CHECK["data-flat-map"]
+
+  if (!("data" in body)) {
+    // Called out by name rather than folded into a generic "missing key"
+    // message: an implementer landing here is almost certainly still serving
+    // the pre-amendment bare map, and needs to be told the contract moved
+    // rather than left hunting for a bug in metrics that are in fact fine.
+    return [
+      fail(
+        endpointId,
+        section,
+        check,
+        `the response body has ${keysOf(body)} and no data key, which is the bare flat map §3.1 used to specify; the contract was amended and now requires that same map wrapped as { "data": { ... } }`,
+      ),
+    ]
+  }
+
+  const data = body["data"]
+  if (!isRecord(data)) {
+    return [
+      fail(
+        endpointId,
+        section,
+        check,
+        `data is ${describeValue(data)}; the contract requires data to be an object whose values are scalar metrics`,
+      ),
+    ]
+  }
+
+  const nested = Object.entries(data).filter(
     ([, value]) => typeof value === "object" && value !== null,
   )
   if (nested.length === 0) return [pass(endpointId, section, check)]
@@ -172,7 +212,7 @@ function checkFlatMap(endpointId: string, section: string, body: Record<string, 
       endpointId,
       section,
       check,
-      `${key} is ${describeValue(value)}; the contract requires a flat map whose values are scalars`,
+      `${displayPath(childPath("$.data", key))} is ${describeValue(value)}; the contract requires data to be a flat map whose values are scalars`,
     ),
   )
 }
@@ -216,7 +256,7 @@ export function checkEnvelopeShape(
       ? checkDataPagination(endpointId, section, body)
       : kind === "items-total"
         ? checkItemsTotal(endpointId, section, body)
-        : checkFlatMap(endpointId, section, body)
+        : checkDataFlatMap(endpointId, section, body)
 
   return findings.length > 0 ? findings : [pass(endpointId, section, check)]
 }

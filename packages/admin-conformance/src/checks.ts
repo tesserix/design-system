@@ -24,13 +24,36 @@ const isScalar = (value: unknown): boolean =>
   typeof value === "boolean"
 
 /**
- * §3.1 — `GET /admin/kpis` returns a flat map of scalars, and an
- * uninstrumented product answers `501`, never `200 {}`.
+ * The one failure `501` exists to prevent. The reasoning is worth repeating in
+ * full in the detail: this is read in a red CI log, and "answer 501" without
+ * the why reads as a pedantic status-code preference rather than the only way
+ * the console can tell "no metrics yet" from "every metric is zero".
+ */
+const emptyMetrics = (endpoint: string, section: string, seen: string): Finding =>
+  fail(
+    endpoint,
+    section,
+    "does not return an empty map of metrics",
+    `returned 200 with ${seen}. A product with no metrics must answer 501 not_implemented ` +
+      'so the console can render "not instrumented" rather than dashes that look like zeroes.',
+  )
+
+/** Phrased as a statement of fact, so a passing line reads as one. */
+const CHECK_KPI_SHAPE = "returns a flat map of metrics under data"
+
+/**
+ * §3.1 — `GET /admin/kpis` returns a flat map of scalars under `data`, and an
+ * uninstrumented product answers `501`, never `200` with an empty map.
  *
  * The old shared route branched on three products and fell through to an empty
  * object, which is why dwellm8 rendered four em-dashes from launch. The
- * console cannot tell `{}` from real zeroes, so the distinction has to be
- * carried by the status code.
+ * console cannot tell an empty map from real zeroes, so the distinction has to
+ * be carried by the status code.
+ *
+ * The wrapper is the 2026-08-26 amendment: §3.1 used to specify a bare map at
+ * the top level, which made the one singleton endpoint the only place a client
+ * could not just read `.data`. It now matches §4.1's `{ data, pagination }`,
+ * and the bare shape it used to require is the deviation.
  */
 export function checkKpis(response: Response): Finding[] {
   const section = "3.1"
@@ -45,62 +68,78 @@ export function checkKpis(response: Response): Finding[] {
       fail(
         endpoint,
         section,
-        "returns a flat map of metrics",
-        `expected a JSON object of scalar metrics, got ${describe(response.body)}`,
+        CHECK_KPI_SHAPE,
+        `expected a JSON object with a data map of scalar metrics, got ${describe(response.body)}`,
       ),
     ]
   }
 
-  const keys = Object.keys(response.body)
-  if (keys.length === 0) {
-    return [
-      fail(
-        endpoint,
-        section,
-        "does not return an empty object",
-        "returned 200 with {}. A product with no metrics must answer 501 not_implemented " +
-          "so the console can render \"not instrumented\" rather than dashes that look like zeroes.",
-      ),
-    ]
+  const body = response.body
+
+  // `{}` is checked before the envelope, because it is the dwellm8 failure
+  // rather than a wrapping mistake: there are no metrics either way, and
+  // telling someone to wrap an empty map in `data` would send them to fix the
+  // wrong thing. Both spellings of "no metrics" get the same answer below.
+  if (Object.keys(body).length === 0) {
+    return [emptyMetrics(endpoint, section, "{}")]
   }
 
-  // A known, specific conflict rather than a generic shape error.
+  // The pre-amendment shape, named rather than reported as a generic error.
   //
-  // §3.1 and §8.2 both describe /admin/kpis as a FLAT map, while §4.1's
-  // { data, pagination } envelope covers lists. mark8ly generalised `data` to
-  // singletons too, so its KPI endpoint answers { "data": { ... } } — which is
-  // arguably the better design, being uniform, but is not what the contract
-  // says. Reporting that as "key `data` is not a scalar" would send someone
-  // looking for a bug in their metrics. Naming the conflict instead makes it
-  // a decision: amend the contract, or unwrap the response.
-  if (keys.length === 1 && keys[0] === "data" && isRecord(response.body.data)) {
+  // Until 2026-08-26 §3.1 specified exactly this: a bare map of scalars at the
+  // top level. The amendment wrapped it in `data` so that every contract
+  // endpoint answers under the same key, and a product still serving the bare
+  // map is now the deviation. Saying so explicitly is the whole point — the
+  // metrics are fine, and someone reading a red line that only complained
+  // about a missing key would go looking for a bug that is not there.
+  if (!("data" in body)) {
+    const bare = Object.values(body).every(isScalar)
     return [
       fail(
         endpoint,
         section,
-        "returns a flat map of metrics",
-        'returned { "data": { ... } }. §3.1 and §8.2 both specify a bare flat map at the ' +
-          "top level, and §4.1's data envelope covers lists rather than singletons. This is " +
-          "a contract-versus-implementation conflict, not a bug in the metrics: either amend " +
-          "§3.1 to adopt the wrapped shape estate-wide, or return the map unwrapped.",
+        CHECK_KPI_SHAPE,
+        (bare
+          ? "returned a bare flat map of metrics at the top level. "
+          : "returned an object with no data key. ") +
+          "§3.1 was amended to the wrapped shape, matching §4.1's data envelope, so that a " +
+          'console reading `.data` needs no special case for this endpoint: wrap the map as ' +
+          '{ "data": { ... } }.',
       ),
     ]
   }
 
-  const nested = keys.filter((key) => !isScalar((response.body as Record<string, unknown>)[key]))
+  const metrics = body.data
+  if (!isRecord(metrics)) {
+    return [
+      fail(
+        endpoint,
+        section,
+        CHECK_KPI_SHAPE,
+        `data is ${describe(metrics)}; §3.1 requires data to be an object whose values are scalar metrics.`,
+      ),
+    ]
+  }
+
+  const keys = Object.keys(metrics)
+  if (keys.length === 0) {
+    return [emptyMetrics(endpoint, section, '{ "data": {} }')]
+  }
+
+  const nested = keys.filter((key) => !isScalar(metrics[key]))
   if (nested.length > 0) {
     return [
       fail(
         endpoint,
         section,
-        "returns a flat map of metrics",
-        `these keys are not scalars: ${nested.join(", ")}. The console renders label ` +
+        CHECK_KPI_SHAPE,
+        `these keys under data are not scalars: ${nested.join(", ")}. The console renders label ` +
           "and format from the registry, which cannot descend into nested objects.",
       ),
     ]
   }
 
-  return [pass(endpoint, section, "returns a flat map of metrics")]
+  return [pass(endpoint, section, CHECK_KPI_SHAPE)]
 }
 
 export interface InboxOptions {
