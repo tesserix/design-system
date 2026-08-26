@@ -6,7 +6,9 @@ import {
   checkTimestamps,
 } from "./assertions"
 import { checkAuditLogScoping, checkInboxItems, checkKpis } from "./checks"
-import { ENDPOINTS, ENDPOINT_IDS, type EndpointId } from "./contract"
+import { checkReasonCodes } from "./checks-reason-codes"
+import { ENDPOINTS, ENDPOINT_IDS, isProbed, type EndpointId } from "./contract"
+import { checkDeclarationRules } from "./declaration-rules"
 import type { Declaration } from "./declaration"
 import { type Finding, fail, skip } from "./finding"
 import { createClient, type Client, type Result } from "./http"
@@ -55,8 +57,28 @@ export async function runConformance(options: RunOptions): Promise<Finding[]> {
       )
       continue
     }
+    // Declared, but the suite must not call it — see `isProbed`. Reported as a
+    // skip so the line is present and says why; its enforcement lives in the
+    // declaration rules below, not on the wire.
+    if (!isProbed(id)) {
+      findings.push(
+        skip(
+          id,
+          ENDPOINTS[id].section,
+          "is declared",
+          "declared, and deliberately never called: a conformance run that invoked this write " +
+            "would change real state. What the contract requires of it is enforced against the " +
+            "declaration instead.",
+        ),
+      )
+      continue
+    }
     findings.push(...(await runEndpoint(client, options.declaration, id)))
   }
+
+  // Cross-endpoint rules last, so they read as conclusions about the product
+  // rather than as another endpoint's result.
+  findings.push(...checkDeclarationRules(options.declaration))
 
   return findings
 }
@@ -184,6 +206,9 @@ function checkResponse(
   }
   if (id === "audit-logs") {
     findings.push(...checkAuditLogScoping(response.body, declaration.slug))
+  }
+  if (id === "lifecycle/reason-codes") {
+    findings.push(...checkReasonCodes(response.body))
   }
 
   return findings

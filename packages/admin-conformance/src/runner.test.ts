@@ -36,6 +36,65 @@ describe("runConformance", () => {
     expect(new URL(url).pathname).toContain("/admin/audit-logs")
   })
 
+
+  // The one endpoint the suite must never call. A conformance run that
+  // suspended a live merchant's tenant to confirm the route conforms is a
+  // worse outcome than an unchecked route, and there is no sandbox tenant to
+  // point it at — so the check is against the declaration instead.
+  it("never calls a declared tenant-lifecycle write", async () => {
+    const fetchImpl = vi.fn(async () => json({}))
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({
+        "tenant-lifecycle": { implemented: true },
+        "lifecycle/reason-codes": { implemented: true },
+      }),
+      fetchImpl,
+    })
+
+    const called = fetchImpl.mock.calls.map(
+      ([url]) => new URL(url as unknown as string).pathname,
+    )
+    expect(called.some((path) => path.includes("/suspend"))).toBe(false)
+    expect(
+      findings.some((f) => f.endpoint === "tenant-lifecycle" && f.status === "skip"),
+    ).toBe(true)
+  })
+
+  it("checks the reason-codes body it fetches", async () => {
+    const fetchImpl = vi.fn(async () => json({ data: { suspend: [], unsuspend: [] } }))
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({ "lifecycle/reason-codes": { implemented: true } }),
+      fetchImpl,
+    })
+
+    const [url] = fetchImpl.mock.calls[0] as unknown as [string]
+    expect(new URL(url).pathname).toContain("/admin/lifecycle/reason-codes")
+    expect(
+      findings.some((f) => f.endpoint === "lifecycle/reason-codes" && f.status === "fail"),
+    ).toBe(true)
+  })
+
+  // The rule from #345, reached through the runner rather than called
+  // directly: a product can be perfectly conforming on every wire response and
+  // still have the gap.
+  it("fails a run whose product declares the writes without the vocabulary", async () => {
+    const fetchImpl = vi.fn(async () => json({}))
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({ "tenant-lifecycle": { implemented: true } }),
+      fetchImpl,
+    })
+
+    expect(
+      findings.some((f) => f.endpoint === "tenant-lifecycle" && f.status === "fail"),
+    ).toBe(true)
+  })
+
   // Partial implementation is legitimate; silent deviation is not. An
   // undeclared endpoint must produce a visible skip rather than nothing at
   // all, or a product that quietly implements none reads as a clean run.
