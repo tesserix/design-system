@@ -7,7 +7,14 @@ import {
 } from "./assertions"
 import { checkAuditLogScoping, checkInboxItems, checkKpis } from "./checks"
 import { checkReasonCodes } from "./checks-reason-codes"
-import { ENDPOINTS, ENDPOINT_IDS, isProbed, type EndpointId } from "./contract"
+import {
+  ENDPOINTS,
+  ENDPOINT_IDS,
+  isProbed,
+  requiresSubtypes,
+  type EndpointId,
+} from "./contract"
+import { DECLARATION_FILENAME } from "./declaration"
 import { checkDeclarationRules } from "./declaration-rules"
 import type { Declaration } from "./declaration"
 import { type Finding, fail, skip } from "./finding"
@@ -47,14 +54,7 @@ export async function runConformance(options: RunOptions): Promise<Finding[]> {
   for (const id of ENDPOINT_IDS) {
     const declared = options.declaration.endpoints[id]
     if (!declared?.implemented) {
-      findings.push(
-        skip(
-          id,
-          ENDPOINTS[id].section,
-          "declared in admin-conformance.json",
-          "not declared, so not checked. Declaring it is what opts an endpoint into enforcement.",
-        ),
-      )
+      findings.push(...(await checkUndeclared(client, id)))
       continue
     }
     // Declared, but the suite must not call it — see `isProbed`. Reported as a
@@ -81,6 +81,96 @@ export async function runConformance(options: RunOptions): Promise<Finding[]> {
   findings.push(...checkDeclarationRules(options.declaration))
 
   return findings
+}
+
+/**
+ * An endpoint the product did not declare.
+ *
+ * The suite skips it — declaring is what opts an endpoint into enforcement —
+ * but it does NOT simply assume the endpoint is absent. It asks.
+ *
+ * # Why an undeclared endpoint is probed at all
+ *
+ * "Contracts are declared, not discovered" governs what is CHECKED. It was
+ * never meant to make an implemented-but-undeclared endpoint invisible, and
+ * treating absence as proof of absence produces the exact failure the
+ * allowlist exists to prevent, one level up: an endpoint that is served, in
+ * production, checked by nothing, reported as a clean skip.
+ *
+ * That gap is not hypothetical. The estate runs this suite from a Kubernetes
+ * CronJob whose declaration lives in a Helm chart, while the contract requires
+ * the product to commit its own `admin-conformance.json` at its repo root.
+ * Two copies, nothing enforcing that they agree, and the drift is silent in
+ * exactly one direction: an endpoint present in the repo file and missing from
+ * the chart is simply never checked, and reports as a skip that reads as a
+ * pass.
+ *
+ * So a 2xx here is a FAILURE, symmetrical with the declared-but-404 case
+ * already reported by `transportFinding`. Declaring something you do not serve
+ * and serving something you do not declare are the same mistake seen from
+ * opposite sides, and only one of them was caught before.
+ *
+ * Anything else — 404, 501, a refusal, an unreachable host — is the honest
+ * skip it always was: the product does not serve this, and said so.
+ */
+async function checkUndeclared(client: Client, id: EndpointId): Promise<Finding[]> {
+  const endpoint = ENDPOINTS[id]
+  const check = "declared in admin-conformance.json"
+
+  const notDeclared = skip(
+    id,
+    endpoint.section,
+    check,
+    "not declared, so not checked. Declaring it is what opts an endpoint into enforcement.",
+  )
+
+  // Two endpoints cannot be probed blind, and neither absence is evidence.
+  //
+  // `entities` has no complete path without a `{type}`, which only the
+  // declaration supplies — so an undeclared one has no URL to ask for.
+  // `tenant-lifecycle` is a WRITE (`isProbed` is false): calling it to find out
+  // whether it exists would suspend a real tenant, which is categorically
+  // worse than the gap it would close.
+  if (requiresSubtypes(id) || !isProbed(id)) {
+    return [
+      skip(
+        id,
+        endpoint.section,
+        check,
+        "not declared, and not probed: " +
+          (requiresSubtypes(id)
+            ? "its path needs a {type} only the declaration supplies, so there is nothing to ask for."
+            : "asking would perform the write. An undeclared write cannot be detected without doing it."),
+      ),
+    ]
+  }
+
+  let response: Result
+  try {
+    response = await client.get(endpoint.path, defaultQuery(id))
+  } catch {
+    // A probe that could not be made proves nothing. Reported as the plain
+    // skip rather than as a finding either way — inventing a conclusion from a
+    // failed request is how a suite starts lying in the reassuring direction.
+    return [notDeclared]
+  }
+
+  if (response.status >= 200 && response.status <= 299) {
+    return [
+      fail(
+        id,
+        endpoint.section,
+        check,
+        `answers ${response.status} but is not declared in ${DECLARATION_FILENAME}. ` +
+          "An endpoint that is served and undeclared is checked by nothing, and reports " +
+          "as a skip that reads as a pass — declare it, or stop serving it. " +
+          "(If the declaration the suite ran with is not the one in the product's repo, " +
+          "those two copies have drifted; that is the same bug seen earlier.)",
+      ),
+    ]
+  }
+
+  return [notDeclared]
 }
 
 async function runEndpoint(
