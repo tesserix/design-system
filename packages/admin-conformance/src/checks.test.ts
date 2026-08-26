@@ -18,17 +18,27 @@ describe("checkKpis (§3.1)", () => {
     expect(statuses(checkKpis({ status: 501, body: undefined }))).toEqual(["pass"])
   })
 
-  it("passes a flat map of metrics", () => {
+  it("fails a 200 whose data map is empty, for the same reason as {}", () => {
+    const findings = checkKpis({ status: 200, body: { data: {} } })
+    expect(statuses(findings)).toContain("fail")
+    expect(findings.find((f) => f.status === "fail")?.detail).toMatch(/501/)
+  })
+
+  it("passes a flat map of metrics wrapped in data", () => {
     const findings = checkKpis({
       status: 200,
-      body: { chefs_active: 412, orders_today: 1877 },
+      body: { data: { chefs_active: 412, orders_today: 1877 } },
     })
     expect(statuses(findings)).toEqual(["pass"])
   })
 
   it("fails a metric that is not a scalar", () => {
-    const findings = checkKpis({ status: 200, body: { nested: { a: 1 } } })
+    const findings = checkKpis({ status: 200, body: { data: { nested: { a: 1 } } } })
     expect(statuses(findings)).toContain("fail")
+  })
+
+  it("fails a data key that is not an object", () => {
+    expect(statuses(checkKpis({ status: 200, body: { data: [1, 2] } }))).toContain("fail")
   })
 })
 
@@ -116,17 +126,20 @@ function findings_fail(
   return findings.some((f) => f.status === "fail" && pattern.test(f.check))
 }
 
-describe("checkKpis and the data-wrapper conflict", () => {
-  // mark8ly's /admin/kpis returns { data: { ... } }. The contract says a bare
-  // flat map. The suite enforces the contract, but the failure has to name the
-  // conflict — otherwise it reads as a bug in the product's metrics.
-  it("names the contract conflict rather than reporting a shape error", () => {
+describe("checkKpis and the pre-amendment bare map", () => {
+  // The contract was amended on 2026-08-26: the wrapped shape mark8ly already
+  // served is now what §3.1 requires, and the bare map it used to require is
+  // the deviation. The failure has to say the contract moved — the metrics of
+  // a product still serving the bare map are perfectly fine, and a generic
+  // "missing data key" would send someone hunting a bug that is not there.
+  it("names the amendment rather than reporting a bare shape error", () => {
     const findings = checkKpis({
       status: 200,
-      body: { data: { tenants_active: 12 } },
+      body: { tenants_active: 12, trials_expiring: 3 },
     })
     const failure = findings.find((f) => f.status === "fail")
     expect(failure?.detail).toMatch(/§3\.1/)
-    expect(failure?.detail).toMatch(/amend|unwrapped/i)
+    expect(failure?.detail).toMatch(/amended/i)
+    expect(failure?.detail).toMatch(/data/)
   })
 })

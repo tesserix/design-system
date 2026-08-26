@@ -107,7 +107,7 @@ describe("runConformance", () => {
 
   it("surveys a conforming product without a single failure", async () => {
     const fetchImpl = vi.fn(async (url: string) => {
-      if (url.includes("/admin/kpis")) return json({ tenants_active: 12 })
+      if (url.includes("/admin/kpis")) return json({ data: { tenants_active: 12 } })
       if (url.includes("/admin/health")) return json({ status: "ok" })
       return json({ data: [], pagination: { page: 1, limit: 50, total: 0 } })
     })
