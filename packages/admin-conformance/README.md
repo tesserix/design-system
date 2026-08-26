@@ -38,7 +38,9 @@ Commit an `admin-conformance.json` at your repo root:
     "audit-logs": true,
     "health": true,
     "entities": { "types": ["tenants", "users"] },
-    "inbox": { "slaDeclared": true }
+    "inbox": { "slaDeclared": true },
+    "tenant-lifecycle": true,
+    "lifecycle/reason-codes": true
   }
 }
 ```
@@ -83,6 +85,24 @@ Per-endpoint rules from §3, and the conventions from §4 over every response:
 - **§3.1** `/admin/kpis` is a flat map, and answers `501` when uninstrumented rather than `{}`
 - **§3.2** every inbox item carries `waiting_since`, and `due_at` where an SLA is declared
 - **§3.3** `/admin/audit-logs` is scoped to the calling product
+- **§8.8** `/admin/lifecycle/reason-codes` publishes both verbs' codes, snake_case, each labelled
+- **§8.8** a product declaring `tenant-lifecycle` also declares `lifecycle/reason-codes`
+
+## The one endpoint that is never called
+
+`tenant-lifecycle` is declarable but has no wire check at all. §8.3's suspend
+and unsuspend are writes against a real merchant's tenant, and there is no
+sandbox tenant to point a conformance run at — a suite that exercised them
+would be a worse outcome than an unchecked route.
+
+It is declarable anyway, because it is the antecedent of a rule. §8.3 requires
+a reason code on those writes and §8.8 requires the accepted codes to be
+*fetchable*; declaring the writes without `lifecycle/reason-codes` fails the
+run. That gap is not hypothetical — mark8ly validated a closed set of codes it
+published nowhere, so the console hand-copied them out of a Go source file
+(tesserix-home#345), and a copied vocabulary drifts silently in the direction
+nobody sees: a newly added code is simply missing from the menu, and the
+operator picks the nearest wrong one.
 
 ## Skips are honest, not lenient
 

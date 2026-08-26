@@ -9,7 +9,7 @@
  * silent deviation is not.
  */
 
-export { ENDPOINTS, ENDPOINT_IDS, isEndpointId } from "./contract"
+export { ENDPOINTS, ENDPOINT_IDS, isEndpointId, isProbed } from "./contract"
 export type { Endpoint, EndpointId, EnvelopeKind } from "./contract"
 
 export {
@@ -19,6 +19,8 @@ export {
   parseDeclaration,
 } from "./declaration"
 export type { Declaration, EndpointDeclaration } from "./declaration"
+
+export { checkDeclarationRules } from "./declaration-rules"
 
 export { runConformance } from "./runner"
 export type { RunOptions } from "./runner"
