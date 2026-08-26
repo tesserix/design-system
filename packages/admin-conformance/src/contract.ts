@@ -146,3 +146,21 @@ export function isProbed(id: EndpointId): boolean {
   const endpoint = ENDPOINTS[id]
   return !("probe" in endpoint) || endpoint.probe !== false
 }
+
+/**
+ * Whether this endpoint's path is incomplete without a subtype.
+ *
+ * Only `entities` answers true: `/admin/entities/{type}` has no URL until the
+ * declaration supplies a `{type}`. That makes it the one endpoint whose
+ * ABSENCE from a declaration cannot be tested — there is nothing to ask for —
+ * which is why `checkUndeclared` skips it explicitly rather than silently
+ * getting a 404 for a path it made up.
+ *
+ * An accessor rather than a property read, for the same reason `isProbed` is
+ * one: the field exists on a single member of the union, so reading it
+ * directly does not type-check.
+ */
+export function requiresSubtypes(id: EndpointId): boolean {
+  const endpoint = ENDPOINTS[id]
+  return "requiresSubtypes" in endpoint && endpoint.requiresSubtypes === true
+}
