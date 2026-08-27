@@ -1,5 +1,6 @@
 import {
   checkEmptyResult,
+  checkEntityRow,
   checkEnvelope,
   checkErrorShape,
   checkMoney,
@@ -282,6 +283,7 @@ function checkResponse(
     ...checkMoney(label, "4.2", response.body),
     ...checkTimestamps(label, "4.3", response.body),
     ...checkEmptyResult(label, "4.5", response.body, response.status),
+    ...checkEntityRow(label, "8.9", response.body),
   ]
 
   if (id === "kpis") {

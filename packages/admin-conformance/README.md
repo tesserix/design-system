@@ -87,6 +87,7 @@ Per-endpoint rules from §3, and the conventions from §4 over every response:
 - **§3.3** `/admin/audit-logs` is scoped to the calling product
 - **§8.8** `/admin/lifecycle/reason-codes` publishes both verbs' codes, snake_case, each labelled
 - **§8.8** a product declaring `tenant-lifecycle` also declares `lifecycle/reason-codes`
+- **§8.9** every `/admin/entities/{type}` row carries a non-empty string `id` and `label`; `sublabel` is optional, but sending it as `null` or `""` instead of omitting it fails, and `source` must not be sent at all
 
 ## The one endpoint that is never called
 
