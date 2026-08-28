@@ -149,7 +149,22 @@ export interface InboxOptions {
    * gates and mark8ly's five-business-day SEA review as the two that have one.
    */
   readonly slaDeclared?: boolean
+  /**
+   * The item kinds that carry an SLA, for a queue that is not uniform. When
+   * present, `due_at` is required of an item only when its `kind` is listed;
+   * every other kind is free to omit it.
+   *
+   * Mutually exclusive with `slaDeclared`, which the declaration parser
+   * enforces. This exists because SLA reality is per kind: mark8ly merges five
+   * kinds and only `sea_manual_review` has a deadline, while
+   * `erasure_request` deliberately has none.
+   */
+  readonly slaKinds?: readonly string[]
 }
+
+/** Where every inbox finding is reported. Shared so the two helpers agree. */
+const INBOX_ENDPOINT = "inbox"
+const INBOX_SECTION = "3.2"
 
 /** Fields every inbox item carries, per the §3.2 example. */
 const REQUIRED_ITEM_FIELDS = ["id", "kind", "title", "waiting_since"] as const
@@ -203,35 +218,87 @@ export function checkInboxItems(body: unknown, options: InboxOptions): Finding[]
     }
   }
 
-  if (options.slaDeclared) {
-    const missingDue = items.filter(
-      (item) => !isRecord(item) || item.due_at === undefined || item.due_at === null,
-    )
-    findings.push(
-      missingDue.length > 0
-        ? fail(
-            endpoint,
-            section,
-            "every item carries due_at",
-            `${missingDue.length} of ${items.length} items omit due_at, and this product ` +
-              "declares an SLA on this queue. A declared SLA that nothing surfaces is the " +
-              "gap §3.2 exists to close.",
-          )
-        : pass(endpoint, section, "every item carries due_at"),
-    )
-  } else {
-    findings.push(
-      skip(
-        endpoint,
-        section,
-        "every item carries due_at",
-        "no SLA declared for this queue, so due_at is optional",
-      ),
-    )
-  }
+  findings.push(...checkDueAt(items, options))
 
   return findings
 }
+
+/** True when an item carries no usable `due_at`. `null` is not a value here. */
+const omitsDueAt = (item: unknown): boolean =>
+  !isRecord(item) || item.due_at === undefined || item.due_at === null
+
+/**
+ * §3.2's `due_at`, against whichever SLA shape the product declared.
+ *
+ * Three declarations, three different questions:
+ *
+ *   - `slaKinds` — a queue where only some kinds are time-bound. Checked per
+ *     kind, because a product forced to choose one boolean for a mixed queue
+ *     must either fabricate a deadline it has refused to model or understate
+ *     a real one.
+ *   - `slaDeclared` — a uniform queue. Every item owes a `due_at`.
+ *   - neither — no SLA anywhere, so `due_at` is optional and this is a skip.
+ */
+function checkDueAt(items: readonly unknown[], options: InboxOptions): Finding[] {
+  const check = "every item carries due_at"
+
+  if (options.slaKinds && options.slaKinds.length > 0) {
+    const declared = new Set(options.slaKinds)
+    const bearing = items.filter((item) => isRecord(item) && declared.has(String(item.kind)))
+
+    // A declared kind that did not appear on this page demonstrated nothing
+    // about whether the product carries its due_at. `pass` would claim
+    // coverage the run does not have — the same rule §8.9's row assertion
+    // follows for a page with no rows.
+    if (bearing.length === 0) {
+      return [
+        skip(
+          INBOX_ENDPOINT,
+          INBOX_SECTION,
+          check,
+          `no item of a declared SLA kind (${options.slaKinds.join(", ")}) appeared on ` +
+            "this page, so nothing about due_at was exercised",
+        ),
+      ]
+    }
+
+    const missing = bearing.filter(omitsDueAt)
+    return [
+      missing.length > 0
+        ? fail(
+            INBOX_ENDPOINT,
+            INBOX_SECTION,
+            check,
+            `${missing.length} of ${bearing.length} items whose kind carries an SLA omit ` +
+              "due_at. A declared SLA that nothing surfaces is the gap §3.2 exists to close. " +
+              `Items of other kinds are not checked: declared SLA kinds are ${options.slaKinds.join(", ")}.`,
+          )
+        : pass(INBOX_ENDPOINT, INBOX_SECTION, check),
+    ]
+  }
+
+  if (options.slaDeclared) {
+    const missing = items.filter(omitsDueAt)
+    return [
+      missing.length > 0
+        ? fail(
+            INBOX_ENDPOINT,
+            INBOX_SECTION,
+            check,
+            `${missing.length} of ${items.length} items omit due_at, and this product ` +
+              "declares an SLA on this queue. A declared SLA that nothing surfaces is the " +
+              "gap §3.2 exists to close. If only some kinds are time-bound, declare " +
+              "slaKinds instead of slaDeclared.",
+          )
+        : pass(INBOX_ENDPOINT, INBOX_SECTION, check),
+    ]
+  }
+
+  return [
+    skip(INBOX_ENDPOINT, INBOX_SECTION, check, "no SLA declared for this queue, so due_at is optional"),
+  ]
+}
+
 
 /** Keys a row might use to name the product it came from. */
 const PRODUCT_FIELDS = ["product", "source", "slug", "product_slug"] as const

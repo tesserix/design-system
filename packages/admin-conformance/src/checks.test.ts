@@ -78,6 +78,42 @@ describe("checkInboxItems (§3.2)", () => {
     expect(findings_fail(undeclared, /due_at/)).toBe(false)
   })
 
+  // slaDeclared is one boolean per product; SLA reality is per queue kind.
+  // mark8ly merges five kinds from independent providers and only
+  // sea_manual_review has a deadline — erasure_request deliberately has none,
+  // because deriving a statutory deadline in a read endpoint would be
+  // inventing policy in the wrong place. Neither boolean value is honest.
+  it("requires due_at only on the kinds declared SLA-bearing", () => {
+    const sea = { ...item, kind: "sea_manual_review" }
+    const erasure = { ...item, kind: "erasure_request" }
+
+    const missing = checkInboxItems(
+      { items: [sea, erasure], total: 2 },
+      { slaKinds: ["sea_manual_review"] },
+    )
+    expect(findings_fail(missing, /due_at/)).toBe(true)
+
+    // The erasure item still has no due_at, and that is correct.
+    const satisfied = checkInboxItems(
+      { items: [{ ...sea, due_at: "2026-08-30T00:00:00Z" }, erasure], total: 2 },
+      { slaKinds: ["sea_manual_review"] },
+    )
+    expect(findings_fail(satisfied, /due_at/)).toBe(false)
+  })
+
+  // A declared kind absent from the sampled page demonstrated nothing about
+  // whether the product carries its due_at. `pass` would claim coverage the
+  // run does not have — the same rule the entity-row assertion follows for a
+  // page with no rows.
+  it("skips rather than passes when no item of a declared kind is present", () => {
+    const findings = checkInboxItems(
+      { items: [{ ...item, kind: "erasure_request" }], total: 1 },
+      { slaKinds: ["sea_manual_review"] },
+    )
+    const due = findings.filter((f) => /due_at/.test(f.check))
+    expect(due.map((f) => f.status)).toEqual(["skip"])
+  })
+
   it("accepts an empty inbox as a pass, not a gap", () => {
     const findings = checkInboxItems({ items: [], total: 0 }, { slaDeclared: true })
     expect(statuses(findings)).not.toContain("fail")

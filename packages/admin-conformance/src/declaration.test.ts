@@ -248,6 +248,48 @@ describe("inbox", () => {
     expect(declaration.endpoints["inbox"]?.slaDeclared).toBe(false)
   })
 
+  it("parses slaKinds, so a product with one time-bound queue can say so", () => {
+    const declaration = parseDeclaration({
+      slug: "mark8ly",
+      contractVersion: 2,
+      endpoints: { inbox: { slaKinds: ["sea_manual_review"] } },
+    })
+
+    expect(declaration.endpoints["inbox"]?.slaKinds).toEqual(["sea_manual_review"])
+    // Not inferred as true: the product-level promise is genuinely absent, and
+    // a checker that read one from the other would re-create the conflation
+    // slaKinds exists to remove.
+    expect(declaration.endpoints["inbox"]?.slaDeclared).toBe(false)
+  })
+
+  // Two answers to one question. Which wins would have to be guessed by every
+  // reader, and the guesses would differ.
+  it("rejects declaring both slaDeclared and slaKinds", () => {
+    expect(() =>
+      parseDeclaration({
+        slug: "mark8ly",
+        contractVersion: 2,
+        endpoints: { inbox: { slaDeclared: true, slaKinds: ["sea_manual_review"] } },
+      }),
+    ).toThrow(/slaDeclared/)
+  })
+
+  it("rejects an empty or non-string slaKinds", () => {
+    const bad = (slaKinds: unknown) => () =>
+      parseDeclaration({
+        slug: "mark8ly",
+        contractVersion: 2,
+        endpoints: { inbox: { slaKinds } },
+      })
+
+    // An empty array is "no kinds have an SLA", which is what omitting it
+    // already says. Two spellings of one statement is the ambiguity this
+    // whole option exists to remove.
+    expect(bad([])).toThrow(/slaKinds/)
+    expect(bad(["ok", ""])).toThrow(/slaKinds/)
+    expect(bad("sea_manual_review")).toThrow(/slaKinds/)
+  })
+
   it("rejects a non-boolean slaDeclared", () => {
     expect(() =>
       parseDeclaration({
