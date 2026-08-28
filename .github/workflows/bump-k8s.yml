@@ -20,12 +20,60 @@ concurrency:
 
 permissions:
   contents: read
+  # WIF: the job exchanges this OIDC token for a GCP credential, which reads
+  # the GitHub App key. No long-lived secret is stored in this repository.
+  id-token: write
 
 jobs:
   bump:
     name: Bump tesserix-k8s image tags
     runs-on: ubuntu-latest
     steps:
+      # The credential chain, and why it has this many links:
+      #
+      #   GitHub OIDC -> WIF -> ds-k8s-bump SA -> Secret Manager
+      #                      -> GitHub App key -> ~1h installation token
+      #
+      # Nothing here is long-lived and nothing is stored in this repository.
+      # The previous arrangement fell back to ADMIN_TOKEN, which is the
+      # credential tesserix-k8s's ruleset lists in `bypass_actors` with
+      # `bypass_mode: always` — so this job held the power to ignore branch
+      # protection on a repo it only ever needs to open a PR against.
+      #
+      # The SA is deliberately NOT the shared `github-actions@` identity:
+      # that one carries artifactregistry.admin, cloudkms.admin,
+      # container.clusterAdmin and iam.serviceAccountAdmin, and reading one
+      # secret with it would swap an over-privileged GitHub token for an
+      # over-privileged Google one. `ds-k8s-bump` holds no project role at
+      # all — only secretAccessor on the two secrets below, and it is
+      # impersonable only by this repository.
+      - name: Authenticate to Google Cloud
+        id: gcp
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/849928263410/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: ds-k8s-bump@tesseracthub-480811.iam.gserviceaccount.com
+
+      - name: Read the GitHub App credentials
+        id: app-secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |-
+            app_id:tesseracthub-480811/ds-k8s-bump-app-id
+            private_key:tesseracthub-480811/ds-k8s-bump-app-private-key
+
+      # Scoped at mint time to one repository and the two permissions this
+      # job uses: contents (push a branch) and pull-requests (open the PR).
+      # The token expires in about an hour and is never stored.
+      - name: Mint a tesserix-k8s token
+        id: k8s-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ steps.app-secrets.outputs.app_id }}
+          private-key: ${{ steps.app-secrets.outputs.private_key }}
+          owner: tesserix
+          repositories: tesserix-k8s
+
       - name: Resolve tag
         id: meta
         env:
@@ -49,9 +97,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: tesserix/tesserix-k8s
-          # TESSERIX_K8S_BOT is set but its PAT no longer authenticates, so the broader
-          # ADMIN_TOKEN leads. Rotate the bot PAT and put it back in front.
-          token: ${{ secrets.ADMIN_TOKEN || secrets.TESSERIX_K8S_BOT }}
+          token: ${{ steps.k8s-token.outputs.token }}
           path: tesserix-k8s
           ref: main
           fetch-depth: 0
@@ -85,7 +131,7 @@ jobs:
         working-directory: tesserix-k8s
         env:
           TAG: ${{ steps.meta.outputs.tag }}
-          GH_TOKEN: ${{ secrets.ADMIN_TOKEN || secrets.TESSERIX_K8S_BOT }}
+          GH_TOKEN: ${{ steps.k8s-token.outputs.token }}
         run: |
           set -euo pipefail
 
