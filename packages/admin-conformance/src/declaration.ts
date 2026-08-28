@@ -39,6 +39,22 @@ export interface EndpointDeclaration {
    * look identical on the wire.
    */
   readonly slaDeclared?: boolean
+  /**
+   * `inbox` only: the item `kind`s that carry an SLA, for a queue that is not
+   * uniform. `due_at` is required of an item only when its kind is listed
+   * here; items of every other kind may carry one or not.
+   *
+   * `slaDeclared` is the same statement for a product whose queue IS uniform,
+   * and the two are mutually exclusive. mark8ly is why this exists: its
+   * `/admin/inbox` merges five kinds from independent providers, and only
+   * `sea_manual_review` has a deadline. `erasure_request` deliberately has
+   * none — GDPR's 30-day window is real, but deriving a statutory deadline in
+   * a read endpoint would be inventing policy in the wrong place. So
+   * `slaDeclared: true` would force mark8ly to fabricate exactly the value its
+   * code documents a refusal to fabricate, and `false` understates a
+   * subscription-clock-pausing commitment on the one queue that has one.
+   */
+  readonly slaKinds?: readonly string[]
 }
 
 export interface Declaration {
@@ -56,7 +72,7 @@ const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 /** Option keys each endpoint accepts. An endpoint absent here accepts none. */
 const ENDPOINT_OPTION_KEYS: Partial<Record<EndpointId, readonly string[]>> = {
   entities: ["types"],
-  inbox: ["slaDeclared"],
+  inbox: ["slaDeclared", "slaKinds"],
 }
 
 /**
@@ -142,6 +158,32 @@ function parseSlaDeclared(value: unknown): boolean {
   return value
 }
 
+/**
+ * The kinds that carry an SLA.
+ *
+ * An empty array is rejected rather than treated as "none": omitting the key
+ * already says that, and two spellings of one statement is the ambiguity this
+ * option exists to remove.
+ */
+function parseSlaKinds(value: unknown): readonly string[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw problem(
+      'endpoints["inbox"].slaKinds must be a non-empty array of item kinds; ' +
+        "omit it entirely if no queue kind carries an SLA",
+    )
+  }
+  const kinds: string[] = []
+  for (const kind of value) {
+    if (typeof kind !== "string" || kind.length === 0) {
+      throw problem(
+        `endpoints["inbox"].slaKinds must contain non-empty strings, got ${JSON.stringify(kind)}`,
+      )
+    }
+    kinds.push(kind)
+  }
+  return kinds
+}
+
 function parseEndpoint(id: EndpointId, value: unknown): EndpointDeclaration {
   // `false` and absence are the same statement — not implemented — so neither
   // needs its options validated. Only a claim of implementation is checkable.
@@ -166,6 +208,25 @@ function parseEndpoint(id: EndpointId, value: unknown): EndpointDeclaration {
   }
 
   if (id === "inbox") {
+    // Both is two answers to one question. Which one wins would have to be
+    // guessed by every reader of this file, and the guesses would differ.
+    if ("slaDeclared" in options && "slaKinds" in options) {
+      throw problem(
+        'endpoints["inbox"] declares both slaDeclared and slaKinds; ' +
+          "use slaDeclared for a queue where every kind carries an SLA, " +
+          "slaKinds for a queue where only some do",
+      )
+    }
+    if ("slaKinds" in options) {
+      // slaDeclared stays false rather than being inferred true: the
+      // product-level promise is genuinely absent, and inferring one would
+      // re-create the conflation slaKinds exists to remove.
+      return {
+        ...declaration,
+        slaDeclared: false,
+        slaKinds: parseSlaKinds(options["slaKinds"]),
+      }
+    }
     return { ...declaration, slaDeclared: parseSlaDeclared(options["slaDeclared"]) }
   }
 

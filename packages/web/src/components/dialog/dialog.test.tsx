@@ -104,3 +104,61 @@ describe("Dialog", () => {
     consoleError.mockRestore()
   })
 })
+
+describe("Dialog — dismissal and background inertness", () => {
+  const openDialog = (props: Record<string, unknown> = {}) =>
+    render(
+      <div>
+        <button type="button">Outside</button>
+        <Dialog defaultOpen>
+          <DialogContent {...props}>
+            <DialogHeader>
+              <DialogTitle>Delete</DialogTitle>
+              <DialogDescription>This cannot be undone.</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      </div>
+    )
+
+  const overlay = () => document.body.querySelector("div.backdrop-blur-sm") as Element
+
+  // The default is unchanged: a plain Dialog stays dismissable, so nothing
+  // that exists today changes behaviour.
+  it("closes on outside click by default", () => {
+    openDialog()
+    fireEvent.mouseDown(overlay())
+    expect(screen.queryByText("Delete")).not.toBeInTheDocument()
+  })
+
+  // For a destructive confirmation a stray click on the overlay should not
+  // silently abandon the flow — and worse, the operator cannot tell whether
+  // they cancelled or mis-clicked.
+  it("stays open on outside click when dismissal is disabled", () => {
+    openDialog({ dismissOnOutsideClick: false })
+    fireEvent.mouseDown(overlay())
+    expect(screen.getByText("Delete")).toBeInTheDocument()
+  })
+
+  // Modality otherwise rests on aria-modal="true" alone. That is the ARIA
+  // contract, but screen-reader support for it is uneven.
+  it("marks background siblings inert while open, and restores them", () => {
+    // The render container, not the button's parent: the portal mounts the
+    // dialog as its own child of document.body, so the container is the
+    // sibling that has to become inert.
+    const { unmount, container } = openDialog({ inertBackground: true })
+
+    expect(container.hasAttribute("inert")).toBe(true)
+    // The dialog's own portal nodes must never be inerted — that would make
+    // the dialog unusable, which is the one failure this cannot have.
+    expect(overlay().hasAttribute("inert")).toBe(false)
+
+    unmount()
+    expect(container.hasAttribute("inert")).toBe(false)
+  })
+
+  it("leaves the background alone unless asked", () => {
+    const { container } = openDialog()
+    expect(container.hasAttribute("inert")).toBe(false)
+  })
+})

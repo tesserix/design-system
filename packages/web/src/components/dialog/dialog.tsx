@@ -129,19 +129,32 @@ const DialogPortal = ({ children }: { children: React.ReactNode }) => {
   return typeof document !== "undefined" ? ReactDOM.createPortal(children, document.body) : null
 }
 
-const DialogOverlay = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<"div">>(
-  ({ className, ...props }, ref) => {
+interface DialogOverlayProps extends React.ComponentPropsWithoutRef<"div"> {
+  /**
+   * Whether a click on the overlay closes the dialog. Defaults to `true`,
+   * which is the behaviour every existing consumer has.
+   *
+   * `false` is for a dialog whose confirm button destroys data: a stray click
+   * landing on the overlay should not silently abandon the flow, and the
+   * operator cannot tell afterwards whether they cancelled or mis-clicked.
+   */
+  dismissOnOutsideClick?: boolean
+}
+
+const DialogOverlay = React.forwardRef<HTMLDivElement, DialogOverlayProps>(
+  ({ className, dismissOnOutsideClick = true, ...props }, ref) => {
     const { onOpenChange, open } = useDialog()
 
     return (
       <div
         ref={ref}
+        data-dialog-portal=""
         data-state={open ? "open" : "closed"}
         className={cn(
           "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           className
         )}
-        onMouseDown={() => onOpenChange(false)}
+        onMouseDown={dismissOnOutsideClick ? () => onOpenChange(false) : undefined}
         {...props}
       />
     )
@@ -178,10 +191,38 @@ interface DialogContentProps
   extends React.ComponentPropsWithoutRef<"div">,
     VariantProps<typeof dialogContentVariants> {
   showCloseButton?: boolean
+  /** See `DialogOverlayProps.dismissOnOutsideClick`. Defaults to `true`. */
+  dismissOnOutsideClick?: boolean
+  /**
+   * Mark everything outside the dialog `inert` while it is open.
+   *
+   * Opt-in rather than default: this dialog portals into `document.body`, so
+   * turning it on reaches every sibling that portals alongside it — toasts,
+   * live regions, anything else mounted there. Nodes belonging to a dialog
+   * are exempted by `data-dialog-portal`, so nesting is safe.
+   *
+   * Worth turning on where modality matters: without it, modality rests on
+   * `aria-modal="true"` alone, which is the ARIA contract but has uneven
+   * screen-reader support.
+   */
+  inertBackground?: boolean
 }
 
 const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
-  ({ className, variant, size, showCloseButton = false, children, onKeyDown, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      showCloseButton = false,
+      dismissOnOutsideClick = true,
+      inertBackground = false,
+      children,
+      onKeyDown,
+      ...props
+    },
+    ref
+  ) => {
     const { open, onOpenChange, triggerRef, titleId, descriptionId } = useDialog()
     const contentRef = React.useRef<HTMLDivElement>(null)
     const previousFocusRef = React.useRef<HTMLElement | null>(null)
@@ -206,6 +247,28 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
         }
       }
     }, [open, triggerRef])
+
+    // Background inertness. Separate from the focus effect above because it
+    // has a different dependency and a different failure mode: getting focus
+    // wrong is awkward, leaving a stray `inert` behind makes the page dead.
+    React.useEffect(() => {
+      if (!open || !inertBackground || typeof document === "undefined") return
+
+      // Only elements this effect actually changed are restored, so a node
+      // that was already inert for its own reasons stays that way.
+      const inerted: HTMLElement[] = []
+      for (const child of Array.from(document.body.children)) {
+        if (!(child instanceof HTMLElement)) continue
+        if (child.hasAttribute("data-dialog-portal")) continue
+        if (child.hasAttribute("inert")) continue
+        child.setAttribute("inert", "")
+        inerted.push(child)
+      }
+
+      return () => {
+        for (const node of inerted) node.removeAttribute("inert")
+      }
+    }, [open, inertBackground])
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Escape") {
@@ -242,9 +305,10 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
 
     return (
       <DialogPortal>
-        <DialogOverlay />
+        <DialogOverlay dismissOnOutsideClick={dismissOnOutsideClick} />
         <div
           ref={contentRef}
+          data-dialog-portal=""
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}

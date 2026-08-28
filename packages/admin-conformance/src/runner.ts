@@ -293,6 +293,7 @@ function checkResponse(
     findings.push(
       ...checkInboxItems(response.body, {
         slaDeclared: declaration.endpoints.inbox?.slaDeclared,
+        slaKinds: declaration.endpoints.inbox?.slaKinds,
       }),
     )
   }
