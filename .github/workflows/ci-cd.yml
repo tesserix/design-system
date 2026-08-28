@@ -108,15 +108,23 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.publish == true)
     permissions:
       contents: write
+      # The release PR. Version bumps arrive as a PR a human merges, rather
+      # than a push straight to a protected branch — see the changesets step.
+      pull-requests: write
       # Lets the runner mint the OIDC token npm exchanges for a short-lived
       # publish credential. Without it, trusted publishing cannot authenticate.
       id-token: write
     steps:
+      # No `token:`. GITHUB_TOKEN is enough now that nothing here pushes to
+      # main: it is minted per run, scoped to this repository, and expires
+      # with the job. This step previously carried ADMIN_TOKEN, a human
+      # admin's PAT that satisfied main's rulesets by BYPASSING them — a
+      # credential valid against every repository that account can admin,
+      # used to push one version commit.
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.ADMIN_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -141,42 +149,48 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Check for changesets
-        id: check-changesets
-        run: |
-          if [ -n "$(find .changeset -name '*.md' -not -name 'README.md' -print -quit)" ]; then
-            echo "has_changesets=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_changesets=false" >> $GITHUB_OUTPUT
-          fi
+      # A stray per-package .npmrc would pin a registry or a stale token and
+      # take precedence over the OIDC credential. Kept as its own step now
+      # that publishing runs inside the changesets action rather than a script
+      # we control — the action cannot do this for us.
+      - name: Remove stray per-package .npmrc files
+        run: rm -f packages/*/.npmrc
 
-      - name: Version packages
-        if: steps.check-changesets.outputs.has_changesets == 'true'
-        run: |
-          pnpm version-packages
-          git add .
-          git commit -m "chore: version packages" || echo "No version changes"
-          git push
-
-      # registry.npmjs.org is the only registry these packages publish to.
+      # Two modes, decided by whether unreleased changesets exist:
       #
-      # Trusted publishing: no NPM_TOKEN anywhere. npm exchanges the workflow's
-      # OIDC identity for a short-lived credential, which is why the trusted
-      # publisher on npmjs.com must name this exact workflow file (ci-cd.yml).
+      #   changesets present -> open/update a "Version Packages" PR
+      #   none present       -> the versions on main are already bumped, so
+      #                         publish them
       #
-      # Must NOT be continue-on-error: a silent failure here strands every
-      # consumer on the previous version — which is what happened to
-      # @tesserix/otto-widget@0.6.0 and @tesserix/web@1.8.0.
-      - name: Publish to npm (public registry)
-        if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
-        run: |
-          # A stray per-package .npmrc would pin a registry or a stale token and
-          # take precedence over the OIDC credential.
-          rm -f packages/*/.npmrc
-          pnpm release
+      # The version bump therefore reaches main through a PR someone merges,
+      # not a push that has to bypass main's rulesets. That is what removes
+      # the need for ADMIN_TOKEN: the old flow ran `git push` at a protected
+      # branch and needed a credential privileged enough to ignore the
+      # protection, for a commit nobody reviewed.
+      #
+      # It also puts a human between a merge and a public npm publish.
+      # @tesserix/web@2.4.0 went to the registry minutes after a PR landed,
+      # with the version bump seen by no one.
+      #
+      # `publish` runs in THIS workflow file deliberately: npm's trusted
+      # publisher names ci-cd.yml, so moving the publish elsewhere breaks
+      # OIDC authentication with no token to fall back on.
+      - name: Create the release PR, or publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+          commit: "chore: version packages"
+          title: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Only when something was actually published. On a run that merely opened
+      # the release PR there is no new version, and checking for one would fail
+      # a run that did exactly what it should.
       - name: Verify the public registry has the published version
-        if: steps.check-changesets.outputs.has_changesets == 'true' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+        if: steps.changesets.outputs.published == 'true' 
         run: |
           version=$(node -p "require('./packages/web/package.json').version")
           # npm's read path is eventually consistent: a version that has just
