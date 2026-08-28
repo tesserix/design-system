@@ -1,6 +1,6 @@
 {
   "name": "@tesserix/admin-conformance",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Conformance suite for the Tesserix Product Admin Integration Contract — a product runs it against its own admin API in CI",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
