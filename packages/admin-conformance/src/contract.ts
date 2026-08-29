@@ -10,6 +10,28 @@
  * "not implemented", which reports as a pass. Add, never rename.
  */
 
+/**
+ * Why an unprobed endpoint is unprobed, as data rather than as a fact
+ * re-derived from `method`.
+ *
+ * `"changes-state"` — probing would mutate real state (a write, or an
+ * operation with no read/write distinction the suite can rely on).
+ * `"read-side-effect"` — probing is a GET, so the request changes nothing,
+ * but making the request is itself the unacceptable act (here: a PII lookup
+ * against live data).
+ *
+ * This is NOT a function of `method`. It happens that today's two
+ * `"changes-state"` ids are POSTs and the one `"read-side-effect"` id is a
+ * GET, but that is coincidence, not law: a future unprobed GET could exist
+ * *because* it fires a side effect (an email, a webhook, a billing event) —
+ * `"changes-state"` in every sense an operator cares about, despite the verb.
+ * Re-deriving this from `endpoint.method` would describe that endpoint to an
+ * on-call engineer as a harmless read "even though nothing changes," which
+ * is false and reassuring in exactly the wrong direction. Every endpoint with
+ * `probe: false` names its reason explicitly, here, instead.
+ */
+export type UnprobedReason = "changes-state" | "read-side-effect"
+
 export const ENDPOINTS = {
   kpis: {
     id: "kpis",
@@ -99,6 +121,7 @@ export const ENDPOINTS = {
     section: "8.3",
     envelope: "free",
     probe: false,
+    unprobedReason: "changes-state",
     summary: "Tenant suspend/unsuspend writes; declared only, never invoked by the suite.",
   },
   /**
@@ -191,6 +214,7 @@ export const ENDPOINTS = {
     section: "9.5",
     envelope: "free",
     probe: false,
+    unprobedReason: "read-side-effect",
     summary: "Lead-to-account conversion state, by email; declared only, never invoked by the suite.",
   },
   "onboarding/funnel": {
@@ -228,6 +252,7 @@ export const ENDPOINTS = {
     section: "9.7",
     envelope: "free",
     probe: false,
+    unprobedReason: "changes-state",
     summary: "Irreversible tenant erasure; declared only, never invoked by the suite.",
   },
 } as const
@@ -235,6 +260,27 @@ export const ENDPOINTS = {
 export type EndpointId = keyof typeof ENDPOINTS
 export type Endpoint = (typeof ENDPOINTS)[EndpointId]
 export type EnvelopeKind = Endpoint["envelope"]
+
+/**
+ * Compile-time guarantee that every `probe: false` entry above carries an
+ * `unprobedReason`. Not a lint rule and not a runtime check — `as const` on
+ * `ENDPOINTS` makes each entry's exact literal type available here, so a
+ * future entry that sets `probe: false` without also setting
+ * `unprobedReason` fails the build on this line rather than surfacing later
+ * as a `runner.ts` string bug or, worse, not surfacing at all.
+ */
+type _UnprobedEntriesHaveAReason = {
+  [K in EndpointId]: (typeof ENDPOINTS)[K] extends { probe: false }
+    ? (typeof ENDPOINTS)[K] extends { unprobedReason: UnprobedReason }
+      ? true
+      : false
+    : true
+}[EndpointId] extends true
+  ? true
+  : never
+// Unused by design: its only job is to fail to compile if the mapped type
+// above ever resolves to `never`.
+const _unprobedEntriesHaveAReason: _UnprobedEntriesHaveAReason = true
 
 export const ENDPOINT_IDS = Object.keys(ENDPOINTS) as EndpointId[]
 
@@ -246,16 +292,10 @@ export function isEndpointId(value: string): value is EndpointId {
  * Whether the suite may call this endpoint over the wire.
  *
  * Three ids answer `false` — `tenant-lifecycle`, `conversions`, `tenant-purge`
- * — for two distinct reasons, not one caution applied three times:
- *
- * - `tenant-lifecycle` and `tenant-purge` are writes. Calling them would
- *   change real state — suspending or, worse, irrecoverably purging a live
- *   merchant's tenant — so the check would be the deviation.
- * - `conversions` is a GET. Nothing it returns mutates anything, but every
- *   value the suite could send as `?email=` is either a real person's
- *   address, making the request a scheduled PII lookup, or a synthetic one
- *   that proves nothing. The request itself is the unacceptable outcome, not
- *   its side effect on the server.
+ * — for two distinct reasons, not one caution applied three times. Each such
+ * entry names its own reason via `unprobedReason`; see that type's doc
+ * comment for why it is data on the endpoint rather than something derived
+ * from `method` at read time.
  *
  * An unprobed endpoint is still reported, as a skip naming why. Silently
  * omitting it would make a declared endpoint indistinguishable from an
@@ -264,6 +304,22 @@ export function isEndpointId(value: string): value is EndpointId {
 export function isProbed(id: EndpointId): boolean {
   const endpoint = ENDPOINTS[id]
   return !("probe" in endpoint) || endpoint.probe !== false
+}
+
+/**
+ * Why this endpoint is unprobed. Throws if it is not — callers must check
+ * `isProbed` first, the same discipline `requiresSubtypes` callers already
+ * follow for `entities`.
+ *
+ * An accessor rather than a property read for the reason `requiresSubtypes`
+ * is one: `unprobedReason` exists only on the union members that declared
+ * `probe: false`, so `endpoint.unprobedReason` does not type-check on the
+ * general `Endpoint` union.
+ */
+export function getUnprobedReason(id: EndpointId): UnprobedReason {
+  const endpoint = ENDPOINTS[id]
+  if ("unprobedReason" in endpoint) return endpoint.unprobedReason
+  throw new Error(`${id} is probed; it has no unprobedReason. Check isProbed first.`)
 }
 
 /**

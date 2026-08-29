@@ -11,6 +11,7 @@ import { checkReasonCodes } from "./checks-reason-codes"
 import {
   ENDPOINTS,
   ENDPOINT_IDS,
+  getUnprobedReason,
   isProbed,
   requiresSubtypes,
   type EndpointId,
@@ -183,11 +184,11 @@ async function runEndpoint(
   const endpoint = ENDPOINTS[id]
   const declared = declaration.endpoints[id]
 
-  // This function always issues `client.get`; `endpoint.method` is not used to determine the HTTP verb
-  // here. That is decorative for `tenant-purge` recording `POST` — nothing in
-  // this file would ever turn that into a POST request. The entire guarantee
-  // that the suite cannot purge a real tenant rests on `probe: false` routing
-  // the id through the skip in `runConformance` before it reaches this
+  // `client.get` is the only request this file issues, full stop. `endpoint.method`
+  // is not read anywhere in this file and never selects the HTTP verb — it is
+  // decorative metadata for `tenant-purge` recording `POST`. The entire
+  // guarantee that the suite cannot purge a real tenant rests on `probe: false`
+  // routing the id through the skip in `runConformance` before it reaches this
   // function at all, not on this function refusing to send the wrong verb.
 
   // `entities` is the one endpoint whose path is incomplete on its own: the
@@ -212,16 +213,18 @@ async function runEndpoint(
  * an operator reading the report.
  *
  * There are two distinct reasons, not one caution reused three times — see
- * `isProbed`'s doc comment in `contract.ts` for the full argument. This
- * derives which one applies from the endpoint's own `method` rather than
- * naming ids, so it stays true if a future unprobed id is added: a non-GET
- * changes state by definition; the one unprobed GET (`conversions`) does not
- * change state but performs a read whose effect on the world — a PII lookup
- * — is unacceptable regardless.
+ * `isProbed`'s doc comment in `contract.ts` for the full argument. This reads
+ * the endpoint's own `unprobedReason` field rather than deriving anything
+ * from `method`: a previous version keyed off `endpoint.method === "GET"`,
+ * which is only a correlation for today's three ids and would silently
+ * mislabel a future unprobed GET added *because* it fires a side effect —
+ * describing it to an on-call engineer as a harmless read "even though
+ * nothing changes" when it does. `unprobedReason` is the fact; `method` was
+ * never entitled to stand in for it.
  */
 function unprobedReason(id: EndpointId): string {
-  const endpoint = ENDPOINTS[id]
-  return endpoint.method === "GET"
+  const reason = getUnprobedReason(id)
+  return reason === "read-side-effect"
     ? "asking would perform a read whose effect on the world is unacceptable, even though nothing changes"
     : "asking would change real state"
 }

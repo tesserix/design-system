@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
+import { ENDPOINTS } from "./contract"
 import { runConformance } from "./runner"
 import type { Declaration } from "./declaration"
 
@@ -326,5 +327,62 @@ describe("v3 endpoints that must never be called", () => {
 
     const finding = findings.find((f) => f.endpoint === "tenant-purge")
     expect(finding?.status).toBe("skip")
+  })
+
+  // `conversions` is a GET; `tenant-lifecycle` and `tenant-purge` are POSTs.
+  // With today's registry, a skip message keyed off `endpoint.method` and one
+  // keyed off `endpoint.unprobedReason` produce IDENTICAL text — the verb and
+  // the reason happen to correlate for all three ids. That correlation is
+  // exactly the trap: a test that only checks today's wording against
+  // today's verbs would pass under either implementation and prove nothing.
+  //
+  // So this pins the two apart directly: it flips `conversions`' recorded
+  // `method` to `"POST"` (as `ENDPOINTS` module state is mutated) without
+  // touching `unprobedReason`, and asserts the skip text still reads as a
+  // read-side-effect, not a state change. Verb-derivation would get this
+  // wrong the moment `method` disagreed with the real reason; reading
+  // `unprobedReason` cannot, because it never looks at `method` at all.
+  it("describes an unprobed skip by its declared reason even when method disagrees", async () => {
+    const fetchImpl = vi.fn(async () => json({}))
+    const conversions = ENDPOINTS.conversions as { method: string }
+    const originalMethod = conversions.method
+    conversions.method = "POST"
+
+    try {
+      const findings = await runConformance({
+        ...config,
+        declaration: declaration({ conversions: { implemented: true } }),
+        fetchImpl,
+      })
+
+      const finding = findings.find((f) => f.endpoint === "conversions")
+      expect(finding?.detail).toMatch(/read whose effect on the world is unacceptable/)
+      expect(finding?.detail).not.toMatch(/would change real state/)
+    } finally {
+      conversions.method = originalMethod
+    }
+  })
+
+  // The companion case: both unprobed POSTs still read as state-changing when
+  // declared normally, so the reason field — not the verb — is what a real
+  // run reports for them too.
+  it("describes both unprobed writes as state-changing", async () => {
+    const fetchImpl = vi.fn(async () => json({}))
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({
+        "tenant-lifecycle": { implemented: true },
+        "tenant-purge": { implemented: true },
+        "lifecycle/reason-codes": { implemented: true },
+      }),
+      fetchImpl,
+    })
+
+    for (const id of ["tenant-lifecycle", "tenant-purge"]) {
+      const finding = findings.find((f) => f.endpoint === id)
+      expect(finding?.detail).toMatch(/would change real state/)
+      expect(finding?.detail).not.toMatch(/read whose effect on the world/)
+    }
   })
 })
