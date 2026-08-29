@@ -299,4 +299,32 @@ describe("v3 endpoints that must never be called", () => {
       expect(finding?.status).toBe("skip")
     }
   })
+
+  // The other half of `probe: false`'s guarantee, and previously untested:
+  // `checkUndeclared`'s `!isProbed` guard at the top of that function. The two
+  // tests above only ever declare `conversions`/`tenant-purge`, so they only
+  // ever exercise the declared branch (`runConformance`'s own `!isProbed`
+  // check). If the undeclared-path guard were deleted, an UNDECLARED
+  // `tenant-purge` would fall through to `checkUndeclared`'s normal probe and
+  // the suite would issue the very request `probe: false` exists to prevent —
+  // and no test would have caught it.
+  it("never probes an undeclared, unprobed endpoint", async () => {
+    const requested: string[] = []
+    const fetchImpl = vi.fn(async (url: string) => {
+      requested.push(url)
+      return json({})
+    })
+
+    // tenant-purge is declared nowhere in this declaration.
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({}),
+      fetchImpl,
+    })
+
+    expect(requested.filter((url) => url.includes("/purge"))).toEqual([])
+
+    const finding = findings.find((f) => f.endpoint === "tenant-purge")
+    expect(finding?.status).toBe("skip")
+  })
 })
