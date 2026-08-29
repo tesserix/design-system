@@ -220,13 +220,24 @@ export const ENDPOINTS = {
     unprobedReason: "read-side-effect",
     summary: "Lead-to-account conversion state, by email; declared only, never invoked by the suite.",
   },
+  /**
+   * §9.6 — the onboarding funnel's counts, by design grouped, not flat.
+   *
+   * `free` rather than a §4.1 envelope: the body nests `last_24h` (a grouped
+   * sub-window of counts) and `window` (a `{from,to}` pair), which is neither
+   * a page nor a flat map of scalars. 0.8.0 declared `data-flat-map` here by
+   * inferring the shape from one line without reading `toFunnelRow`; flattening
+   * would lose the grouping the endpoint exists to provide. Same reasoning as
+   * `lifecycle/reason-codes` above: §4.1 correctly reports a skip rather than
+   * asserting an envelope the contract does not require here.
+   */
   "onboarding/funnel": {
     id: "onboarding/funnel",
     method: "GET",
     path: "/admin/onboarding/funnel",
     section: "9.6",
-    envelope: "data-flat-map",
-    summary: "Onboarding funnel counts as a flat map of scalars (contract v3).",
+    envelope: "free",
+    summary: "Onboarding funnel counts, grouped by window (contract v3).",
   },
   "onboarding/sessions": {
     id: "onboarding/sessions",
