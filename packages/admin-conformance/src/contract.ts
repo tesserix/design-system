@@ -181,10 +181,13 @@ export const ENDPOINTS = {
    * §9.4 — the emergency-account inventory.
    *
    * The first READ in the estate gated on an exact capability VALUE
-   * (`rotate-credentials`). A run that does not send one gets a 403 — the
-   * endpoint working correctly, reported as a failure — so the caller must
-   * pass `--capability rotate-credentials`. Probed, but only usefully so
-   * once the signing identity holds that capability.
+   * (`rotate-credentials`). There is no grant list and no signing identity
+   * that "holds" capabilities — the gate is exact string equality between
+   * the presented `--capability` value and the literal string
+   * `rotate-credentials`, plus a non-empty `--operator`. A run that sends
+   * a mismatched or default capability gets a 403 — the endpoint working
+   * correctly, reported as a failure — so the caller must simply pass
+   * `--capability rotate-credentials`.
    */
   "break-glass": {
     id: "break-glass",
