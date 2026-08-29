@@ -67,9 +67,8 @@ export async function runConformance(options: RunOptions): Promise<Finding[]> {
           id,
           ENDPOINTS[id].section,
           "is declared",
-          "declared, and deliberately never called: a conformance run that invoked this write " +
-            "would change real state. What the contract requires of it is enforced against the " +
-            "declaration instead.",
+          `declared, and deliberately never called: ${unprobedReason(id)}. ` +
+            "What the contract requires of it is enforced against the declaration instead.",
         ),
       )
       continue
@@ -125,13 +124,15 @@ async function checkUndeclared(client: Client, id: EndpointId): Promise<Finding[
     "not declared, so not checked. Declaring it is what opts an endpoint into enforcement.",
   )
 
-  // Two endpoints cannot be probed blind, and neither absence is evidence.
+  // Four endpoints cannot be probed blind, and neither absence is evidence.
   //
   // `entities` has no complete path without a `{type}`, which only the
   // declaration supplies — so an undeclared one has no URL to ask for.
-  // `tenant-lifecycle` is a WRITE (`isProbed` is false): calling it to find out
-  // whether it exists would suspend a real tenant, which is categorically
-  // worse than the gap it would close.
+  // `tenant-lifecycle`, `tenant-purge`, and `conversions` all have `isProbed`
+  // false — the first two because asking would perform a write against real
+  // state, `conversions` because asking would perform the unacceptable read
+  // itself (a PII lookup). An undeclared instance of any of the three cannot
+  // be detected without doing the very thing that must not be done.
   if (requiresSubtypes(id) || !isProbed(id)) {
     return [
       skip(
@@ -141,7 +142,7 @@ async function checkUndeclared(client: Client, id: EndpointId): Promise<Finding[
         "not declared, and not probed: " +
           (requiresSubtypes(id)
             ? "its path needs a {type} only the declaration supplies, so there is nothing to ask for."
-            : "asking would perform the write. An undeclared write cannot be detected without doing it."),
+            : `${unprobedReason(id)}, and an undeclared instance cannot be detected without doing it.`),
       ),
     ]
   }
@@ -182,6 +183,13 @@ async function runEndpoint(
   const endpoint = ENDPOINTS[id]
   const declared = declaration.endpoints[id]
 
+  // This function always issues `client.get`; `endpoint.method` is never read
+  // here. That is decorative for `tenant-purge` recording `POST` — nothing in
+  // this file would ever turn that into a POST request. The entire guarantee
+  // that the suite cannot purge a real tenant rests on `probe: false` routing
+  // the id through the skip in `runConformance` before it reaches this
+  // function at all, not on this function refusing to send the wrong verb.
+
   // `entities` is the one endpoint whose path is incomplete on its own: the
   // `{type}` segment is product-defined, so the declaration supplies it and
   // each type is checked separately.
@@ -197,6 +205,25 @@ async function runEndpoint(
 
   const response = await client.get(endpoint.path, defaultQuery(id))
   return checkResponse(declaration, id, id, response)
+}
+
+/**
+ * Why an unprobed endpoint (`isProbed(id) === false`) is unprobed, worded for
+ * an operator reading the report.
+ *
+ * There are two distinct reasons, not one caution reused three times — see
+ * `isProbed`'s doc comment in `contract.ts` for the full argument. This
+ * derives which one applies from the endpoint's own `method` rather than
+ * naming ids, so it stays true if a future unprobed id is added: a non-GET
+ * changes state by definition; the one unprobed GET (`conversions`) does not
+ * change state but performs a read whose effect on the world — a PII lookup
+ * — is unacceptable regardless.
+ */
+function unprobedReason(id: EndpointId): string {
+  const endpoint = ENDPOINTS[id]
+  return endpoint.method === "GET"
+    ? "asking would perform a read whose effect on the world is unacceptable, even though nothing changes"
+    : "asking would change real state"
 }
 
 /**

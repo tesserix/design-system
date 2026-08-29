@@ -245,11 +245,17 @@ export function isEndpointId(value: string): value is EndpointId {
 /**
  * Whether the suite may call this endpoint over the wire.
  *
- * Only §8.3's tenant-lifecycle writes answer `false`, and the reason is not
- * caution — it is that the check would be the deviation. Every other endpoint
- * in this registry is a GET whose worst outcome is a wasted request; suspending
- * a live merchant's tenant to confirm the route conforms is not a check anyone
- * would run twice.
+ * Three ids answer `false` — `tenant-lifecycle`, `conversions`, `tenant-purge`
+ * — for two distinct reasons, not one caution applied three times:
+ *
+ * - `tenant-lifecycle` and `tenant-purge` are writes. Calling them would
+ *   change real state — suspending or, worse, irrecoverably purging a live
+ *   merchant's tenant — so the check would be the deviation.
+ * - `conversions` is a GET. Nothing it returns mutates anything, but every
+ *   value the suite could send as `?email=` is either a real person's
+ *   address, making the request a scheduled PII lookup, or a synthetic one
+ *   that proves nothing. The request itself is the unacceptable outcome, not
+ *   its side effect on the server.
  *
  * An unprobed endpoint is still reported, as a skip naming why. Silently
  * omitting it would make a declared endpoint indistinguishable from an
