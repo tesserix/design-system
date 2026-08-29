@@ -270,3 +270,33 @@ describe("runConformance", () => {
     expect(findings.some((f) => f.status === "pass")).toBe(true)
   })
 })
+
+describe("v3 endpoints that must never be called", () => {
+  it("skips conversions and tenant-purge without issuing a request", async () => {
+    const requested: string[] = []
+    const fetchImpl = vi.fn(async (url: string) => {
+      requested.push(url)
+      return json({})
+    })
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({
+        conversions: { implemented: true },
+        "tenant-purge": { implemented: true },
+      }),
+      fetchImpl,
+    })
+
+    // The point of probe:false is that no request happens. Asserting only on
+    // the finding's status would pass even if the suite had purged a tenant
+    // and then reported a skip.
+    expect(requested.filter((url) => url.includes("/admin/conversions"))).toEqual([])
+    expect(requested.filter((url) => url.includes("/purge"))).toEqual([])
+
+    for (const id of ["conversions", "tenant-purge"]) {
+      const finding = findings.find((f) => f.endpoint === id)
+      expect(finding?.status).toBe("skip")
+    }
+  })
+})
