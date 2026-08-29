@@ -183,7 +183,7 @@ async function runEndpoint(
   const endpoint = ENDPOINTS[id]
   const declared = declaration.endpoints[id]
 
-  // This function always issues `client.get`; `endpoint.method` is not used to determine the HTTP verb
+  // This function always issues `client.get`; `endpoint.method` is never read
   // here. That is decorative for `tenant-purge` recording `POST` — nothing in
   // this file would ever turn that into a POST request. The entire guarantee
   // that the suite cannot purge a real tenant rests on `probe: false` routing
