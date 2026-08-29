@@ -262,25 +262,38 @@ export type Endpoint = (typeof ENDPOINTS)[EndpointId]
 export type EnvelopeKind = Endpoint["envelope"]
 
 /**
+ * A type-level `assert(cond)`: only accepts the literal `true`. Passing
+ * anything else (`false`, or the `boolean` union you get when a mapped type
+ * produces a mix of `true` and `false`) fails at the instantiation site with
+ * "Type '...' does not satisfy the constraint 'true'". Note this must be a
+ * constrained type *parameter* — a plain conditional like
+ * `Cond extends true ? true : never` does NOT error on a `false` input, it
+ * silently resolves to `never`.
+ */
+type AssertTrue<T extends true> = T
+
+/**
  * Compile-time guarantee that every `probe: false` entry above carries an
  * `unprobedReason`. Not a lint rule and not a runtime check — `as const` on
  * `ENDPOINTS` makes each entry's exact literal type available here, so a
  * future entry that sets `probe: false` without also setting
  * `unprobedReason` fails the build on this line rather than surfacing later
  * as a `runner.ts` string bug or, worse, not surfacing at all.
+ *
+ * Expressed as an exported type alias (never a value binding) so there is
+ * nothing for `no-unused-vars` to flag and nothing to "clean up" by
+ * deleting: the failure happens at this declaration regardless of whether
+ * anything downstream ever references the type.
  */
-type _UnprobedEntriesHaveAReason = {
-  [K in EndpointId]: (typeof ENDPOINTS)[K] extends { probe: false }
-    ? (typeof ENDPOINTS)[K] extends { unprobedReason: UnprobedReason }
-      ? true
-      : false
-    : true
-}[EndpointId] extends true
-  ? true
-  : never
-// Unused by design: its only job is to fail to compile if the mapped type
-// above ever resolves to `never`.
-const _unprobedEntriesHaveAReason: _UnprobedEntriesHaveAReason = true
+export type _UnprobedEntriesHaveAReason = AssertTrue<
+  {
+    [K in EndpointId]: (typeof ENDPOINTS)[K] extends { probe: false }
+      ? (typeof ENDPOINTS)[K] extends { unprobedReason: UnprobedReason }
+        ? true
+        : false
+      : true
+  }[EndpointId]
+>
 
 export const ENDPOINT_IDS = Object.keys(ENDPOINTS) as EndpointId[]
 
