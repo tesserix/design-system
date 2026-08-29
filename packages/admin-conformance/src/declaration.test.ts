@@ -374,3 +374,37 @@ describe("loadDeclaration", () => {
     expect(() => loadDeclaration(path)).toThrow(/slug/)
   })
 })
+
+describe("contract v3 declarations", () => {
+  const base = { slug: "mark8ly", contractVersion: 3 }
+
+  it("accepts every v3 id declared as a bare true", () => {
+    const declaration = parseDeclaration({
+      ...base,
+      endpoints: {
+        outbox: true,
+        "email-sends": true,
+        notifications: true,
+        "break-glass": true,
+        conversions: true,
+        "onboarding/funnel": true,
+        "onboarding/sessions": true,
+        "tenant-purge": true,
+      },
+    })
+    expect(declaration.endpoints.outbox?.implemented).toBe(true)
+    expect(declaration.endpoints["tenant-purge"]?.implemented).toBe(true)
+  })
+
+  it("rejects an option on a v3 id, naming that it accepts none", () => {
+    expect(() =>
+      parseDeclaration({ ...base, endpoints: { outbox: { types: ["a"] } } }),
+    ).toThrow(/accepted options: none/)
+  })
+
+  it("still rejects an id the contract does not define", () => {
+    expect(() =>
+      parseDeclaration({ ...base, endpoints: { "onboarding/funnels": true } }),
+    ).toThrow(/unknown endpoint/)
+  })
+})

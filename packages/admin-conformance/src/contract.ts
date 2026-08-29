@@ -10,6 +10,28 @@
  * "not implemented", which reports as a pass. Add, never rename.
  */
 
+/**
+ * Why an unprobed endpoint is unprobed, as data rather than as a fact
+ * re-derived from `method`.
+ *
+ * `"changes-state"` — probing would mutate real state (a write, or an
+ * operation with no read/write distinction the suite can rely on).
+ * `"read-side-effect"` — probing is a GET, so the request changes nothing,
+ * but making the request is itself the unacceptable act (here: a PII lookup
+ * against live data).
+ *
+ * This is NOT a function of `method`. It happens that today's two
+ * `"changes-state"` ids are POSTs and the one `"read-side-effect"` id is a
+ * GET, but that is coincidence, not law: a future unprobed GET could exist
+ * *because* it fires a side effect (an email, a webhook, a billing event) —
+ * `"changes-state"` in every sense an operator cares about, despite the verb.
+ * Re-deriving this from `endpoint.method` would describe that endpoint to an
+ * on-call engineer as a harmless read "even though nothing changes," which
+ * is false and reassuring in exactly the wrong direction. Every endpoint with
+ * `probe: false` names its reason explicitly, here, instead.
+ */
+export type UnprobedReason = "changes-state" | "read-side-effect"
+
 export const ENDPOINTS = {
   kpis: {
     id: "kpis",
@@ -99,6 +121,7 @@ export const ENDPOINTS = {
     section: "8.3",
     envelope: "free",
     probe: false,
+    unprobedReason: "changes-state",
     summary: "Tenant suspend/unsuspend writes; declared only, never invoked by the suite.",
   },
   /**
@@ -117,11 +140,160 @@ export const ENDPOINTS = {
     envelope: "free",
     summary: "The reason codes this product's lifecycle writes accept (contract v2).",
   },
+  /**
+   * §9.1 — the transactional outbox's undelivered and failed rows.
+   *
+   * `SlugsImplementing`, never `Slugs`: a product without an outbox has no
+   * outbox, and that is not a 501 worth rendering in the console.
+   */
+  outbox: {
+    id: "outbox",
+    method: "GET",
+    path: "/admin/outbox",
+    section: "9.1",
+    envelope: "data-pagination",
+    summary: "Undelivered and failed outbox rows (contract v3).",
+  },
+  "email-sends": {
+    id: "email-sends",
+    method: "GET",
+    path: "/admin/email-sends",
+    section: "9.2",
+    envelope: "data-pagination",
+    summary: "Transactional email delivery log (contract v3).",
+  },
+  /**
+   * §9.3 — the product's own notification log.
+   *
+   * NOT the console's notification bell, which is derived from ticket rows
+   * and has no table behind it. Two different things with one word; see the
+   * design's §1.1 before wiring either into the other.
+   */
+  notifications: {
+    id: "notifications",
+    method: "GET",
+    path: "/admin/notifications",
+    section: "9.3",
+    envelope: "data-pagination",
+    summary: "Product-owned notification log (contract v3).",
+  },
+  /**
+   * §9.4 — the emergency-account inventory.
+   *
+   * The first READ in the estate gated on an exact capability VALUE
+   * (`rotate-credentials`). A run that does not send one gets a 403 — the
+   * endpoint working correctly, reported as a failure — so the caller must
+   * pass `--capability rotate-credentials`. Probed, but only usefully so
+   * once the signing identity holds that capability.
+   */
+  "break-glass": {
+    id: "break-glass",
+    method: "GET",
+    path: "/admin/break-glass",
+    section: "9.4",
+    envelope: "data-pagination",
+    summary: "Emergency-account inventory; requires the rotate-credentials capability (contract v3).",
+  },
+  /**
+   * §9.5 — did this lead become a live account.
+   *
+   * `probe: false`, and not because it writes. It requires `?email=`, and
+   * every value the suite could send is either a real person's address —
+   * making the nightly run a scheduled PII lookup — or a synthetic one that
+   * exercises only the `state: "none"` branch and asserts nothing. Declared,
+   * never called.
+   *
+   * `free` rather than a §4.1 envelope: the body is a bare
+   * `{ state, ref?, label?, idle_hours?, observed_at }`, which is neither a
+   * page nor a flat map of scalars.
+   */
+  conversions: {
+    id: "conversions",
+    method: "GET",
+    path: "/admin/conversions",
+    section: "9.5",
+    envelope: "free",
+    probe: false,
+    unprobedReason: "read-side-effect",
+    summary: "Lead-to-account conversion state, by email; declared only, never invoked by the suite.",
+  },
+  "onboarding/funnel": {
+    id: "onboarding/funnel",
+    method: "GET",
+    path: "/admin/onboarding/funnel",
+    section: "9.6",
+    envelope: "data-flat-map",
+    summary: "Onboarding funnel counts as a flat map of scalars (contract v3).",
+  },
+  "onboarding/sessions": {
+    id: "onboarding/sessions",
+    method: "GET",
+    path: "/admin/onboarding/sessions",
+    section: "9.6",
+    envelope: "data-pagination",
+    summary: "Individual onboarding sessions behind the funnel (contract v3).",
+  },
+  /**
+   * §9.7 — irreversible tenant erasure.
+   *
+   * `probe: false` for `tenant-lifecycle`'s reason, only stronger: suspending
+   * a real tenant to check an envelope is worse than no check, and purging
+   * one is unrecoverable. There is no sandbox tenant to point the suite at.
+   *
+   * `GET /admin/tenants/{id}/purge/preview` is deliberately NOT a separate
+   * id. It is the read half of one operation and is meaningless without the
+   * write; splitting them would let a product declare a preview it cannot
+   * execute.
+   */
+  "tenant-purge": {
+    id: "tenant-purge",
+    method: "POST",
+    path: "/admin/tenants/{id}/purge",
+    section: "9.7",
+    envelope: "free",
+    probe: false,
+    unprobedReason: "changes-state",
+    summary: "Irreversible tenant erasure; declared only, never invoked by the suite.",
+  },
 } as const
 
 export type EndpointId = keyof typeof ENDPOINTS
 export type Endpoint = (typeof ENDPOINTS)[EndpointId]
 export type EnvelopeKind = Endpoint["envelope"]
+
+/**
+ * A type-level `assert(cond)`: only accepts the literal `true`. Passing
+ * anything else (`false`, or the `boolean` union you get when a mapped type
+ * produces a mix of `true` and `false`) fails at the instantiation site with
+ * "Type '...' does not satisfy the constraint 'true'". Note this must be a
+ * constrained type *parameter* — a plain conditional like
+ * `Cond extends true ? true : never` does NOT error on a `false` input, it
+ * silently resolves to `never`.
+ */
+type AssertTrue<T extends true> = T
+
+/**
+ * Compile-time guarantee that every `probe: false` entry above carries an
+ * `unprobedReason`. Not a lint rule and not a runtime check — `as const` on
+ * `ENDPOINTS` makes each entry's exact literal type available here, so a
+ * future entry that sets `probe: false` without also setting
+ * `unprobedReason` fails the build on this line rather than surfacing later
+ * as a `runner.ts` string bug or, worse, not surfacing at all.
+ *
+ * Expressed as an exported type alias (never a value binding) so there is
+ * nothing for `no-unused-vars` to flag and nothing to "clean up" by
+ * deleting: the failure happens at this declaration regardless of whether
+ * anything downstream ever references the type.
+ */
+export type _UnprobedEntriesHaveAReason = AssertTrue<
+  {
+    [K in EndpointId]: (typeof ENDPOINTS)[K] extends { probe: false }
+      ? (typeof ENDPOINTS)[K] extends { unprobedReason: UnprobedReason }
+        ? true
+        : false
+      : true
+  }[EndpointId]
+>
 
 export const ENDPOINT_IDS = Object.keys(ENDPOINTS) as EndpointId[]
 
@@ -132,11 +304,11 @@ export function isEndpointId(value: string): value is EndpointId {
 /**
  * Whether the suite may call this endpoint over the wire.
  *
- * Only §8.3's tenant-lifecycle writes answer `false`, and the reason is not
- * caution — it is that the check would be the deviation. Every other endpoint
- * in this registry is a GET whose worst outcome is a wasted request; suspending
- * a live merchant's tenant to confirm the route conforms is not a check anyone
- * would run twice.
+ * Three ids answer `false` — `tenant-lifecycle`, `conversions`, `tenant-purge`
+ * — for two distinct reasons, not one caution applied three times. Each such
+ * entry names its own reason via `unprobedReason`; see that type's doc
+ * comment for why it is data on the endpoint rather than something derived
+ * from `method` at read time.
  *
  * An unprobed endpoint is still reported, as a skip naming why. Silently
  * omitting it would make a declared endpoint indistinguishable from an
@@ -145,6 +317,22 @@ export function isEndpointId(value: string): value is EndpointId {
 export function isProbed(id: EndpointId): boolean {
   const endpoint = ENDPOINTS[id]
   return !("probe" in endpoint) || endpoint.probe !== false
+}
+
+/**
+ * Why this endpoint is unprobed. Throws if it is not — callers must check
+ * `isProbed` first, the same discipline `requiresSubtypes` callers already
+ * follow for `entities`.
+ *
+ * An accessor rather than a property read for the reason `requiresSubtypes`
+ * is one: `unprobedReason` exists only on the union members that declared
+ * `probe: false`, so `endpoint.unprobedReason` does not type-check on the
+ * general `Endpoint` union.
+ */
+export function getUnprobedReason(id: EndpointId): UnprobedReason {
+  const endpoint = ENDPOINTS[id]
+  if ("unprobedReason" in endpoint) return endpoint.unprobedReason
+  throw new Error(`${id} is probed; it has no unprobedReason. Check isProbed first.`)
 }
 
 /**
