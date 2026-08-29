@@ -117,6 +117,119 @@ export const ENDPOINTS = {
     envelope: "free",
     summary: "The reason codes this product's lifecycle writes accept (contract v2).",
   },
+  /**
+   * §9.1 — the transactional outbox's undelivered and failed rows.
+   *
+   * `SlugsImplementing`, never `Slugs`: a product without an outbox has no
+   * outbox, and that is not a 501 worth rendering in the console.
+   */
+  outbox: {
+    id: "outbox",
+    method: "GET",
+    path: "/admin/outbox",
+    section: "9.1",
+    envelope: "data-pagination",
+    summary: "Undelivered and failed outbox rows (contract v3).",
+  },
+  "email-sends": {
+    id: "email-sends",
+    method: "GET",
+    path: "/admin/email-sends",
+    section: "9.2",
+    envelope: "data-pagination",
+    summary: "Transactional email delivery log (contract v3).",
+  },
+  /**
+   * §9.3 — the product's own notification log.
+   *
+   * NOT the console's notification bell, which is derived from ticket rows
+   * and has no table behind it. Two different things with one word; see the
+   * design's §1.1 before wiring either into the other.
+   */
+  notifications: {
+    id: "notifications",
+    method: "GET",
+    path: "/admin/notifications",
+    section: "9.3",
+    envelope: "data-pagination",
+    summary: "Product-owned notification log (contract v3).",
+  },
+  /**
+   * §9.4 — the emergency-account inventory.
+   *
+   * The first READ in the estate gated on an exact capability VALUE
+   * (`rotate-credentials`). A run that does not send one gets a 403 — the
+   * endpoint working correctly, reported as a failure — so the caller must
+   * pass `--capability rotate-credentials`. Probed, but only usefully so
+   * once the signing identity holds that capability.
+   */
+  "break-glass": {
+    id: "break-glass",
+    method: "GET",
+    path: "/admin/break-glass",
+    section: "9.4",
+    envelope: "data-pagination",
+    summary: "Emergency-account inventory; requires the rotate-credentials capability (contract v3).",
+  },
+  /**
+   * §9.5 — did this lead become a live account.
+   *
+   * `probe: false`, and not because it writes. It requires `?email=`, and
+   * every value the suite could send is either a real person's address —
+   * making the nightly run a scheduled PII lookup — or a synthetic one that
+   * exercises only the `state: "none"` branch and asserts nothing. Declared,
+   * never called.
+   *
+   * `free` rather than a §4.1 envelope: the body is a bare
+   * `{ state, ref?, label?, idle_hours?, observed_at }`, which is neither a
+   * page nor a flat map of scalars.
+   */
+  conversions: {
+    id: "conversions",
+    method: "GET",
+    path: "/admin/conversions",
+    section: "9.5",
+    envelope: "free",
+    probe: false,
+    summary: "Lead-to-account conversion state, by email; declared only, never invoked by the suite.",
+  },
+  "onboarding/funnel": {
+    id: "onboarding/funnel",
+    method: "GET",
+    path: "/admin/onboarding/funnel",
+    section: "9.6",
+    envelope: "data-flat-map",
+    summary: "Onboarding funnel counts as a flat map of scalars (contract v3).",
+  },
+  "onboarding/sessions": {
+    id: "onboarding/sessions",
+    method: "GET",
+    path: "/admin/onboarding/sessions",
+    section: "9.6",
+    envelope: "data-pagination",
+    summary: "Individual onboarding sessions behind the funnel (contract v3).",
+  },
+  /**
+   * §9.7 — irreversible tenant erasure.
+   *
+   * `probe: false` for `tenant-lifecycle`'s reason, only stronger: suspending
+   * a real tenant to check an envelope is worse than no check, and purging
+   * one is unrecoverable. There is no sandbox tenant to point the suite at.
+   *
+   * `GET /admin/tenants/{id}/purge/preview` is deliberately NOT a separate
+   * id. It is the read half of one operation and is meaningless without the
+   * write; splitting them would let a product declare a preview it cannot
+   * execute.
+   */
+  "tenant-purge": {
+    id: "tenant-purge",
+    method: "POST",
+    path: "/admin/tenants/{id}/purge",
+    section: "9.7",
+    envelope: "free",
+    probe: false,
+    summary: "Irreversible tenant erasure; declared only, never invoked by the suite.",
+  },
 } as const
 
 export type EndpointId = keyof typeof ENDPOINTS
