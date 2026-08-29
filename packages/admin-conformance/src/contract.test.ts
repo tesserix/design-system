@@ -41,7 +41,7 @@ describe("contract v3 ids", () => {
     expect(ENDPOINTS.notifications.envelope).toBe("data-pagination")
     expect(ENDPOINTS["break-glass"].envelope).toBe("data-pagination")
     expect(ENDPOINTS["onboarding/sessions"].envelope).toBe("data-pagination")
-    expect(ENDPOINTS["onboarding/funnel"].envelope).toBe("data-flat-map")
+    expect(ENDPOINTS["onboarding/funnel"].envelope).toBe("free")
     expect(ENDPOINTS.conversions.envelope).toBe("free")
     expect(ENDPOINTS["tenant-purge"].envelope).toBe("free")
   })
