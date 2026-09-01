@@ -74,3 +74,41 @@ describe('AlertDialog', () => {
     })
   })
 })
+
+// A `position: fixed` element is positioned against the VIEWPORT only while
+// no ancestor establishes a containing block. Any ancestor with a
+// transform, filter, backdrop-filter, perspective, contain or will-change
+// takes that job over — and `inset-0` then resolves to that ancestor's box.
+//
+// This is not hypothetical. mark8ly's admin animates every page with
+// `animate-[fadeInUp...]` and `animation-fill-mode: both`, which leaves an
+// identity `transform: matrix(1,0,0,1,0,0)` applied for as long as the page
+// is mounted. A dialog rendered inside it drew its scrim as a grey RECTANGLE
+// over the content column, leaving the sidebar, header and the rest of the
+// page undimmed. Portalling to document.body is what makes the overlay
+// immune: nothing between the dialog and <body> can capture it.
+describe('AlertDialog — portal', () => {
+  it('renders into document.body, not the caller subtree', () => {
+    const { container } = render(
+      <div style={{ transform: 'translateZ(0)' }}>
+        <AlertDialog isOpen onClose={vi.fn()} title="Portalled" message="Msg" />
+      </div>
+    )
+
+    expect(container.textContent).not.toContain('Portalled')
+    expect(document.body.textContent).toContain('Portalled')
+  })
+
+  it('the scrim is not a descendant of a transformed ancestor', () => {
+    render(
+      <div data-testid="animated" style={{ transform: 'translateZ(0)' }}>
+        <AlertDialog isOpen onClose={vi.fn()} title="Scrim" message="Msg" />
+      </div>
+    )
+
+    const animated = screen.getByTestId('animated')
+    const scrim = document.querySelector('[data-alert-dialog-overlay]')
+    expect(scrim).not.toBeNull()
+    expect(animated.contains(scrim)).toBe(false)
+  })
+})

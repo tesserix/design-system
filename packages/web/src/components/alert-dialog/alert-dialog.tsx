@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
+
 import { cn } from "../../lib/utils"
 
 type AlertDialogType = 'success' | 'error' | 'warning' | 'info' | 'confirm'
@@ -29,7 +32,7 @@ const iconStyles: Record<AlertDialogType, { color: string; bgColor: string }> = 
   error: { color: 'text-destructive', bgColor: 'bg-destructive/10' },
   warning: { color: 'text-warning', bgColor: 'bg-warning-muted' },
   info: { color: 'text-primary', bgColor: 'bg-primary/20' },
-  confirm: { color: 'text-warning', bgColor: 'bg-warning-muted' },
+  confirm: { color: 'text-destructive', bgColor: 'bg-destructive/10' },
 }
 
 const buttonColors: Record<AlertDialogType, string> = {
@@ -37,7 +40,10 @@ const buttonColors: Record<AlertDialogType, string> = {
   error: 'bg-destructive hover:bg-destructive/90',
   warning: 'bg-warning hover:bg-warning/90',
   info: 'bg-primary hover:bg-primary/90',
-  confirm: 'bg-warning hover:bg-warning/90',
+  // A confirm dialog is overwhelmingly used to confirm a REMOVAL. Amber
+  // reads as "be careful"; the button that actually deletes something
+  // should read as destructive.
+  confirm: 'bg-destructive hover:bg-destructive/90',
 }
 
 function AlertDialog({
@@ -51,6 +57,12 @@ function AlertDialog({
   onConfirm,
   onCancel,
 }: AlertDialogProps) {
+  // document.body does not exist during SSR, and calling createPortal
+  // against it would crash the render. Mount-gated so the server emits
+  // nothing and the client portals on the first effect.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   if (!isOpen) return null
 
   const handleConfirm = () => {
@@ -66,15 +78,18 @@ function AlertDialog({
   const isConfirmDialog = type === 'confirm'
   const { color, bgColor } = iconStyles[type]
 
-  return (
+  const body = (
     <>
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+        data-alert-dialog-overlay=""
+        className="fixed inset-0 bg-foreground/40 z-50 animate-in fade-in duration-200"
         onClick={onClose}
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="bg-card rounded-lg shadow-2xl max-w-md w-full pointer-events-auto animate-in zoom-in-95 fade-in duration-200"
+          role="alertdialog"
+          aria-modal="true"
+          className="bg-card rounded-md shadow-xl max-w-md w-full pointer-events-auto animate-in zoom-in-95 fade-in duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start justify-between p-6 pb-4">
@@ -121,6 +136,17 @@ function AlertDialog({
       </div>
     </>
   )
+
+  // Portalled to <body> so no ancestor can capture the fixed overlay.
+  // `position: fixed` resolves against the viewport ONLY while nothing
+  // above it has a transform/filter/contain/will-change; an ancestor that
+  // does becomes the containing block and `inset-0` then covers that box
+  // instead. mark8ly's admin animates each page with animation-fill-mode
+  // `both`, leaving an identity transform in place permanently, and the
+  // scrim rendered as a grey rectangle over the content column while the
+  // sidebar and header stayed bright. Portalling makes it immune rather
+  // than asking every caller to avoid animating their pages.
+  return mounted ? createPortal(body, document.body) : null
 }
 
 export { AlertDialog }
