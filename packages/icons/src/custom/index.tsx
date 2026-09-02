@@ -155,6 +155,38 @@ export function TikTok({ size = 24, className, ...props }: CustomIconProps) {
   )
 }
 
+export function GitHub({ size = 24, className, ...props }: CustomIconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+      <path d="M12 .297a12 12 0 0 0-3.792 23.387c.6.111.82-.26.82-.577l-.015-2.04c-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.73.083-.73 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.303-5.467-1.333-5.467-5.932 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23a11.5 11.5 0 0 1 6.006 0c2.291-1.552 3.298-1.23 3.298-1.23.654 1.652.243 2.873.12 3.176.769.84 1.234 1.911 1.234 3.221 0 4.61-2.806 5.625-5.479 5.922.43.372.814 1.102.814 2.222l-.014 3.293c0 .32.216.694.825.576A12 12 0 0 0 12 .297z" />
+    </svg>
+  )
+}
+
+export function GitLab({ size = 24, className, ...props }: CustomIconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+      <path d="M23.955 13.587l-1.342-4.135-2.664-8.189a.455.455 0 0 0-.867 0L16.418 9.45H7.582L4.918 1.263a.455.455 0 0 0-.867 0L1.386 9.452.044 13.587a.924.924 0 0 0 .331 1.03L12 23.054l11.625-8.437a.924.924 0 0 0 .33-1.03" />
+    </svg>
+  )
+}
+
 export function Apple({ size = 24, className, ...props }: CustomIconProps) {
   return (
     <svg
@@ -184,6 +216,8 @@ export const customIcons = {
   Threads,
   TikTok,
   Apple,
+  GitHub,
+  GitLab,
 } as const
 
 export type CustomIconName = keyof typeof customIcons

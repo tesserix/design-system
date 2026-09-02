@@ -99,6 +99,8 @@ function MyComponent() {
 - `Threads` - Threads social icon
 - `TikTok` - TikTok social icon
 - `Apple` - Apple social icon
+- `GitHub` - GitHub brand mark (removed from lucide in 1.0)
+- `GitLab` - GitLab brand mark (removed from lucide in 1.0)
 
 ## Icon Sizes
 
@@ -144,7 +146,7 @@ Check, CheckCircle, AlertCircle, AlertTriangle, Info, XCircle, HelpCircle, Loade
 Image, File, FileText, Folder, FolderOpen, Camera, Video, Music
 
 ### Other
-Eye, EyeOff, Lock, Unlock, LogIn, LogOut, MoreHorizontal, MoreVertical, Github
+Eye, EyeOff, Lock, Unlock, LogIn, LogOut, MoreHorizontal, MoreVertical
 
 For the complete list of available icons, visit [Lucide Icons](https://lucide.dev/icons/).
 
