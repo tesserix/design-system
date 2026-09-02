@@ -1,5 +1,12 @@
 # @tesserix/storybook
 
+## 0.0.22
+
+### Patch Changes
+
+- Updated dependencies [fa0300c]
+  - @tesserix/web@2.4.1
+
 ## 0.0.21
 
 ### Patch Changes
