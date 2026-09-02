@@ -300,10 +300,31 @@ function checkResponse(
   const transport = transportFinding(label, section, response)
   if (transport) return [transport]
 
-  // An error response is checked against §4.4 rather than against the
-  // endpoint's success shape: a 4xx/5xx that carries a stable code is
-  // conforming, and asserting the success envelope over it would report the
-  // wrong deviation.
+  // A 5xx is the endpoint failing, not the caller being refused, and the two
+  // must not share an outcome. Routing it to §4.4 let a well-formed error body
+  // report a PASS: an endpoint that 500s on every request produced one green
+  // line and no skips, reading *cleaner* than the working endpoint beside it,
+  // and inverting the incentive so that a broken product gets the greener
+  // report. Its error shape may be perfect and it is still not conforming,
+  // because §4.1's envelope was never demonstrated.
+  if (response.status >= 500) {
+    return [
+      fail(
+        label,
+        section,
+        "answers without erroring",
+        `${response.status}. The endpoint is declared and mounted but errored, so nothing ` +
+          "about its success shape could be checked — §4.1's envelope was never " +
+          "demonstrated. Its error body may well conform to §4.4; that is not the " +
+          "question a 5xx leaves open. Fix the endpoint, then re-run.",
+      ),
+    ]
+  }
+
+  // A 4xx is checked against §4.4 rather than against the endpoint's success
+  // shape: the request was refused deliberately — a 403 from a capability gate,
+  // say — a refusal that carries a stable code is conforming, and asserting the
+  // success envelope over it would report the wrong deviation.
   if (response.status >= 400) {
     return checkErrorShape(label, "4.4", response.body)
   }
