@@ -186,6 +186,72 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # A blocked release PR is the one failure in this job that looks exactly
+      # like a flake and is not. GitHub's account-level switch — Settings ->
+      # Actions -> General -> "Allow GitHub Actions to create and approve pull
+      # requests" — overrides this job's own `pull-requests: write`, so
+      # `changesets/action` versions the packages successfully and then dies on
+      # `HttpError: GitHub Actions is not permitted to create or approve pull
+      # requests`. The computed bump is discarded, and the only evidence is
+      # buried in this job's log: a release can sit unshipped for days while
+      # every surface says "a job went red".
+      #
+      # This step does not fix that — the fix is either a scoped GitHub App
+      # token for the changesets step, or enabling the switch, and the second
+      # also grants Actions the ability to APPROVE pull requests, which is a
+      # route around required review. It makes the failure say what it is.
+      - name: Explain a discarded release
+        if: failure() && steps.changesets.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pending=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | sort)
+          # No unreleased changesets means the action took its publish branch,
+          # and whatever failed there is a different problem than this one.
+          if [ -z "$pending" ]; then
+            echo "The changesets step failed with no unreleased changesets present, so it failed while PUBLISHING, not while opening the release PR."
+            exit 0
+          fi
+
+          # The action pushes its version branch and only then asks for the PR,
+          # so a pushed branch with no PR is the fingerprint of the blocked
+          # call specifically — as opposed to `pnpm version-packages` itself
+          # having failed, which leaves no branch behind and is a different
+          # bug wearing the same red X.
+          if git ls-remote --exit-code --heads origin changeset-release/main >/dev/null 2>&1; then
+            stage="versioned the packages, pushed \`changeset-release/main\`, and failed at the point of opening its PR"
+          else
+            stage="failed before it could push a version branch, so this may be \`pnpm version-packages\` itself rather than the blocked PR call — read the step log"
+          fi
+
+          # Requires admin scope, which GITHUB_TOKEN does not have. Read it
+          # anyway: on a self-hosted or admin-scoped run it names the cause
+          # outright, and the guidance below stands either way.
+          allowed=$(gh api "repos/$GITHUB_REPOSITORY/actions/permissions/workflow" \
+            --jq '.default_workflow_permissions' 2>/dev/null || echo "unreadable")
+
+          echo "::error title=Release computed and discarded::A version bump was computed from $(echo "$pending" | wc -l | tr -d ' ') unreleased changeset(s) and was not released. Nothing was published; the changesets are still on main and the next push will hit this again."
+          {
+            echo "## The release did not ship"
+            echo
+            echo "\`changesets/action\` $stage."
+            echo "Unreleased changesets still on \`main\`:"
+            echo
+            echo '```'
+            echo "$pending"
+            echo '```'
+            echo
+            echo "This job already requests \`pull-requests: write\`. That is overridden by"
+            echo "**Settings -> Actions -> General -> Workflow permissions -> \"Allow GitHub Actions to create and approve pull requests\"**,"
+            echo "which is off at the repository and organisation level (repo \`default_workflow_permissions\`: \`$allowed\`)."
+            echo
+            echo "Choose one:"
+            echo
+            echo "1. Give the changesets step a **GitHub App installation token** scoped to this repository with \`pull_requests: write\`. Narrowest, and keeps the review model intact."
+            echo "2. **Enable the switch.** One click — and it also lets Actions *approve* PRs, a route around required review. This repo deliberately removed \`ADMIN_TOKEN\` for that reason."
+            echo "3. Open the version PR by hand: \`pnpm version-packages\`, commit as \`chore: version packages\`, open the PR, merge. Publishing then works unaided — the publish branch needs only \`id-token: write\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # Only when something was actually published. On a run that merely opened
       # the release PR there is no new version, and checking for one would fail
       # a run that did exactly what it should.
