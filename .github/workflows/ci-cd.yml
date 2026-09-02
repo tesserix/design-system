@@ -107,12 +107,15 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_dispatch' && inputs.publish == true)
     permissions:
+      # Checkout, and the version branch `changesets/action` pushes. The
+      # release PR itself is opened with an App installation token instead —
+      # `pull-requests: write` is deliberately absent, because GITHUB_TOKEN
+      # cannot open a PR here whatever this block says (#51) and leaving the
+      # scope in suggests otherwise.
       contents: write
-      # The release PR. Version bumps arrive as a PR a human merges, rather
-      # than a push straight to a protected branch — see the changesets step.
-      pull-requests: write
       # Lets the runner mint the OIDC token npm exchanges for a short-lived
-      # publish credential. Without it, trusted publishing cannot authenticate.
+      # publish credential, and the one Google exchanges for the service
+      # account that reads the App's key. Without it, neither authenticates.
       id-token: write
     steps:
       # No `token:`. GITHUB_TOKEN is enough now that nothing here pushes to
@@ -143,6 +146,54 @@ jobs:
 
       - name: Build packages
         run: pnpm build
+
+      # The credential that opens the Version Packages PR (#51).
+      #
+      # GITHUB_TOKEN cannot: "Allow GitHub Actions to create and approve pull
+      # requests" is off at repo and org level, so this job's own
+      # `pull-requests: write` is overridden and `changesets/action` dies after
+      # versioning, discarding the release. Turning that switch on would also
+      # let Actions APPROVE pull requests — a route around required review, and
+      # the reason `ADMIN_TOKEN` was removed from this file.
+      #
+      # An App installation token has no such second edge: it can open a pull
+      # request and cannot approve one. It is minted per run, scoped at mint
+      # time to this repository and to `contents` + `pull_requests`, and
+      # expires in about an hour.
+      #
+      # The App is the one `bump-k8s.yml` already uses. Its name reads as
+      # k8s-specific and its remit is now slightly wider — "the credential this
+      # repository's automation uses to open a pull request", against
+      # tesserix-k8s there and against itself here. Its permissions were
+      # already exactly the two this needs, and a second App would mean a
+      # second private key to store, rotate and reason about for no additional
+      # confinement.
+      - name: Authenticate to Google Cloud
+        id: gcp
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/849928263410/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: ds-k8s-bump@tesseracthub-480811.iam.gserviceaccount.com
+
+      - name: Read the GitHub App credentials
+        id: app-secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |-
+            app_id:tesseracthub-480811/ds-k8s-bump-app-id
+            private_key:tesseracthub-480811/ds-k8s-bump-app-private-key
+
+      # `repositories: design-system` is the confinement that matters: the same
+      # key can mint a tesserix-k8s token in the other workflow, and neither
+      # token reaches the other repository.
+      - name: Mint a design-system token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ steps.app-secrets.outputs.app_id }}
+          private-key: ${{ steps.app-secrets.outputs.private_key }}
+          owner: tesserix
+          repositories: design-system
 
       - name: Configure Git
         run: |
@@ -184,7 +235,9 @@ jobs:
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The App token, not GITHUB_TOKEN — see the mint step above. Losing
+          # this line puts the release back where #51 found it.
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       # A blocked release PR is the one failure in this job that looks exactly
       # like a flake and is not. GitHub's account-level switch — Settings ->
@@ -231,12 +284,6 @@ jobs:
             stage="failed before it could push a version branch, so this may be \`pnpm version-packages\` itself rather than the blocked PR call — read the step log"
           fi
 
-          # Requires admin scope, which GITHUB_TOKEN does not have. Read it
-          # anyway: on a self-hosted or admin-scoped run it names the cause
-          # outright, and the guidance below stands either way.
-          allowed=$(gh api "repos/$GITHUB_REPOSITORY/actions/permissions/workflow" \
-            --jq '.default_workflow_permissions' 2>/dev/null || echo "unreadable")
-
           echo "::error title=Release computed and discarded::A version bump was computed from $(echo "$pending" | wc -l | tr -d ' ') unreleased changeset(s) and was not released. Nothing was published; the changesets are still on main and the next push will hit this again."
           {
             echo "## The release did not ship"
@@ -248,15 +295,16 @@ jobs:
             echo "$pending"
             echo '```'
             echo
-            echo "This job already requests \`pull-requests: write\`. That is overridden by"
-            echo "**Settings -> Actions -> General -> Workflow permissions -> \"Allow GitHub Actions to create and approve pull requests\"**,"
-            echo "which is off at the repository and organisation level (repo \`default_workflow_permissions\`: \`$allowed\`)."
+            echo "The PR is opened with a **GitHub App installation token**, not \`GITHUB_TOKEN\` — see the mint step."
+            echo "If the failure was the PR call itself, check in this order:"
             echo
-            echo "Choose one:"
+            echo "1. The App (\`tesserix-k8s-bump\`) still has **\`design-system\` in its repository access**. Removing the repo there breaks this job and nothing else, silently."
+            echo "2. The App still holds \`pull_requests: write\` and \`contents: write\` on that installation."
+            echo "3. The mint step succeeded at all — a GCP auth or Secret Manager failure lands earlier in this job, not here."
             echo
-            echo "1. Give the changesets step a **GitHub App installation token** scoped to this repository with \`pull_requests: write\`. Narrowest, and keeps the review model intact."
-            echo "2. **Enable the switch.** One click — and it also lets Actions *approve* PRs, a route around required review. This repo deliberately removed \`ADMIN_TOKEN\` for that reason."
-            echo "3. Open the version PR by hand: \`pnpm version-packages\`, commit as \`chore: version packages\`, open the PR, merge. Publishing then works unaided — the publish branch needs only \`id-token: write\`."
+            echo "A message naming *\"GitHub Actions is not permitted to create or approve pull requests\"* means the step fell back to \`GITHUB_TOKEN\`: the App token was empty, so the \`GITHUB_TOKEN:\` line under the changesets step is what to read."
+            echo
+            echo "To ship the release meanwhile: open the version PR by hand from the \`changeset-release/main\` branch this run already pushed, and merge it. Publishing then works unaided — the publish branch needs only \`id-token: write\`."
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Only when something was actually published. On a run that merely opened
