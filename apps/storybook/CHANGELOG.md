@@ -1,5 +1,13 @@
 # @tesserix/storybook
 
+## 0.0.23
+
+### Patch Changes
+
+- Updated dependencies [ac36bd5]
+  - @tesserix/icons@1.1.0
+  - @tesserix/web@2.4.2
+
 ## 0.0.22
 
 ### Patch Changes
