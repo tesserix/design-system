@@ -1,5 +1,12 @@
 # @tesserix/admin-conformance
 
+## 0.8.3
+
+### Patch Changes
+
+- 9f66863: Throwaway changeset used to verify that the release job can open its Version
+  Packages PR with the App installation token (#51). Not for merge.
+
 ## 0.8.2
 
 ### Patch Changes
