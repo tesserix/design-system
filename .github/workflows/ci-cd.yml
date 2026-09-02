@@ -205,9 +205,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pending=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | sort)
-          # No unreleased changesets means the action took its publish branch,
-          # and whatever failed there is a different problem than this one.
+          # Read the changesets from the pushed commit, NOT from the working
+          # tree: `pnpm version-packages` CONSUMES them, so by the time this
+          # step runs the directory is empty whether the action died opening
+          # its PR or never versioned anything at all. Reading the tree got
+          # this exactly backwards on run 33605143147 — a blocked release PR
+          # reported as a publish failure.
+          pending=$(git ls-tree --name-only "$GITHUB_SHA" .changeset/ \
+            | grep -E '\.md$' | grep -v 'README\.md' | sort || true)
+          # No unreleased changesets on the commit means the action took its
+          # publish branch, and whatever failed there is a different problem.
           if [ -z "$pending" ]; then
             echo "The changesets step failed with no unreleased changesets present, so it failed while PUBLISHING, not while opening the release PR."
             exit 0
