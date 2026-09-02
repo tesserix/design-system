@@ -75,8 +75,10 @@ export {
   LogOut,
   MoreHorizontal,
   MoreVertical,
-  Github,
 } from 'lucide-react'
+
+// Brand marks (GitHub, GitLab, ...) are NOT re-exported here: lucide removed them
+// in 1.0. Import them from '@tesserix/icons/custom' instead.
 
 import type { LucideProps, LucideIcon } from 'lucide-react'
 

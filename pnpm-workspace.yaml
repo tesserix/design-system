@@ -8,6 +8,10 @@ allowBuilds:
   sharp: false
   unrs-resolver: false
 
+minimumReleaseAgeExclude:
+  - lucide-react-native@1.39.0
+  - lucide-react@1.39.0
+
 # Transitive dependency pins. pnpm 11 no longer reads `pnpm.overrides` from
 # package.json — this is the only place overrides are honoured.
 overrides:
