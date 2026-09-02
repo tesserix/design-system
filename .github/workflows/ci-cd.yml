@@ -310,22 +310,51 @@ jobs:
       # Only when something was actually published. On a run that merely opened
       # the release PR there is no new version, and checking for one would fail
       # a run that did exactly what it should.
-      - name: Verify the public registry has the published version
-        if: steps.changesets.outputs.published == 'true' 
+      #
+      # Every package the action says it published, not one hard-coded name.
+      # This step used to read `packages/web/package.json` alone, so the release
+      # of `@tesserix/admin-conformance@0.8.2` was "verified" by looking up a
+      # version of `@tesserix/web` that had shipped days earlier and was
+      # therefore always going to be found. A check that passes without
+      # consulting the thing it is checking is worse than no check: it is a
+      # green line that means nothing.
+      - name: Verify the public registry has the published versions
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          PUBLISHED: ${{ steps.changesets.outputs.publishedPackages }}
         run: |
-          version=$(node -p "require('./packages/web/package.json').version")
+          remaining=$(node -e 'JSON.parse(process.env.PUBLISHED).forEach((p) => console.log(p.name + "@" + p.version))')
+          if [ -z "$remaining" ]; then
+            echo "::error title=Nothing to verify::The changesets step reported published=true and named no packages, so this step cannot confirm anything reached the registry. Treating that as a failure rather than a pass."
+            exit 1
+          fi
+          echo "Verifying: $(echo "$remaining" | tr '\n' ' ')"
+
           # npm's read path is eventually consistent: a version that has just
           # been accepted is briefly invisible to `npm view`, so a single check
-          # reports a false failure for a publish that actually succeeded.
+          # reports a false failure for a publish that actually succeeded. Each
+          # round re-checks only what is still missing.
           for attempt in 1 2 3 4 5 6; do
-            published=$(npm view "@tesserix/web@$version" version --registry https://registry.npmjs.org 2>/dev/null || true)
-            if [ "$published" = "$version" ]; then
-              echo "Verified @tesserix/web@$version on registry.npmjs.org (attempt $attempt)"
+            still=""
+            while IFS= read -r spec; do
+              [ -z "$spec" ] && continue
+              want="${spec##*@}"
+              got=$(npm view "$spec" version --registry https://registry.npmjs.org 2>/dev/null || true)
+              if [ "$got" = "$want" ]; then
+                echo "Verified $spec on registry.npmjs.org (attempt $attempt)"
+              else
+                still="$still$spec"$'\n'
+              fi
+            done <<< "$remaining"
+
+            remaining=$(printf '%s' "$still")
+            if [ -z "$remaining" ]; then
               exit 0
             fi
-            echo "Not visible yet (attempt $attempt); waiting for the registry to catch up."
+            echo "Not visible yet (attempt $attempt): $(echo "$remaining" | tr '\n' ' ')"
             sleep 10
           done
-          echo "::error::@tesserix/web@$version is not on registry.npmjs.org 60s after publishing. Consumers resolving from the public registry are stranded on the previous version."
+
+          echo "::error title=Published version missing from the registry::$(echo "$remaining" | tr '\n' ' ')is not on registry.npmjs.org 60s after publishing. Consumers resolving from the public registry are stranded on the previous version."
           exit 1
 
