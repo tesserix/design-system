@@ -80,7 +80,10 @@ Per-endpoint rules from §3, and the conventions from §4 over every response:
 - **§4.1** the pagination envelope, exactly: `{ data, pagination: { page, limit, total } }`
 - **§4.2** money in minor units with an explicit currency, never a bare number
 - **§4.3** timestamps as ISO 8601 **with an offset** — a naive local time fails
-- **§4.4** errors carrying a stable machine-readable `error` code
+- **§4.4** errors carrying a stable machine-readable `error` code — applied to a **4xx**,
+  which is a refusal the caller provoked and whose shape is the whole contract. A **5xx**
+  is the endpoint failing, and fails the run outright however well-formed its error body:
+  §4.1's envelope was never demonstrated, so there is nothing to pass.
 - **§4.5** an empty result is `200` + `[]`, never `null` and never `{}`
 - **§3.1** `/admin/kpis` is a flat map, and answers `501` when uninstrumented rather than `{}`
 - **§3.2** every inbox item carries `waiting_since`, and `due_at` where an SLA is declared

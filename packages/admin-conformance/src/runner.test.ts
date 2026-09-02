@@ -386,3 +386,48 @@ describe("v3 endpoints that must never be called", () => {
     }
   })
 })
+
+/**
+ * §4.4 is right to check a refusal's shape and wrong to accept it as the whole
+ * story when the server is the thing that broke. Found in production: an
+ * endpoint that 500s on every request reported one green §4.4 line and no
+ * skips, which reads *cleaner* than the endpoint beside it that works.
+ */
+describe("a declared endpoint that errors", () => {
+  it("fails a 5xx however well-formed its error body is", async () => {
+    const fetchImpl = serving(["/admin/audit-logs"], () =>
+      json({ error: "internal_error", message: "the database role cannot read it" }, 500),
+    )
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({ "audit-logs": { implemented: true } }),
+      fetchImpl,
+    })
+
+    const own = findings.filter((f) => f.endpoint === "audit-logs")
+    expect(own.every((f) => f.status !== "pass")).toBe(true)
+    const failure = own.find((f) => f.status === "fail")
+    expect(failure, "a 5xx on a declared endpoint must fail").toBeDefined()
+    expect(failure?.detail).toMatch(/500/)
+  })
+
+  // The other side of the line, which must keep working: a 403 from a
+  // capability gate is a refusal the caller provoked, and its error shape
+  // genuinely is the whole contract there.
+  it("still checks a 4xx refusal against §4.4 alone", async () => {
+    const fetchImpl = serving(["/admin/audit-logs"], () =>
+      json({ error: "forbidden", message: "capability not granted" }, 403),
+    )
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({ "audit-logs": { implemented: true } }),
+      fetchImpl,
+    })
+
+    const own = findings.filter((f) => f.endpoint === "audit-logs")
+    expect(own.some((f) => f.status === "pass" && f.section === "4.4")).toBe(true)
+    expect(own.filter((f) => f.status === "fail")).toEqual([])
+  })
+})
