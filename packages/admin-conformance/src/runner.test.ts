@@ -247,6 +247,58 @@ describe("runConformance", () => {
       .toBe(true)
   })
 
+  // A 503 is not one condition. The platform surfaces distinguish a missing
+  // signing secret, where retrying never helps, from a dependency being down,
+  // where retrying is the whole remedy — and this suite used to print the
+  // first message for both. On 2026-09-23 six checks reported "has no signing
+  // secret" during a platform-api outage while the secrets were present and
+  // correct in both namespaces, which is a diagnosis that sends its reader to
+  // the wrong subsystem.
+  it("names a dependency outage as one, rather than blaming the signing secret", async () => {
+    const fetchImpl = vi.fn(async () => json({ error: "upstream_unavailable" }, 503))
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({ health: { implemented: true } }),
+      fetchImpl,
+    })
+
+    const failure = findings.find((f) => f.status === "fail")
+    expect(failure).toBeDefined()
+    expect(failure?.detail).toMatch(/upstream_unavailable/)
+    expect(failure?.detail).not.toMatch(/signing secret/i)
+  })
+
+  it("reports an unmodelled 503 code verbatim instead of guessing", async () => {
+    const fetchImpl = vi.fn(async () => json({ error: "read_only_mode" }, 503))
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({ health: { implemented: true } }),
+      fetchImpl,
+    })
+
+    const failure = findings.find((f) => f.status === "fail")
+    expect(failure?.detail).toMatch(/read_only_mode/)
+    expect(failure?.detail).not.toMatch(/signing secret/i)
+  })
+
+  // A far end that says nothing useful still gets the old message: it is the
+  // most likely cause of a bare 503 on this surface, and a fallback that
+  // reported nothing would be worse than one that reports a good guess.
+  it("falls back to the configuration message when the body carries no code", async () => {
+    const fetchImpl = vi.fn(async () => json({}, 503))
+
+    const findings = await runConformance({
+      ...config,
+      declaration: declaration({ health: { implemented: true } }),
+      fetchImpl,
+    })
+
+    expect(findings.some((f) => f.status === "fail" && /not_configured/.test(f.detail ?? "")))
+      .toBe(true)
+  })
+
   it("surveys a conforming product without a single failure", async () => {
     const fetchImpl = serving(
       ["/admin/kpis", "/admin/health", "/admin/audit-logs"],
