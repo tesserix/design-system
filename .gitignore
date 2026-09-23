@@ -27,3 +27,17 @@ test-results
 .vercel
 
 .claude/
+
+# Written into the workspace by google-github-actions/auth@v2 — the action's
+# own README says to ignore it. It is an external_account (Workload Identity
+# Federation) CONFIG file, not a key: it carries the audience, token URL and
+# service-account impersonation URL, and no private_key. The OIDC token it
+# exchanges lives only in the runner, so the file authenticates nothing once it
+# leaves CI.
+#
+# It still must not be committed. On 2026-09-23 the changesets release job
+# picked it up alongside the version bump and put it in the "version packages"
+# PR, where GitGuardian flagged it — disclosing the WIF pool and the
+# impersonated service account, which is reconnaissance rather than access, and
+# blocking a release either way.
+gha-creds-*.json
