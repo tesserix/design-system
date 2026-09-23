@@ -248,6 +248,21 @@ function defaultQuery(id: EndpointId): Record<string, string> | undefined {
  * status for every rejection, so the suite has to supply the diagnosis the
  * response withholds.
  */
+/**
+ * The `error` code from a JSON error body, when there is one.
+ *
+ * Products return `{ error, message }` on a refusal, and the code is the
+ * machine-readable half — the half worth reporting. Returns undefined for a
+ * body that is absent, not an object, or carries no string `error`, so a far
+ * end that answers 503 with nothing useful falls back to the message this
+ * suite would have printed anyway.
+ */
+function errorCode(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null) return undefined
+  const code = (body as { error?: unknown }).error
+  return typeof code === "string" && code !== "" ? code : undefined
+}
+
 function transportFinding(
   id: string,
   section: string,
@@ -265,6 +280,39 @@ function transportFinding(
     )
   }
   if (response.status === 503) {
+    // Read the error code the far end actually sent. A 503 is not one
+    // condition: the platform surfaces distinguish `not_configured` (no
+    // signing secret — retrying never helps) from `upstream_unavailable`
+    // (the surface is fine, a dependency it proxies to is down — retrying
+    // is exactly what helps), and the products comment that distinction as
+    // load-bearing.
+    //
+    // Reporting every 503 as "has no signing secret" sent a reader looking
+    // for a missing secret that was present and correct. On 2026-09-23 six
+    // checks failed that way during a 17-minute platform-api outage; the
+    // secrets were verified present, in both namespaces, while the report
+    // said they were absent. A diagnosis that names the wrong subsystem is
+    // worse than no diagnosis, because it is followed.
+    const code = errorCode(response.body)
+    if (code === "upstream_unavailable") {
+      return fail(
+        id,
+        section,
+        "dependencies are reachable",
+        "503 upstream_unavailable. The surface is deployed and configured; a service " +
+          "it proxies to did not answer. Not a contract deviation and not a missing " +
+          "secret — look at the dependency, then re-run.",
+      )
+    }
+    if (code && code !== "not_configured") {
+      return fail(
+        id,
+        section,
+        "is available",
+        `503 ${code}. The surface refused the request for a reason this suite does ` +
+          `not model; the error code is the far end's own.`,
+      )
+    }
     return fail(
       id,
       section,
